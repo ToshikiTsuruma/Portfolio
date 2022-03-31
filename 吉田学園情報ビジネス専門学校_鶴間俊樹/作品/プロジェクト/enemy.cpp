@@ -15,6 +15,7 @@
 #include "effect.h"
 #include "billboard.h"
 #include "timer.h"
+#include "particleEffect.h"
 
 //=============================================================================
 // マクロ定義
@@ -29,15 +30,11 @@
 #define DISTANCE_LOSE_SIGHT (600.0f)	//プレイヤーを見失う距離
 #define VIEW_ANGLE (D3DX_PI * 0.8f)		//視野角度
 #define ATTACK_ANGLE (D3DX_PI * 0.1f)	//攻撃角度
-#define FALLDOWN_TIME (30)	//死亡時の倒れる時間
+#define FALLDOWN_TIME (35)	//死亡時の倒れる時間
 #define DEAD_TIME (120)	//死亡後消えるまでの時間
 #define LIFE_GAUGE_HEIGHT (100.0f)	//敵の位置からの体力ゲージの高さ
 #define DRAW_DISTANCE (1800.0f)			//描画が可能になり始めるプレイヤーとの距離
 #define MAX_DRAW_DISTANCE (2000.0f)		//描画可能な最大のプレイヤーとの距離
-
-//=============================================================================
-// 静的メンバ変数宣言
-//=============================================================================
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -77,10 +74,12 @@ CEnemy::CEnemy(const PARTS_INFO* pPartsInfoArray, int nNumParts, const MOTION_IN
 	if (m_pGaugeLifeFrame != NULL) {
 		m_pGaugeLifeFrame->SetColor(D3DXCOLOR(0.3f, 0.3f, 0.3f, 1.0f)); //体力ゲージの色の設定
 		m_pGaugeLifeFrame->SetDraw(false);	//描画しないようにする
+		m_pGaugeLifeFrame->SetDrawPriority(DRAW_PRIORITY::UI);	//描画順の設定
 	}
 	if (m_pGaugeLife != NULL) {
 		m_pGaugeLife->SetColor(D3DXCOLOR(1.0f, 0.2f, 0.0f, 1.0f)); //体力ゲージの色の設定
 		m_pGaugeLife->SetDraw(false);	//描画しないようにする
+		m_pGaugeLife->SetDrawPriority(DRAW_PRIORITY::UI);	//描画順の設定
 	}
 
 	m_pClock = nullptr;
@@ -101,7 +100,7 @@ CEnemy::~CEnemy()
 //=============================================================================
 // 同心円状にランダムに角度ずらして敵を配置する
 //=============================================================================
-//引数：中心の位置　円の数　円ごとの距離（半径）　（同じ園の一つ前の敵との）最短距離、最長距離
+//引数：中心の位置　円の数　円ごとの距離（半径）　（同じ円の一つ前の敵との）最短距離、最長距離
 void CEnemy::SetEnemyCircle(D3DXVECTOR3 posCenter, int nNumCircle, float fDistCircle, int nMinDist, int nMaxDist) {
 	int nCntCircle = 0;	//作成した木の円の数
 	float fRotCreate = 0.0f;	//配置する角度
@@ -121,8 +120,8 @@ void CEnemy::SetEnemyCircle(D3DXVECTOR3 posCenter, int nNumCircle, float fDistCi
 		else {
 			//敵を生成する位置の設定
 			D3DXVECTOR3 posCreate = posCenter;	//配置する位置
-			posCreate.x = sinf(fRotCreate + fRandStartRot) * fDistCircle * (nCntCircle + 1);
-			posCreate.z = cosf(fRotCreate + fRandStartRot) * fDistCircle * (nCntCircle + 1);
+			posCreate.x += sinf(fRotCreate + fRandStartRot) * fDistCircle * (nCntCircle + 1);
+			posCreate.z += cosf(fRotCreate + fRandStartRot) * fDistCircle * (nCntCircle + 1);
 			//敵の種類をランダムで決める
 			int nRandType = rand() % 2;
 			//敵の生成
@@ -231,6 +230,15 @@ void CEnemy::Update(void) {
 		if (m_nCntDead == FALLDOWN_TIME) {
 			//倒れる音
 			if (pSound != NULL)pSound->PlaySound(CSound::SOUND_LABEL::STUN);
+
+
+			//パーティクルエフェクトの生成
+			D3DXVECTOR3 posParticle;	//パーティクルの位置
+			GetPosCollision(&posParticle, D3DXVECTOR3(0.0f, 20.0f, 0.0f), 0);	//胴体の位置の取得
+			//パーティクルの情報
+			CParticleEffect::PARTICLE_INFO particleInfo = { 60, 25.0f, -0.25f, 2.0f, D3DXVECTOR3(0.0f, -0.01f, 0.0f), D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f), D3DXCOLOR(0.5f, 1.0f, 1.0f, 1.0f) };
+			//エフェクトの生成
+			CParticleEffect::Create(particleInfo, posParticle, DEAD_TIME - FALLDOWN_TIME, 10, 0.05f * D3DX_PI);
 		}
 
 		//エネミーの破棄
@@ -540,7 +548,7 @@ void CEnemy::Draw(void) {
 	if (pGame != nullptr) pPlayer = pGame->GetPlayer();
 
 	//プレイヤーの位置を取得
-	D3DXVECTOR3 posPlayer = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 posPlayer;
 	if (pPlayer != nullptr) posPlayer = pPlayer->GetPos();
 	//プレイヤーとの距離を求める
 	D3DXVECTOR2 vecPlayer = D3DXVECTOR2(posPlayer.x - GetPos().x, posPlayer.z - GetPos().z);

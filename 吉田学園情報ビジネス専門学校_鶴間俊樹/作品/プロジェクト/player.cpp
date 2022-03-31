@@ -16,6 +16,7 @@
 #include "item.h"
 #include "effect.h"
 #include "particle.h"
+#include "particleEffect.h"
 #include "scene2D.h"
 #include "billboard.h"
 #include "sword.h"
@@ -90,7 +91,7 @@ CPlayer::CPlayer() : CSceneMotion(m_pPartsInfoArray, m_nNumParts, &m_aMotionInfo
 	m_bLand = false;
 	m_bValidAttack = false;
 	m_nNumKillEnemy = 0;
-	m_bRecovery = false;
+	m_bLockAct = false;
 	m_nCntDodge = 0;
 	m_nLife = MAX_LIFE;
 	m_bStun = false;
@@ -417,11 +418,11 @@ void CPlayer::Update(void) {
 	//----------------------------
 	//硬直中
 	//----------------------------
-	if (m_bRecovery == true) {
+	if (m_bLockAct == true) {
 		//モーションの遷移が完了した場合
 		if (GetTransMotion() == false) {
 			//硬直の解除
-			m_bRecovery = false;
+			m_bLockAct = false;
 		}
 	}
 
@@ -436,7 +437,7 @@ void CPlayer::Update(void) {
 			//ニュートラルモーションを設定
 			SetMotion((int)MOTION_TYPE::NEUTRAL);
 			//硬直状態にする
-			m_bRecovery = true;
+			m_bLockAct = true;
 
 			if (m_bLand == true) {
 				m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);	//大きく重力をかける
@@ -447,7 +448,9 @@ void CPlayer::Update(void) {
 		}
 		else {
 			//パーティクルの生成
-			CParticle::Create(*pPosPlayer, 30.0f, 1.0f, D3DXCOLOR(0.0f, 1.0f, 0.9f, 1.0f));
+			D3DXVECTOR3 posParticle = *pPosPlayer;	//パーティクルの位置
+			posParticle.y += 10.0f;
+			CParticle::Create(posParticle, 20, 25.0f, -0.5f, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(0.0f, 0.5f, 1.0f, 1.0f), D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f));
 		}
 	}
 
@@ -472,7 +475,7 @@ void CPlayer::Update(void) {
 		//----------------------------
 		//攻撃
 		//----------------------------
-		if (pInput->GetTrigger(CInput::CODE::ATTACK) && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bRecovery == false) {
+		if (pInput->GetTrigger(CInput::CODE::ATTACK) && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bLockAct == false) {
 			//まだ攻撃していない場合
 			if (GetMotionCategory() != MOTION_CATEGORY::ATTACK) {
 				//モーションの設定
@@ -556,7 +559,7 @@ void CPlayer::Update(void) {
 		//----------------------------
 		//武器の変更
 		//----------------------------
-		if (pInput->GetTrigger(CInput::CODE::CHANGE_WEAPON) && GetMotionCategory() != MOTION_CATEGORY::ATTACK && m_bRecovery == false && GetMotionCategory() != MOTION_CATEGORY::DODGE) {
+		if (pInput->GetTrigger(CInput::CODE::CHANGE_WEAPON) && GetMotionCategory() != MOTION_CATEGORY::ATTACK && m_bLockAct == false && GetMotionCategory() != MOTION_CATEGORY::DODGE) {
 			int nTypeWeapon = (int)m_typeWeapon;	//武器の種類
 			nTypeWeapon++;	//種類を次に進める
 			if (nTypeWeapon >= (int)WEAPONTYPE::ENUM_MAX) nTypeWeapon = 0;	//種類数の最大まで行ったら０に戻す
@@ -600,7 +603,7 @@ void CPlayer::Update(void) {
 				//角度の取得
 				float rotY = GetRot().y;
 				//移動量を後方にする
-				m_move = D3DXVECTOR3(DODGE_SPEED_BACK * sinf(rotY), 0.0f, DODGE_SPEED_BACK * cosf(rotY));
+				m_move = D3DXVECTOR3(DODGE_SPEED_BACK * sinf(rotY), -POWER_GRAVITY_GROUND, DODGE_SPEED_BACK * cosf(rotY));
 				//回避音の再生
 				if (pSound != nullptr)pSound->PlaySound(CSound::SOUND_LABEL::DODGE);
 			}
@@ -616,7 +619,7 @@ void CPlayer::Update(void) {
 			//角度の取得
 			float rotY = GetRot().y;
 			//移動量を後方にする
-			m_move = D3DXVECTOR3(DODGE_SPEED_SHEATH * sinf(rotY), 0.0f, DODGE_SPEED_SHEATH * cosf(rotY));
+			m_move = D3DXVECTOR3(DODGE_SPEED_SHEATH * sinf(rotY), -POWER_GRAVITY_GROUND, DODGE_SPEED_SHEATH * cosf(rotY));
 			//回避音の再生
 			if (pSound != nullptr)pSound->PlaySound(CSound::SOUND_LABEL::DODGE);
 		}
@@ -624,12 +627,12 @@ void CPlayer::Update(void) {
 		//----------------------------
 		//回避
 		//----------------------------
-		if (GetMotionCategory() != MOTION_CATEGORY::ATTACK  && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bRecovery == false) {
+		if (GetMotionCategory() != MOTION_CATEGORY::ATTACK  && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bLockAct == false) {
 			if (m_bLand == true && pInput->GetTrigger(CInput::CODE::DODGE)) {
 				m_nCntDodge = DODGE_TIME_FRONT;
 				float rotY = GetRot().y;
 				rotY += D3DX_PI;	//角度を前方にする
-				m_move = D3DXVECTOR3(DODGE_SPEED_FRONT * sinf(rotY), 0.0f, DODGE_SPEED_FRONT * cosf(rotY));	//移動量を前方にする
+				m_move = D3DXVECTOR3(DODGE_SPEED_FRONT * sinf(rotY), -POWER_GRAVITY_GROUND, DODGE_SPEED_FRONT * cosf(rotY));	//移動量を前方にする
 				SetMotion((int)MOTION_TYPE::DODGE_FRONT);	//前方回避モーション
 				if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::DODGE);	//回避音の再生
 			}
@@ -644,7 +647,7 @@ void CPlayer::Update(void) {
 				if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::CANSEL);
 			}
 
-			if (GetMotionCategory() != MOTION_CATEGORY::ATTACK && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bRecovery == false) {
+			if (GetMotionCategory() != MOTION_CATEGORY::ATTACK && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bLockAct == false) {
 				//アイテム使用開始
 				if (pInput->GetTrigger(CInput::CODE::USE_ITME) && m_pCounterItem->GetScore() > 0 && m_nLife < MAX_LIFE) {
 					m_bUseItem = true;
@@ -655,7 +658,7 @@ void CPlayer::Update(void) {
 			//アイテム使用中
 			if (m_bUseItem == true) {
 				//アイテム使用継続
-				if (pInput->GetPress(CInput::CODE::USE_ITME) && GetMotionCategory() != MOTION_CATEGORY::ATTACK && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bRecovery == false) {
+				if (pInput->GetPress(CInput::CODE::USE_ITME) && GetMotionCategory() != MOTION_CATEGORY::ATTACK && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bLockAct == false) {
 					if (m_nCntUseItem % SPAN_ITEM_USE_SOUND == 0) {
 						//アイテムゲージ進行音の再生
 						if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::GAUGE);
@@ -700,6 +703,14 @@ void CPlayer::Update(void) {
 							//アイテム使用音の再生
 							pSound->PlaySound(CSound::SOUND_LABEL::HEAL);
 						}
+
+						//パーティクルエフェクトの生成
+						D3DXVECTOR3 posParticle = *pPosPlayer;	//パーティクルの位置
+						posParticle.y += 10.0f;	//位置の調整
+						//パーティクルの情報
+						CParticleEffect::PARTICLE_INFO particleInfo = { 30, 50.0f, -1.5f, 9.0f, D3DXVECTOR3(0.0f, -0.6f, 0.0f), D3DXCOLOR(0.1f, 1.0f, 0.1f, 1.0f), D3DXCOLOR(0.8f, 1.0f, 0.2f, 1.0f) };
+						//エフェクトの生成
+						CParticleEffect::EmitCircle(particleInfo, posParticle, 12, 0.1f * D3DX_PI);
 					}
 					//アイテム使用ゲージの更新
 					if (m_pGaugeUseItem != nullptr) m_pGaugeUseItem->SetRatioHeight((float)m_nCntUseItem / (float)TIME_ITEM_USE);
@@ -725,7 +736,7 @@ void CPlayer::Update(void) {
 		m_move.y -= POWER_GRAVITY;	//重力を加算
 	}
 
-	if (pInput != nullptr && GetMotionCategory() != MOTION_CATEGORY::ATTACK && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bRecovery == false) {
+	if (pInput != nullptr && GetMotionCategory() != MOTION_CATEGORY::ATTACK && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bLockAct == false) {
 		//上下左右キー入力状態の取得
 		const bool bPressUp = pInput->GetPress(CInput::CODE::UP);
 		const bool bPressDown = pInput->GetPress(CInput::CODE::DOWN);
@@ -1071,7 +1082,7 @@ void CPlayer::Update(void) {
 		case MOTION_TYPE::ATTACK_KATANA_3:
 		case MOTION_TYPE::ATTACK_KATANA_DRAW:
 		case MOTION_TYPE::SHEATH:
-			m_bRecovery = true;	//硬直の設定
+			m_bLockAct = true;	//硬直の設定
 
 			//硬直なしのモーション
 		case MOTION_TYPE::PUNCH_1:
@@ -1348,7 +1359,7 @@ void CPlayer::Update(void) {
 				Attack(OBJ_TYPE::TREE, aPosCol[nCntCollision], fRadiusCol, nDamageAttack, DAMAGE_TYPE::PUNCH, nullptr);		//木
 			}
 			//攻撃の先端にパーティクルの生成
-			CParticle::Create(aPosCol[nNumCol - 1], fRadiusCol * 2, 1.0f, D3DXCOLOR(0.0f, 0.2f, 1.0f, 1.0f));
+			CParticle::Create(aPosCol[nNumCol - 1], 20, 15.0f, -0.5f, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(0.0f, 0.5f, 1.0f, 1.0f), D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f));
 
 			//攻撃開始時
 			if (bBeginAttack == true) {
@@ -1515,7 +1526,7 @@ void CPlayer::GameOver(void) {
 	}
 	//移動量を重力のみにする
 	m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
-	m_bRecovery = false;
+	m_bLockAct = false;
 	//武器を攻撃していない状態にする
 	if (m_pWeapon != nullptr) {
 		if (m_pWeapon->GetAttack() == true) {
@@ -1597,7 +1608,7 @@ void CPlayer::Damage(int nDamage, bool* pDead) {
 
 		//移動量を重力のみにする
 		m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
-		m_bRecovery = false;
+		m_bLockAct = false;
 		//武器を攻撃していない状態にする
 		if (m_pWeapon != nullptr) {
 			if (m_pWeapon->GetAttack() == true) {

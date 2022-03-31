@@ -15,7 +15,7 @@
 //=============================================================================
 // デフォルトコンストラクタ
 //=============================================================================
-CParticle::CParticle()
+CParticle::CParticle() : m_nLifeDef(0)
 {
 
 }
@@ -23,11 +23,19 @@ CParticle::CParticle()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CParticle::CParticle(float fDecSize) {
-	//描画順の設定
-	SetDrawPriority(DRAW_PRIORITY::EFFECT);
+CParticle::CParticle(int nLife, float fAddSize, D3DXVECTOR3 move, D3DXVECTOR3 addMove, D3DXCOLOR colStart, D3DXCOLOR colEnd) : m_nLifeDef(nLife)
+{
+	//深度バッファをそのままにする
+	SetZtestAlways(false);
+	//描画可能な距離の最大値設定
+	SetDistanceDrawMax(4000.0f);
 
-	m_fDecSize = fDecSize;
+	m_nLife = nLife;
+	m_fAddSize = fAddSize;
+	m_move = move;
+	m_addMove = addMove;
+	m_colStart = colStart;
+	m_colEnd = colEnd;
 }
 
 //=============================================================================
@@ -41,19 +49,19 @@ CParticle::~CParticle()
 //=============================================================================
 // 生成処理
 //=============================================================================
-CParticle* CParticle::Create(D3DXVECTOR3 pos, float fSize, float fDecSize, D3DXCOLOR col) {
+CParticle* CParticle::Create(D3DXVECTOR3 pos, int nLife, float fSizeStart, float fAddSize, D3DXVECTOR3 move, D3DXVECTOR3 addMove, D3DXCOLOR colStart, D3DXCOLOR colEnd) {
 	CParticle* pParticle;
-	pParticle = new CParticle(fDecSize);
+	pParticle = new CParticle(nLife, fAddSize, move, addMove, colStart, colEnd);
 	if (pParticle != NULL) {
 		pParticle->SetTexType(CTexture::TEXTURE_TYPE::EFFECT_PARTICLE);
 		pParticle->SetPos(pos);
-		pParticle->SetSize(D3DXVECTOR3(fSize, fSize, 0.0f));
+		pParticle->SetSize(D3DXVECTOR3(fSizeStart, fSizeStart, 0.0f));
 
 		//初期化
 		pParticle->Init();
 
 		//色の変更
-		pParticle->SetColor(col);
+		pParticle->SetColor(colStart);
 	}
 
 	return pParticle;
@@ -80,20 +88,41 @@ void CParticle::Uninit(void) {
 // パーティクルの更新処理
 //=============================================================================
 void CParticle::Update(void) {
-	CBillboard::Update();
-
-	D3DXVECTOR3 size = GetSize();
-	//サイズの減算
-	size.x -= m_fDecSize;
-	size.y -= m_fDecSize;
-	//サイズがマイナスになったら消える
-	if (size.x <= 0) {
+	//ライフが０以下
+	if (m_nLife <= 0) {
+		//パーティクル破棄
 		Uninit();
 		return;
 	}
-	//サイズの設定
-	SetSize(size);
-	return;
+	else {
+		//ライフの減少
+		m_nLife--;
+	}
+
+	//ビルボードの更新
+	CBillboard::Update();
+
+	//位置の更新
+	D3DXVECTOR3 pos = GetPos();	//位置の取得
+	pos += m_move;	//位置を移動
+	SetPos(pos);	//位置の設定
+
+	//移動量を追加
+	m_move += m_addMove;	
+
+	D3DXVECTOR3 size = GetSize();	//サイズの取得
+	//サイズの減算
+	size.x += m_fAddSize;
+	size.y += m_fAddSize;
+	//サイズが０未満にならないように
+	if (size.x >= 0) {
+		//サイズの設定
+		SetSize(size);
+	}
+
+	//色の設定
+	D3DXCOLOR colDelta = m_colEnd - m_colStart;	//最初と最後の色の差分
+	SetColor(colDelta * ((float)(m_nLifeDef - m_nLife) / (float)m_nLifeDef) + m_colStart);
 }
 
 //=============================================================================

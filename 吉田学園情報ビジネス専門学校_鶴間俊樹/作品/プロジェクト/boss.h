@@ -100,7 +100,7 @@ private:
 	bool m_bValidAttack;	//UŒ‚‚ª—LŒø‚©‚Ç‚¤‚©
 	int m_nCntNormalAttack;	//’ÊíUŒ‚‚ğs‚Á‚½‰ñ”
 	int m_nCntAttackRush;	//“ËiUŒ‚‚ğ˜A‘±‚Ås‚Á‚½‰ñ”
-	bool m_bRecovery;		//UŒ‚Œã‚Ìd’¼’†
+	bool m_bLockAct;		//UŒ‚Œã‚Ìd’¼’†
 	int m_nLife;					//‘Ì—Í
 	CScene2D* m_pGaugeLife;			//‘Ì—ÍƒQ[ƒW
 	CScene2D* m_pGaugeLifeBg;		//‘Ì—ÍƒQ[ƒW”wŒi

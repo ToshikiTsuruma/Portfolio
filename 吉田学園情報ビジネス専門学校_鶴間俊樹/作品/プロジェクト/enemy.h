@@ -36,7 +36,7 @@ public:
 	CEnemy(const PARTS_INFO* pPartsInfoArray, int nNumParts, const MOTION_INFO* pMotionInfoArray, int nNumTypeMotion, bool bOutline, int nLife, float fDistAttack, int nAddTime);	//オーバーロードされたコンストラクタ
 	~CEnemy();	//デストラクタ
 
-	static void SetEnemyCircle(D3DXVECTOR3 posCenter, int nNumCircle, float fDistCircle, int nMinDist, int nMaxDist);	//同心円状にランダムに角度ずらして敵を配置する
+	static void SetEnemyCircle(D3DXVECTOR3 posCenter, int nNumCircle, float fRadiusCircle, int nMinDist, int nMaxDist);	//同心円状にランダムに角度ずらして敵を配置する
 	virtual HRESULT Init(void);		//初期化処理
 	virtual void Uninit(void);		//終了処理
 	virtual void Update(void);		//更新処理

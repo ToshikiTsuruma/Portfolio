@@ -26,6 +26,7 @@
 #include "tree.h"
 #include "compass.h"
 
+#include "particleEffect.h"
 //=============================================================================
 // マクロ定義
 //=============================================================================
@@ -127,6 +128,7 @@ HRESULT CGame::Init(void) {
 		m_pFogBillboard->SetDrawPriority(CScene::DRAW_PRIORITY::BG);	//描画順の設定
 		m_pFogBillboard->SetEnableFog(true);		//フォグが有効
 		m_pFogBillboard->SetZtestAlways(false);		//深度が影響する
+		m_pFogBillboard->SetDrawAllDistance(true);	//距離に関係なく描画できる
 	}
 
 	//円柱の壁の生成
@@ -143,10 +145,14 @@ HRESULT CGame::Init(void) {
 	//筏を生成
 	m_pRaft = CSceneModel::Create(CModel::MODELTYPE::RAFT, D3DXVECTOR3(0.0f, HEIGHT_SEA, 4700.0f), D3DXVECTOR3(0.0f, D3DX_PI * 0.1f, 0.0f));
 	if (m_pRaft != nullptr) m_pRaft->SetObjType(CScene::OBJ_TYPE::OTHER);
+	//筏の位置のパーティクルエフェクトの生成
+	CParticleEffect::PARTICLE_INFO particleInfo = { 120, 50.0f, -0.5f, 2.0f, D3DXVECTOR3(0.0f, -0.0f, 0.0f), D3DXCOLOR(0.2f, 0.0f, 1.0f, 1.0f), D3DXCOLOR(1.0f, 0.0f, 0.2f, 1.0f) };
+	CParticleEffect::Create(particleInfo, D3DXVECTOR3(0.0f, HEIGHT_SEA, 4700.0f), 0, 10, 0.04f * D3DX_PI);
 	//インタラクトキー有効時のアイコンの生成	筏の上の位置
 	m_pIconInteract = CBillboard::Create(D3DXVECTOR3(0.0f, 100.0f, 4700.0f), CTexture::TEXTURE_TYPE::NONE, 50.0f, 50.0f);
 	if (m_pIconInteract != nullptr) {
 		m_pIconInteract->SetObjType(CScene::OBJ_TYPE::OTHER);
+		m_pIconInteract->SetDrawPriority(CScene::DRAW_PRIORITY::UI);
 		m_pIconInteract->SetDraw(false);
 	}
 	//コンパスの生成

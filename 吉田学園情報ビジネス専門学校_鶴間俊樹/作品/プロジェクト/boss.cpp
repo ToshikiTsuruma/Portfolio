@@ -69,7 +69,7 @@ CBoss::CBoss() : CSceneMotion(m_pPartsInfoArray, m_nNumParts, &m_aMotionInfo[0],
 	m_bValidAttack = false;
 	m_nCntNormalAttack = 0;
 	m_nCntAttackRush = 0;
-	m_bRecovery = false;
+	m_bLockAct = false;
 	m_nLife = MAX_LIFE;
 	m_bDead = false;
 	m_nCntDead = 0;
@@ -293,11 +293,11 @@ void CBoss::Update(void) {
 	//----------------------------
 	bool bAttackRush = false;	//突進攻撃が攻撃可能かどうか
 
-	if (m_bRecovery == true) {
+	if (m_bLockAct == true) {
 		//モーションの遷移が完了した場合
 		if (GetTransMotion() == false) {
 			//硬直の解除
-			m_bRecovery = false;
+			m_bLockAct = false;
 
 			//通常攻撃を一定回数以上行っていた場合
 			if (m_nCntNormalAttack >= MAX_SPAN_RUSH_ATTACK) {
@@ -316,7 +316,7 @@ void CBoss::Update(void) {
 	bool bAngleAttackUnder = false;	//下攻撃できる角度にいるかどうか
 
 	//硬直中ではない場合
-	if (m_bRecovery == false && bStunPlayer == false) {
+	if (m_bLockAct == false && bStunPlayer == false) {
 		//--------------------------
 		//プレイヤーとの角度を計算
 		//--------------------------
@@ -366,7 +366,7 @@ void CBoss::Update(void) {
 	//----------------------------
 	//目標角度と移動量の設定
 	//----------------------------
-	if (m_bRecovery == false && m_bEncounterPlayer == true) {
+	if (m_bLockAct == false && m_bEncounterPlayer == true) {
 		//スタン中に一定以上離れた場合待機
 		if (m_bStay == false && bStunPlayer == true && fDistPlayer > DISTANCE_STAY) {
 			//ニュートラルモーションモーションを設定
@@ -414,7 +414,7 @@ void CBoss::Update(void) {
 	//回転
 	//----------------------------
 	//硬直中ではないとき
-	if (m_bRecovery == false && m_bEncounterPlayer == true) {
+	if (m_bLockAct == false && m_bEncounterPlayer == true) {
 		//目標角度と角度が不一致の場合
 		if (m_rotDestY != GetRot().y) {
 			//攻撃モーション中ではない場合で、待機中でなはい場合
@@ -524,7 +524,7 @@ void CBoss::Update(void) {
 			else {
 				//攻撃の終了
 				SetMotion((int)MOTION_TYPE::NEUTRAL);
-				m_bRecovery = true;
+				m_bLockAct = true;
 				m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
 			}
 			break;
@@ -533,7 +533,7 @@ void CBoss::Update(void) {
 		case MOTION_TYPE::ATTACK_UNDER:
 			//攻撃の終了
 			SetMotion((int)MOTION_TYPE::NEUTRAL);
-			m_bRecovery = true;
+			m_bLockAct = true;
 			m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
 			break;
 
@@ -547,7 +547,7 @@ void CBoss::Update(void) {
 			else {
 				//攻撃の終了
 				SetMotion((int)MOTION_TYPE::NEUTRAL);
-				m_bRecovery = true;
+				m_bLockAct = true;
 				m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
 			}
 			break;

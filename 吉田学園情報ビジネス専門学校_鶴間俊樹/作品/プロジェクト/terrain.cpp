@@ -186,8 +186,9 @@ bool CTerrain::Collision(D3DXVECTOR3* pPosCollision, D3DXVECTOR3 vecStart, D3DXV
 					//頂点バッファのアンロック
 					pMesh->UnlockVertexBuffer();
 
-					//地形のローカル座標での衝突位置
-					D3DXVECTOR3 posCol = D3DXVECTOR3(posVtx[0] + fU * (posVtx[1] - posVtx[0]) + fV * (posVtx[2] - posVtx[0]));	
+					D3DXVECTOR3 posCol = D3DXVECTOR3(posVtx[0] + fU * (posVtx[1] - posVtx[0]) + fV * (posVtx[2] - posVtx[0]));	//地形のローカル座標での衝突位置
+
+					//地形との衝突位置をワールド座標に変換
 					D3DXMATRIX mtxWorld;	//地形のワールドマトリックス
 					D3DXMATRIX mtxTrans, mtxRot;	//計算用マトリックス
 					//ワールドマトリックスの初期化

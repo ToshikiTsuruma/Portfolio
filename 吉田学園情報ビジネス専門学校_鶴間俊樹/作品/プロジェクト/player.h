@@ -102,7 +102,7 @@ private:
 	bool m_bLand;			//接地中かどうか
 	bool m_bValidAttack;	//攻撃が有効かどうか
 	int m_nNumKillEnemy;	//敵を倒した数
-	bool m_bRecovery;		//攻撃や回避後の硬直中
+	bool m_bLockAct;		//攻撃や回避後の硬直中
 	int m_nCntDodge;		//回避中のカウンタ
 	int m_nCntAttackMove;	//攻撃中の移動カウンタ
 	int m_nLife;			//体力

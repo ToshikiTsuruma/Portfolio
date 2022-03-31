@@ -7,10 +7,13 @@
 #include "billboard.h"
 #include "manager.h"
 #include "renderer.h"
+#include "game.h"
+#include "player.h"
 
 //=============================================================================
 // 静的メンバ変数宣言
 //=============================================================================
+#define MAX_DRAW_DISTANCE_DEFAULT (2000.0f)	//描画可能な最大の距離のデフォルト値
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -38,7 +41,7 @@ CBillboard::CBillboard()
 		}
 	}
 
-	SetDrawPriority(DRAW_PRIORITY::FRONT);	//描画順の設定
+	SetDrawPriority(DRAW_PRIORITY::EFFECT);	//描画順の設定
 
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXMatrixIdentity(&m_mtxWorld);
@@ -49,6 +52,9 @@ CBillboard::CBillboard()
 	m_bDraw = true;
 	m_bEnableFog = false;
 	m_bZtestAlways = true;
+	m_bZwriteEnable = false;
+	m_bDrawAllDist = false;
+	m_fDistDrawMax = MAX_DRAW_DISTANCE_DEFAULT;
 }
 
 //=============================================================================
@@ -153,6 +159,24 @@ void CBillboard::Draw(void) {
 	//デバイスがnullの場合終了
 	if (pDevice == nullptr) return;
 
+	//距離によっては描画せずに終了
+	if (m_bDrawAllDist == false) {
+		//ゲームの取得
+		CGame* pGame = nullptr;
+		if (pManager != nullptr) pGame = pManager->GetGame();
+		//プレイヤーの取得
+		CPlayer* pPlayer = nullptr;
+		if (pGame != nullptr) pPlayer = pGame->GetPlayer();
+		//プレイヤーの位置を取得
+		D3DXVECTOR3 posPlayer;
+		if (pPlayer != nullptr) posPlayer = pPlayer->GetPos();
+		//プレイヤーとの距離を求める
+		D3DXVECTOR2 vecPlayer = D3DXVECTOR2(posPlayer.x - GetPos().x, posPlayer.z - GetPos().z);
+		float fDistPlayer = D3DXVec2Length(&vecPlayer);
+		//プレイヤーから一定以上離れていた場合終了
+		if (fDistPlayer > m_fDistDrawMax) return;
+	}
+
 	D3DXMATRIX mtxTrans;	//計算用マトリックス
 	D3DXMATRIX mtxView;		//ビューマトリックス取得用
 	LPDIRECT3DTEXTURE9 pTexture;	//テクスチャへのポインタ
@@ -192,6 +216,8 @@ void CBillboard::Draw(void) {
 	if (m_bZtestAlways == true) {
 		//Zテスト
 		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+	}
+	if (m_bZwriteEnable == false) {
 		//Zバッファの更新
 		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 	}
@@ -204,6 +230,8 @@ void CBillboard::Draw(void) {
 	if (m_bZtestAlways == true) {
 		//Zテスト
 		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+	}
+	if (m_bZwriteEnable == false) {
 		//Zバッファの更新
 		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	}
@@ -346,8 +374,29 @@ void CBillboard::SetEnableFog(bool bEnable) {
 }
 
 //=============================================================================
-//深度関係なく描画できるかどうかの設定
+// 深度関係なく描画できるかどうかの設定
 //=============================================================================
 void CBillboard::SetZtestAlways(bool bAlways) {
 	m_bZtestAlways = bAlways;
+}
+
+//=============================================================================
+// 深度が高いポリゴンを遮るかどうかの設定
+//=============================================================================
+void CBillboard::SetZwriteEnable(bool bEnable) {
+	m_bZwriteEnable = bEnable;
+}
+
+//=============================================================================
+// 全ての距離で描画可能かどうかの設定
+//=============================================================================
+void CBillboard::SetDrawAllDistance(bool bDraw) {
+	m_bDrawAllDist = bDraw;
+}
+
+//=============================================================================
+// 描画可能な距離の最大値の設定
+//=============================================================================
+void CBillboard::SetDistanceDrawMax(float fDist) {
+	m_fDistDrawMax = fDist;
 }

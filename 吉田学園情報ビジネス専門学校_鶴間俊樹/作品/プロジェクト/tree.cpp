@@ -52,10 +52,12 @@ CTree::CTree() : CSceneMotion(m_pPartsInfoArray, m_nNumParts, &m_aMotionInfo[0],
 	if (m_pGaugeLifeFrame != NULL) {
 		m_pGaugeLifeFrame->SetColor(D3DXCOLOR(0.3f, 0.3f, 0.3f, 1.0f)); //体力ゲージの色の設定
 		m_pGaugeLifeFrame->SetDraw(false);	//描画しないようにする
+		m_pGaugeLifeFrame->SetDrawPriority(DRAW_PRIORITY::UI);	//描画順の設定
 	}
 	if (m_pGaugeLife != NULL) {
 		m_pGaugeLife->SetColor(D3DXCOLOR(0.3f, 1.0f, 0.0f, 1.0f)); //体力ゲージの色の設定
 		m_pGaugeLife->SetDraw(false);	//描画しないようにする
+		m_pGaugeLife->SetDrawPriority(DRAW_PRIORITY::UI);	//描画順の設定
 	}
 }
 
@@ -70,7 +72,7 @@ CTree::~CTree()
 //=============================================================================
 // 同心円状にランダムに角度ずらして木を配置する
 //=============================================================================
-//引数：中心の位置　円の数　円ごとの距離（半径）　（同じ園の一つ前の木との）最短距離、最長距離
+//引数：中心の位置　円の数　円ごとの距離（半径）　（同じ円の一つ前の木との）最短距離、最長距離
 void CTree::SetTreeCircle(D3DXVECTOR3 posCenter, int nNumCircle, float fDistCircle, int nMinDist, int nMaxDist) {
 	int nCntCircle = 0;	//作成した木の円の数
 	float fRotCreate = 0.0f;	//配置する角度
@@ -90,8 +92,8 @@ void CTree::SetTreeCircle(D3DXVECTOR3 posCenter, int nNumCircle, float fDistCirc
 		else {
 			//木を生成する位置の設定
 			D3DXVECTOR3 posCreate = posCenter;	//配置する位置
-			posCreate.x = sinf(fRotCreate + fRandStartRot) * fDistCircle * (nCntCircle + 1);
-			posCreate.z = cosf(fRotCreate + fRandStartRot) * fDistCircle * (nCntCircle + 1);
+			posCreate.x += sinf(fRotCreate + fRandStartRot) * fDistCircle * (nCntCircle + 1);
+			posCreate.z += cosf(fRotCreate + fRandStartRot) * fDistCircle * (nCntCircle + 1);
 			//木の生成
 			CTree::Create(posCreate);
 		}

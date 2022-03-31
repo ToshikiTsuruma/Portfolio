@@ -38,6 +38,9 @@ public:
 	void SetDraw(bool bDraw);		//描画するかどうかの設定
 	void SetEnableFog(bool bEnable);	//フォグを有効にするかどうかの設定
 	void SetZtestAlways(bool bAlways);	//深度関係なく描画できるかどうかの設定
+	void SetZwriteEnable(bool bEnable);	//深度が高いポリゴンを遮るかどうかの設定
+	void SetDrawAllDistance(bool bDraw);	//全ての距離で描画可能かどうかの設定
+	void SetDistanceDrawMax(float fDist);	//描画可能な距離の最大値の設定
 
 private:
 	D3DXVECTOR3	m_pos;	//ポリゴンの中心座標
@@ -50,6 +53,9 @@ private:
 	bool m_bDraw;	//描画するかどうか
 	bool m_bEnableFog;		//フォグを有効にするかどうか
 	bool m_bZtestAlways;	//深度関係なく描画できるかどうか
+	bool m_bZwriteEnable;	//深度が高いポリゴンを遮るかどうか
+	bool m_bDrawAllDist;	//全ての距離で描画可能かどうか
+	float m_fDistDrawMax;	//描画可能な距離の最大値
 };
 
 #endif // !_BILLBOARD_H_

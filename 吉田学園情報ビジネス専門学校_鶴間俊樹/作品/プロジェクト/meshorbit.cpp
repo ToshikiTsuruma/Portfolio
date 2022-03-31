@@ -243,6 +243,8 @@ void CMeshorbit::Draw(void) {
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 	//カリングなし
 	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	//Zバッファの更新が不可能
+	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
 	//-------------------------------
 	//描画
@@ -263,6 +265,8 @@ void CMeshorbit::Draw(void) {
 	//-------------------------------
 	//描画の設定を戻す
 	//-------------------------------
+	//Zバッファの更新が可能
+	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	//カリングの設定を戻す
 	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 	//ライト反映

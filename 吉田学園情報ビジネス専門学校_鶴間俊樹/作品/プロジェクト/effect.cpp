@@ -17,9 +17,6 @@
 //=============================================================================
 CEffect::CEffect()
 {
-	//ï`âÊèáÇÃê›íË
-	SetDrawPriority(DRAW_PRIORITY::EFFECT);
-
 	m_nCntAnim = 0;
 	m_nSpanAnim = 0;
 	m_nPatternAnim = 0;

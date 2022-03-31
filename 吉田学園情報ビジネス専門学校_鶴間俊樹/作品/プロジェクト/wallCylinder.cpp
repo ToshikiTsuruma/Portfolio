@@ -129,8 +129,6 @@ void CWallCylinder::Draw(void) {
 	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	//ライトを無効
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
-	//フォグを無効
-	pDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
 
 	//描画
 	CMeshcylinder::Draw();
@@ -139,8 +137,6 @@ void CWallCylinder::Draw(void) {
 	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 	//ライトを有効
 	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
-	//フォグを有効
-	pDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
 }
 
 //=============================================================================
