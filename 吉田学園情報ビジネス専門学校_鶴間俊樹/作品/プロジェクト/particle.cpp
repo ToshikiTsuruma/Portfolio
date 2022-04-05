@@ -52,7 +52,7 @@ CParticle::~CParticle()
 CParticle* CParticle::Create(D3DXVECTOR3 pos, int nLife, float fSizeStart, float fAddSize, D3DXVECTOR3 move, D3DXVECTOR3 addMove, D3DXCOLOR colStart, D3DXCOLOR colEnd) {
 	CParticle* pParticle;
 	pParticle = new CParticle(nLife, fAddSize, move, addMove, colStart, colEnd);
-	if (pParticle != NULL) {
+	if (pParticle != nullptr) {
 		pParticle->SetTexType(CTexture::TEXTURE_TYPE::EFFECT_PARTICLE);
 		pParticle->SetPos(pos);
 		pParticle->SetSize(D3DXVECTOR3(fSizeStart, fSizeStart, 0.0f));

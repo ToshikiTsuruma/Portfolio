@@ -41,7 +41,7 @@ CEffect::~CEffect()
 CEffect* CEffect::Create(D3DXVECTOR3 pos, EFFECT_TYPE type, float fWidth, float fHeight) {
 	CEffect* pEffect;
 	pEffect = new CEffect;
-	if (pEffect != NULL) {
+	if (pEffect != nullptr) {
 		pEffect->m_type = type;
 		pEffect->SetPos(pos);
 		pEffect->SetSize(D3DXVECTOR3(fWidth, fHeight, 0.0f));

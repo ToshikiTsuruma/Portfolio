@@ -98,10 +98,10 @@ void CFade::Update(void) {
 	CManager* pManager = CManager::GetManager();	
 
 	//モード切り替え時の終了
-	if (m_bChangeFade == true) m_bChangeFade = false;
+	if (m_bChangeFade) m_bChangeFade = false;
 
 	//フェードアウト
-	if (m_bFadein == false && m_colA > 0.0f) {
+	if (!m_bFadein && m_colA > 0.0f) {
 		m_colA -= m_fFadeSpeed;
 		if (m_colA < 0.0f) {
 			m_colA = 0.0f;
@@ -109,7 +109,7 @@ void CFade::Update(void) {
 	}
 
 	//フェードイン
-	if (m_bFadein == true && m_colA <= 1.0f) {
+	if (m_bFadein && m_colA <= 1.0f) {
 		m_colA += m_fFadeSpeed;
 		//フェード完了時
 		if (m_colA >= 1.0f) {
@@ -125,7 +125,7 @@ void CFade::Update(void) {
 	}
 
 	//フェード中のみ更新
-	if (m_bFadein == true || m_colA > 0.0f) {
+	if (m_bFadein || m_colA > 0.0f) {
 		VERTEX_2D *pVtx;
 
 		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
@@ -155,7 +155,7 @@ void CFade::Draw(void) {
 	if (pDevice == nullptr) return;
 
 	//フェード中のみ描画
-	if (m_bFadein == true || m_colA > 0.0f) {
+	if (m_bFadein || m_colA > 0.0f) {
 		pDevice->SetFVF(FVF_VERTEX_2D);			//頂点フォーマットの設定
 		pDevice->SetStreamSource(0, m_pVtxBuff, 0, sizeof(VERTEX_2D));	//頂点バッファをデバイスのデータストリームに設定
 		pDevice->SetTexture(0, NULL);		//テクスチャの設定
@@ -170,7 +170,7 @@ void CFade::Draw(void) {
 //フェードの設定
 //=============================================================================
 void CFade::SetFade(CManager::MODE mode, float fFadeSpeed) {
-	if (m_bFadein == false) {
+	if (!m_bFadein) {
 		m_bFadein = true;
 		m_nextMode = mode;
 		m_fFadeSpeed = fFadeSpeed;
@@ -189,7 +189,7 @@ void CFade::SkipFade(void) {
 // フェード中かどうかを取得
 //=============================================================================
 bool CFade::GetFade(void) {
-	if (m_bFadein == true || m_colA > 0.0f) {
+	if (m_bFadein || m_colA > 0.0f) {
 		return true;
 	}
 	return false;

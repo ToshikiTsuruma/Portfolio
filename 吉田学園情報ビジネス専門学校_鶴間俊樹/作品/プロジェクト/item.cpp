@@ -31,7 +31,7 @@ CItem::CItem()
 //=============================================================================
 //オーバーロードされたコンストラクタ
 //=============================================================================
-CItem::CItem(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 rot, bool bOutLine) : CSceneModel(typeModel, pos, rot, NULL, bOutLine)
+CItem::CItem(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 rot, bool bOutLine) : CSceneModel(typeModel, pos, rot, nullptr, bOutLine)
 {
 	SetObjType(OBJ_TYPE::ITEM);	//オブジェクトタイプの設定
 }
@@ -84,12 +84,12 @@ void CItem::Draw(void) {
 
 	//プレイヤーの位置を取得
 	D3DXVECTOR3 posPlayer = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	if (pPlayer != NULL) posPlayer = pPlayer->GetPos();
+	if (pPlayer != nullptr) posPlayer = pPlayer->GetPos();
 	//プレイヤーとの距離を求める
 	D3DXVECTOR2 vecPlayer = D3DXVECTOR2(posPlayer.x - GetPos().x, posPlayer.z - GetPos().z);
 	float fDistPlayer = D3DXVec2Length(&vecPlayer);
 	//描画の設定
-	if (m_bDraw == true) {
+	if (m_bDraw) {
 		//描画外の位置にいたら描画しないようにする
 		if (fDistPlayer > MAX_DRAW_DISTANCE) {
 			m_bDraw = false;
@@ -103,7 +103,7 @@ void CItem::Draw(void) {
 	}
 
 	//描画
-	if (m_bDraw == true) {
+	if (m_bDraw) {
 		CSceneModel::Draw();
 	}
 }
@@ -112,7 +112,7 @@ void CItem::Draw(void) {
 // アイテムとの衝突判定
 //=============================================================================
 void CItem::Collision(CScene* pSceneCol) {
-	if (pSceneCol == NULL) return;
+	if (pSceneCol == nullptr) return;
 
 	D3DXVECTOR3 posCol = pSceneCol->GetPos();			//当たり判定するオブジェクトの位置座標
 	float radiusCol = pSceneCol->GetRadius();			//当たり判定するオブジェクトの半径
@@ -120,13 +120,13 @@ void CItem::Collision(CScene* pSceneCol) {
 	CScene* pScene;	//オブジェクトへのポインタ
 	pScene = GetSceneTopObjtype(OBJ_TYPE::ITEM);	//アイテムのオブジェクトタイプのリストの先頭を取得
 
-	while (pScene != NULL) {
+	while (pScene != nullptr) {
 		CScene* pSceneNext = GetSceneNextObjtype(pScene);	//リストの次のオブジェクトのポインタを取得
 		CItem* pItem = dynamic_cast<CItem*>(pScene);	//アイテムクラスにキャスト
 		//キャスト成功時
-		if (pItem != NULL) {
+		if (pItem != nullptr) {
 			//死亡フラグが立っていない場合
-			if (pItem->GetDeath() == false) {
+			if (!pItem->GetDeath()) {
 				D3DXVECTOR3 posItem = pItem->GetPos();	//アイテムの位置の取得
 				float fRadiusItem = pItem->GetRadius();	//アイテムの半径の取得
 				posItem.y += fRadiusItem;	//アイテムはローカル座標で底辺が0なので中央に来るように調整する

@@ -21,7 +21,7 @@
 // 静的メンバ変数宣言
 //=============================================================================
 int CEnemyNormal::m_nNumParts = 0;
-CSceneMotion::PARTS_INFO* CEnemyNormal::m_pPartsInfoArray = NULL;
+CSceneMotion::PARTS_INFO* CEnemyNormal::m_pPartsInfoArray = nullptr;
 CSceneMotion::MOTION_INFO CEnemyNormal::m_aMotionInfo[(int)CEnemyNormal::MOTION_TYPE::ENUM_MAX] = {};
 
 //=============================================================================
@@ -46,7 +46,7 @@ CEnemyNormal::~CEnemyNormal()
 CEnemyNormal* CEnemyNormal::Create(D3DXVECTOR3 pos) {
 	CEnemyNormal* pEnemyNormal;
 	pEnemyNormal = new CEnemyNormal();
-	if (pEnemyNormal != NULL) {
+	if (pEnemyNormal != nullptr) {
 		pEnemyNormal->SetPos(pos);
 		pEnemyNormal->Init();
 	}
@@ -61,7 +61,7 @@ void CEnemyNormal::LoadMotionInfo(void) {
 	//ロードする前に動的確保したメモリをdeleteする
 	UnloadMotionInfo();
 
-	Load(TEXT_FILE_NAME_LOAD_MOTION, &m_pPartsInfoArray, &m_nNumParts, &m_aMotionInfo[0], (int)MOTION_TYPE::ENUM_MAX, NULL);
+	Load(TEXT_FILE_NAME_LOAD_MOTION, &m_pPartsInfoArray, &m_nNumParts, &m_aMotionInfo[0], (int)MOTION_TYPE::ENUM_MAX, nullptr);
 }
 
 //=============================================================================
@@ -71,18 +71,18 @@ void CEnemyNormal::UnloadMotionInfo(void) {
 	m_nNumParts = 0;
 
 	//パーツ情報の解放
-	if (m_pPartsInfoArray != NULL) {
+	if (m_pPartsInfoArray != nullptr) {
 		delete[] m_pPartsInfoArray;
-		m_pPartsInfoArray = NULL;
+		m_pPartsInfoArray = nullptr;
 	}
 	//モーション情報の解放
 	for (int nCntMotionInfo = 0; nCntMotionInfo < (int)MOTION_TYPE::ENUM_MAX; nCntMotionInfo++)
 	{
 		for (int nCntKeyInfo = 0; nCntKeyInfo < MAX_KEY_MOTION; nCntKeyInfo++)
 		{
-			if (m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray != NULL) {
+			if (m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray != nullptr) {
 				delete[] m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray;
-				m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray = NULL;
+				m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray = nullptr;
 			}
 		}
 	}
@@ -128,13 +128,13 @@ void CEnemyNormal::Draw(void) {
 //=============================================================================
 void CEnemyNormal::GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECTOR3** const ppPosColArray, float* const pRadiusCol) {
 	//当たり判定の数を設定
-	if (pNumCol != NULL) *pNumCol = NUM_COLLISION;
+	if (pNumCol != nullptr) *pNumCol = NUM_COLLISION;
 	//当たり判定の半径を設定
-	if (pRadiusCol != NULL) *pRadiusCol = COLLISION_RADIUS;
+	if (pRadiusCol != nullptr) *pRadiusCol = COLLISION_RADIUS;
 	//当たり判定の位置の配列を設定
-	if (ppPosColArray != NULL) {
+	if (ppPosColArray != nullptr) {
 		//posのポインタが空だった場合
-		if (*ppPosColArray == NULL) {
+		if (*ppPosColArray == nullptr) {
 			//posの変数を当たり判定の数分配列で確保
 			*ppPosColArray = new D3DXVECTOR3[NUM_COLLISION];
 
@@ -234,7 +234,7 @@ void CEnemyNormal::MotionAct(void) {
 		//攻撃
 	case MOTION_TYPE::ATTACK:
 		//攻撃のタイミング
-		if ((GetCurrentKey() == 1 || GetCurrentKey() == 2) && GetTransMotion() == false) {
+		if ((GetCurrentKey() == 1 || GetCurrentKey() == 2) && !GetTransMotion()) {
 			const int nNumCollision = 3;	//攻撃の当たり判定の数
 			D3DXVECTOR3 aPosCol[nNumCollision] = {};	//当たり判定の位置
 			int nIdxModel = 2;	//右手
@@ -252,7 +252,7 @@ void CEnemyNormal::MotionAct(void) {
 			for (int nCntAttack = 0; nCntAttack < nNumCollision; nCntAttack++)
 			{
 				//攻撃
-				CSceneMotion::Attack(OBJ_TYPE::PLAYER, aPosCol[nCntAttack], 10.0f, 1, DAMAGE_TYPE::ENEMY, NULL);
+				CSceneMotion::Attack(OBJ_TYPE::PLAYER, aPosCol[nCntAttack], 10.0f, 1, DAMAGE_TYPE::ENEMY, nullptr);
 			}
 			//攻撃の先端にパーティクルの生成
 			//CParticle::Create(aPosCol[nNumCollision - 1], 20.0f, 1.0f, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));

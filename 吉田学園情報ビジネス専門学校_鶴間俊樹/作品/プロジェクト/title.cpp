@@ -23,13 +23,13 @@
 //=============================================================================
 CTitle::CTitle() {
 	for (int nCnt = 0; nCnt < (int)SELECT_TYPE::ENUM_MAX; nCnt++) {
-		m_apScene2D[nCnt] = NULL;
+		m_apScene2D[nCnt] = nullptr;
 	}
 	m_bFade = false;
-	m_pTutorial = NULL;
+	m_pTutorial = nullptr;
 	m_bTutorial = false;
 	m_typeTutorial = TUTORIAL_TYPE::CONTROLL;
-	m_pCredit = NULL;
+	m_pCredit = nullptr;
 	m_bCredit = false;
 	m_nSelect = 0;
 }
@@ -72,7 +72,7 @@ HRESULT CTitle::Init(void) {
 	CSound *pSound = nullptr;
 	if (pManager != nullptr) pSound = pManager->GetSound();
 	//曲の再生
-	if (pSound != NULL) {
+	if (pSound != nullptr) {
 		pSound->PlaySound(CSound::SOUND_LABEL::BGM_TITLE);
 		CSound::SetBGM(CSound::SOUND_LABEL::BGM_TITLE);
 	}
@@ -121,7 +121,7 @@ void CTitle::Update(void) {
 	//入力処理
 	if (pInput != nullptr && pFade != nullptr) {
 		//タイトル開始時のフェード中の処理
-		if (pFade->GetFade() == true && m_bFade == false) {
+		if (pFade->GetFade() && !m_bFade) {
 			if (pInput->GetTrigger(CInput::CODE::SELECT)) {
 				pFade->SkipFade();
 			}
@@ -131,24 +131,24 @@ void CTitle::Update(void) {
 			//----------------------------------------
 			//戻るボタン押下時
 			//----------------------------------------
-			if (pInput->GetTrigger(CInput::CODE::BACK) && m_bFade == false) {
-				if (m_bTutorial == true) {
+			if (pInput->GetTrigger(CInput::CODE::BACK) && !m_bFade) {
+				if (m_bTutorial) {
 					//チュートリアルを閉じる
-					if (m_pTutorial != NULL) {
+					if (m_pTutorial != nullptr) {
 						m_pTutorial->Uninit();
 						//効果音の再生
-						if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_CLOSE);
-						m_pTutorial = NULL;
+						if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_CLOSE);
+						m_pTutorial = nullptr;
 					}
 					m_bTutorial = false;
 				}
-				else if (m_bCredit == true) {
+				else if (m_bCredit) {
 					//クレジットを閉じる
-					if (m_pCredit != NULL) {
+					if (m_pCredit != nullptr) {
 						m_pCredit->Uninit();
 						//効果音の再生
-						if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_CLOSE);
-						m_pCredit = NULL;
+						if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_CLOSE);
+						m_pCredit = nullptr;
 					}
 					m_bCredit = false;
 				}
@@ -157,13 +157,13 @@ void CTitle::Update(void) {
 			//----------------------------------------
 			//選択切り替え
 			//----------------------------------------
-			if (m_bTutorial == false && m_bCredit == false && m_bFade == false) {
+			if (!m_bTutorial && !m_bCredit && !m_bFade) {
 				//上キー
 				if (pInput->GetTrigger(CInput::CODE::UP)) {
 					//選択から外れるポリゴンの色を戻す
 					m_apScene2D[m_nSelect]->SetColor(DEFAULT_COLOR);
 					//効果音の再生
-					if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_SWITCH);
+					if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_SWITCH);
 					//選択を変更
 					if (m_nSelect <= 0) {
 						m_nSelect = (int)SELECT_TYPE::ENUM_MAX - 1;
@@ -179,7 +179,7 @@ void CTitle::Update(void) {
 					//選択から外れるポリゴンの色を戻す
 					m_apScene2D[m_nSelect]->SetColor(DEFAULT_COLOR);
 					//効果音の再生
-					if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_SWITCH);
+					if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_SWITCH);
 					//選択を変更
 					if (m_nSelect >= (int)SELECT_TYPE::ENUM_MAX - 1) {
 						m_nSelect = 0;
@@ -193,7 +193,7 @@ void CTitle::Update(void) {
 			}
 
 			//チュートリアル
-			if (m_bTutorial == true && m_bCredit == false && m_bFade == false) {
+			if (m_bTutorial && !m_bCredit && !m_bFade) {
 				//左右キー
 				if (pInput->GetTrigger(CInput::CODE::LEFT) || pInput->GetTrigger(CInput::CODE::RIGHT)) {
 					if (pInput->GetTrigger(CInput::CODE::LEFT)) {
@@ -226,11 +226,11 @@ void CTitle::Update(void) {
 					}
 
 					//別のチュートリアル画面を生成
-					if (m_pTutorial != NULL) {
+					if (m_pTutorial != nullptr) {
 						m_pTutorial->Uninit();
 						m_pTutorial = CScene2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f), typeTex, SCREEN_WIDTH, SCREEN_HEIGHT);
 						//効果音の再生
-						if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_SWITCH);
+						if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_SWITCH);
 					}
 				}
 			}
@@ -238,26 +238,26 @@ void CTitle::Update(void) {
 			//----------------------------------------
 			//選択決定時
 			//----------------------------------------
-			if (pInput->GetTrigger(CInput::CODE::SELECT) && m_bFade == false) {
+			if (pInput->GetTrigger(CInput::CODE::SELECT) && !m_bFade) {
 				//チュートリアル画面表示時
-				if (m_bTutorial == true) {
+				if (m_bTutorial) {
 					//チュートリアルを閉じる
-					if (m_pTutorial != NULL) {
+					if (m_pTutorial != nullptr) {
 						m_pTutorial->Uninit();
 						//効果音の再生
-						if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_CLOSE);
-						m_pTutorial = NULL;
+						if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_CLOSE);
+						m_pTutorial = nullptr;
 					}
 					m_bTutorial = false;
 				}
 				//クレジット画面表示時
-				else if (m_bCredit == true) {
+				else if (m_bCredit) {
 					//クレジットを閉じる
-					if (m_pCredit != NULL) {
+					if (m_pCredit != nullptr) {
 						m_pCredit->Uninit();
 						//効果音の再生
-						if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_CLOSE);
-						m_pCredit = NULL;
+						if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_CLOSE);
+						m_pCredit = nullptr;
 					}
 					m_bCredit = false;
 				}
@@ -268,9 +268,9 @@ void CTitle::Update(void) {
 						//ゲームスタート
 					case (int)SELECT_TYPE::START:
 						//効果音の再生
-						if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_START);
+						if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_START);
 						//ゲームのモードに切り替え
-						if (pFade != NULL) {
+						if (pFade != nullptr) {
 							pFade->SetFade(CManager::MODE::GAME, FADE_SPEED);
 							m_bFade = true;
 						}
@@ -278,9 +278,9 @@ void CTitle::Update(void) {
 						//チュートリアル
 					case (int)SELECT_TYPE::TUTORIAL:
 						//効果音の再生
-						if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_OPEN);
+						if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_OPEN);
 						//チュートリアル画面生成
-						if (m_pTutorial == NULL) {
+						if (m_pTutorial == nullptr) {
 							m_pTutorial = CScene2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f), CTexture::TEXTURE_TYPE::TITLE_TUTORIAL_001, SCREEN_WIDTH, SCREEN_HEIGHT);
 							m_bTutorial = true;
 							m_typeTutorial = TUTORIAL_TYPE::CONTROLL;
@@ -289,9 +289,9 @@ void CTitle::Update(void) {
 						//クレジット表記
 					case (int)SELECT_TYPE::CREDIT:
 						//効果音の再生
-						if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_OPEN);
+						if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_OPEN);
 						//クレジット画面生成
-						if (m_pCredit == NULL) {
+						if (m_pCredit == nullptr) {
 							m_pCredit = CScene2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f), CTexture::TEXTURE_TYPE::TITLE_CREDIT, SCREEN_WIDTH, SCREEN_HEIGHT);
 							m_bCredit = true;
 						}

@@ -31,7 +31,7 @@
 // 静的メンバ変数宣言
 //=============================================================================
 int CTree::m_nNumParts = 0;
-CSceneMotion::PARTS_INFO* CTree::m_pPartsInfoArray = NULL;
+CSceneMotion::PARTS_INFO* CTree::m_pPartsInfoArray = nullptr;
 CSceneMotion::MOTION_INFO CTree::m_aMotionInfo[(int)CTree::MOTION_TYPE::ENUM_MAX] = {};
 
 //=============================================================================
@@ -49,12 +49,12 @@ CTree::CTree() : CSceneMotion(m_pPartsInfoArray, m_nNumParts, &m_aMotionInfo[0],
 	m_pGaugeLifeFrame = CBillboard::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), CTexture::TEXTURE_TYPE::NONE, 75.0f, 15.0f);
 	m_pGaugeLife = CBillboard::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), CTexture::TEXTURE_TYPE::NONE, 70.0f, 10.0f);
 
-	if (m_pGaugeLifeFrame != NULL) {
+	if (m_pGaugeLifeFrame != nullptr) {
 		m_pGaugeLifeFrame->SetColor(D3DXCOLOR(0.3f, 0.3f, 0.3f, 1.0f)); //体力ゲージの色の設定
 		m_pGaugeLifeFrame->SetDraw(false);	//描画しないようにする
 		m_pGaugeLifeFrame->SetDrawPriority(DRAW_PRIORITY::UI);	//描画順の設定
 	}
-	if (m_pGaugeLife != NULL) {
+	if (m_pGaugeLife != nullptr) {
 		m_pGaugeLife->SetColor(D3DXCOLOR(0.3f, 1.0f, 0.0f, 1.0f)); //体力ゲージの色の設定
 		m_pGaugeLife->SetDraw(false);	//描画しないようにする
 		m_pGaugeLife->SetDrawPriority(DRAW_PRIORITY::UI);	//描画順の設定
@@ -106,7 +106,7 @@ void CTree::SetTreeCircle(D3DXVECTOR3 posCenter, int nNumCircle, float fDistCirc
 CTree* CTree::Create(D3DXVECTOR3 pos) {
 	CTree* pTree;
 	pTree = new CTree();
-	if (pTree != NULL) {
+	if (pTree != nullptr) {
 		pTree->CSceneMotion::SetPos(pos);
 		pTree->Init();
 	}
@@ -121,7 +121,7 @@ void CTree::LoadMotionInfo(void) {
 	//ロードする前に動的確保したメモリをdeleteする
 	UnloadMotionInfo();
 
-	Load(TEXT_FILE_NAME_LOAD_MOTION, &m_pPartsInfoArray, &m_nNumParts, &m_aMotionInfo[0], (int)MOTION_TYPE::ENUM_MAX, NULL);
+	Load(TEXT_FILE_NAME_LOAD_MOTION, &m_pPartsInfoArray, &m_nNumParts, &m_aMotionInfo[0], (int)MOTION_TYPE::ENUM_MAX, nullptr);
 }
 
 //=============================================================================
@@ -131,18 +131,18 @@ void CTree::UnloadMotionInfo(void) {
 	m_nNumParts = 0;
 
 	//パーツ情報の解放
-	if (m_pPartsInfoArray != NULL) {
+	if (m_pPartsInfoArray != nullptr) {
 		delete[] m_pPartsInfoArray;
-		m_pPartsInfoArray = NULL;
+		m_pPartsInfoArray = nullptr;
 	}
 	//モーション情報の解放
 	for (int nCntMotionInfo = 0; nCntMotionInfo < (int)MOTION_TYPE::ENUM_MAX; nCntMotionInfo++)
 	{
 		for (int nCntKeyInfo = 0; nCntKeyInfo < MAX_KEY_MOTION; nCntKeyInfo++)
 		{
-			if (m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray != NULL) {
+			if (m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray != nullptr) {
 				delete[] m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray;
-				m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray = NULL;
+				m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray = nullptr;
 			}
 		}
 	}
@@ -170,7 +170,7 @@ HRESULT CTree::Init(void) {
 
 	bLand = CTerrain::Collision(&posColTerrain, vecStart, vecEnd);
 
-	if (bLand == true) {
+	if (bLand) {
 		SetPos(posColTerrain);
 	}
 
@@ -185,14 +185,14 @@ HRESULT CTree::Init(void) {
 //=============================================================================
 void CTree::Uninit(void) {
 	//体力ゲージの破棄
-	if (m_pGaugeLife != NULL) {
+	if (m_pGaugeLife != nullptr) {
 		m_pGaugeLife->Uninit();
-		m_pGaugeLife = NULL;
+		m_pGaugeLife = nullptr;
 	}
 	//体力ゲージの枠の破棄
-	if (m_pGaugeLifeFrame != NULL) {
+	if (m_pGaugeLifeFrame != nullptr) {
 		m_pGaugeLifeFrame->Uninit();
-		m_pGaugeLifeFrame = NULL;
+		m_pGaugeLifeFrame = nullptr;
 	}
 	//終了処理
 	CSceneMotion::Uninit();
@@ -208,7 +208,7 @@ void CTree::Update(void) {
 	CSound *pSound = nullptr;
 	if(pManager != nullptr) pSound = pManager->GetSound();
 
-	if (m_bDead == true) {
+	if (m_bDead) {
 		m_nCntDead++;
 
 		//木の破棄
@@ -219,7 +219,7 @@ void CTree::Update(void) {
 			//消滅エフェクトの生成
 			CEffect::Create(GetPos(), CEffect::EFFECT_TYPE::EXPLOSION, 50.0f, 50.0f);
 			//消滅音の再生
-			if (pSound != NULL) pSound->CSound::PlaySound(CSound::SOUND_LABEL::EXPLOSION);
+			if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::EXPLOSION);
 
 			//終了処理
 			Uninit();
@@ -235,13 +235,13 @@ void CTree::Update(void) {
 		//描画時間がなくなった場合
 		if (m_nCntDrawGaugeLife <= 0) {
 			//描画しなくする
-			if (m_pGaugeLife != NULL) m_pGaugeLife->SetDraw(false);
-			if (m_pGaugeLifeFrame != NULL) m_pGaugeLifeFrame->SetDraw(false);
+			if (m_pGaugeLife != nullptr) m_pGaugeLife->SetDraw(false);
+			if (m_pGaugeLifeFrame != nullptr) m_pGaugeLifeFrame->SetDraw(false);
 		}
 		else {
 			//位置を更新
-			if (m_pGaugeLife != NULL) m_pGaugeLife->SetPos(D3DXVECTOR3(GetPos().x, GetPos().y + LIFE_GAUGE_HEIGHT, GetPos().z));
-			if (m_pGaugeLifeFrame != NULL) m_pGaugeLifeFrame->SetPos(D3DXVECTOR3(GetPos().x, GetPos().y + LIFE_GAUGE_HEIGHT, GetPos().z));
+			if (m_pGaugeLife != nullptr) m_pGaugeLife->SetPos(D3DXVECTOR3(GetPos().x, GetPos().y + LIFE_GAUGE_HEIGHT, GetPos().z));
+			if (m_pGaugeLifeFrame != nullptr) m_pGaugeLifeFrame->SetPos(D3DXVECTOR3(GetPos().x, GetPos().y + LIFE_GAUGE_HEIGHT, GetPos().z));
 		}
 	}
 }
@@ -261,12 +261,12 @@ void CTree::Draw(void) {
 
 	//プレイヤーの位置を取得
 	D3DXVECTOR3 posPlayer = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	if (pPlayer != NULL) posPlayer = pPlayer->GetPos();
+	if (pPlayer != nullptr) posPlayer = pPlayer->GetPos();
 	//プレイヤーとの距離を求める
 	D3DXVECTOR2 vecPlayer = D3DXVECTOR2(posPlayer.x - GetPos().x, posPlayer.z - GetPos().z);
 	float fDistPlayer = D3DXVec2Length(&vecPlayer);
 	//描画の設定
-	if (m_bDraw == true) {
+	if (m_bDraw) {
 		//描画外の位置にいたら描画しないようにする
 		if (fDistPlayer > MAX_DRAW_DISTANCE) {
 			m_bDraw = false;
@@ -280,7 +280,7 @@ void CTree::Draw(void) {
 	}
 
 	//描画
-	if (m_bDraw == true) {
+	if (m_bDraw) {
 		CSceneMotion::Draw();
 	}
 }
@@ -290,13 +290,13 @@ void CTree::Draw(void) {
 //=============================================================================
 void CTree::GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECTOR3** const ppPosColArray, float* const pRadiusCol) {
 	//当たり判定の数を設定
-	if (pNumCol != NULL) *pNumCol = NUM_COLLISION;
+	if (pNumCol != nullptr) *pNumCol = NUM_COLLISION;
 	//当たり判定の半径を設定
-	if (pRadiusCol != NULL) *pRadiusCol = COLLISION_RADIUS;
+	if (pRadiusCol != nullptr) *pRadiusCol = COLLISION_RADIUS;
 	//当たり判定の位置の配列を設定
-	if (ppPosColArray != NULL) {
+	if (ppPosColArray != nullptr) {
 		//posのポインタが空だった場合
-		if (*ppPosColArray == NULL) {
+		if (*ppPosColArray == nullptr) {
 			//posの変数を当たり判定の数分配列で確保
 			*ppPosColArray = new D3DXVECTOR3[NUM_COLLISION];
 
@@ -317,7 +317,7 @@ void CTree::GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECTOR3**
 // 木のダメージ処理
 //=============================================================================
 void CTree::Damage(int nDamage, bool* pDead) {
-	if (m_bDead == true) return;
+	if (m_bDead) return;
 
 	//サウンドの取得
 	CManager* pManager = nullptr;
@@ -331,37 +331,37 @@ void CTree::Damage(int nDamage, bool* pDead) {
 	//死亡時
 	if (m_nLife <= 0) {
 		m_bDead = true;
-		if (pDead != NULL) *pDead = true;
+		if (pDead != nullptr) *pDead = true;
 		//死亡モーション設定
 		SetMotion((int)MOTION_TYPE::BREAK);
 		//倒壊音の再生
-		if (pSound != NULL) pSound->CSound::PlaySound(CSound::SOUND_LABEL::BREAK_TREE);
+		if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::BREAK_TREE);
 		//死亡カウントの初期化
 		m_nCntDead = 0;
 		//当たり判定を無効
 		SetEnableCollision(false);
 		//体力ゲージの破棄
-		if (m_pGaugeLife != NULL) {
+		if (m_pGaugeLife != nullptr) {
 			m_pGaugeLife->Uninit();
-			m_pGaugeLife = NULL;
+			m_pGaugeLife = nullptr;
 		}
 		//体力ゲージの枠の破棄
-		if (m_pGaugeLifeFrame != NULL) {
+		if (m_pGaugeLifeFrame != nullptr) {
 			m_pGaugeLifeFrame->Uninit();
-			m_pGaugeLifeFrame = NULL;
+			m_pGaugeLifeFrame = nullptr;
 		}
 	}
 	else {
 		*pDead = false;
 		//体力ゲージの描画時間の設定
 		m_nCntDrawGaugeLife = 300;
-		if (m_pGaugeLife != NULL) {
+		if (m_pGaugeLife != nullptr) {
 			//体力ゲージの幅を変える
 			m_pGaugeLife->SetRatioWidth((float)m_nLife / (float)MAX_LIFE);
 			//描画させる
 			m_pGaugeLife->SetDraw(true);
 		}
-		if (m_pGaugeLifeFrame != NULL) {
+		if (m_pGaugeLifeFrame != nullptr) {
 			//描画させる
 			m_pGaugeLifeFrame->SetDraw(true);
 		}

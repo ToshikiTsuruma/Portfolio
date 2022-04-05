@@ -49,9 +49,9 @@ CTimer::~CTimer()
 CTimer* CTimer::Create(int nStartTime, int nNumDigit, CTexture::TEXTURE_TYPE type, D3DXVECTOR3 pos, float fSize, float fSpace) {
 	CTimer* pTimer;
 	pTimer = new CTimer(nNumDigit, type);
-	if (pTimer != NULL) {
+	if (pTimer != nullptr) {
 		//ナンバーの初期化
-		if (pTimer->m_pNumberArray != NULL) {
+		if (pTimer->m_pNumberArray != nullptr) {
 			for (int nCnt = 0; nCnt < pTimer->m_nNumDigit; nCnt++) {
 				pTimer->m_pNumberArray[nCnt].Init(D3DXVECTOR3(pos.x - nCnt * fSpace, pos.y, pos.z), fSize);
 			}
@@ -71,7 +71,7 @@ HRESULT CTimer::Init(void) {
 	//カウンタの設定
 	m_nCntTime = FPS;
 	//数字の設定
-	if (m_pNumberArray != NULL) {
+	if (m_pNumberArray != nullptr) {
 		for (int nCnt = 0; nCnt < m_nNumDigit; nCnt++) {
 			m_pNumberArray[nCnt].SetNumber((m_nTime % (int)pow(10, nCnt + 1)) / (int)pow(10, nCnt));
 		}
@@ -83,12 +83,12 @@ HRESULT CTimer::Init(void) {
 // タイマーの終了処理
 //=============================================================================
 void CTimer::Uninit(void) {
-	if (m_pNumberArray != NULL) {
+	if (m_pNumberArray != nullptr) {
 		for (int nCnt = 0; nCnt < m_nNumDigit; nCnt++) {
 			m_pNumberArray[nCnt].Uninit();
 		}
 		delete[] m_pNumberArray;
-		m_pNumberArray = NULL;
+		m_pNumberArray = nullptr;
 	}
 	//オブジェクトの破棄
 	Release();
@@ -98,7 +98,7 @@ void CTimer::Uninit(void) {
 // タイマーの更新処理
 //=============================================================================
 void CTimer::Update(void) {
-	if (m_pNumberArray != NULL && m_nTime > 0 && m_bStop == false) {
+	if (m_pNumberArray != nullptr && m_nTime > 0 && !m_bStop) {
 		//ナンバーの更新処理
 		for (int nCnt = 0; nCnt < m_nNumDigit; nCnt++) {
 			m_pNumberArray[nCnt].Update();
@@ -142,7 +142,7 @@ void CTimer::Update(void) {
 // タイマーの描画処理
 //=============================================================================
 void CTimer::Draw(void) {
-	if (m_pNumberArray != NULL) {
+	if (m_pNumberArray != nullptr) {
 		for (int nCnt = 0; nCnt < m_nNumDigit; nCnt++) {
 			m_pNumberArray[nCnt].Draw();
 		}
@@ -156,7 +156,7 @@ void CTimer::AddTime(int nTime) {
 	//時間の追加
 	m_nTime += nTime;
 	//タイマーの更新
-	if (m_pNumberArray != NULL) {
+	if (m_pNumberArray != nullptr) {
 		for (int nCnt = 0; nCnt < m_nNumDigit; nCnt++) {
 			m_pNumberArray[nCnt].SetNumber((m_nTime % (int)pow(10, nCnt + 1)) / (int)pow(10, nCnt));
 		}

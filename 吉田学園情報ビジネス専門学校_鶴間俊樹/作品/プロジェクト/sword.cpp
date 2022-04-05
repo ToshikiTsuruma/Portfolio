@@ -31,7 +31,7 @@ CSword::CSword()
 //=============================================================================
 CSword::CSword(D3DXVECTOR3 pos, D3DXVECTOR3 rot, CModel* pParent) : CWeapon(CModel::MODELTYPE::WEAPON_SWORD, pos, rot, pParent, false)
 {
-	m_pMeshorbit = NULL;
+	m_pMeshorbit = nullptr;
 }
 
 //=============================================================================
@@ -49,7 +49,7 @@ CSword::~CSword()
 CSword* CSword::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, CModel* pParent) {
 	CSword* pSword;
 	pSword = new CSword(pos, rot, pParent);
-	if (pSword != NULL) {
+	if (pSword != nullptr) {
 		pSword->Init();
 	}
 
@@ -62,8 +62,8 @@ CSword* CSword::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, CModel* pParent) {
 HRESULT CSword::Init(void) {
 	//メッシュ軌道の生成
 	CModel* pModel = GetPtrModel();	//武器のモデルのポインタ
-	if(pModel != NULL) m_pMeshorbit = CMeshorbit::Create(pModel->GetPtrMtxWorld(), 40, 0, D3DXVECTOR3(0.0f, 10.0f, 0.0f), D3DXVECTOR3(0.0f, 76.0f, 0.0f), COLOR_ORBIT_0, COLOR_ORBIT_1);
-	if (m_pMeshorbit != NULL)m_pMeshorbit->SetVisible(false);
+	if(pModel != nullptr) m_pMeshorbit = CMeshorbit::Create(pModel->GetPtrMtxWorld(), 40, 0, D3DXVECTOR3(0.0f, 10.0f, 0.0f), D3DXVECTOR3(0.0f, 76.0f, 0.0f), COLOR_ORBIT_0, COLOR_ORBIT_1);
+	if (m_pMeshorbit != nullptr)m_pMeshorbit->SetVisible(false);
 	//武器の初期化処理
 	CWeapon::Init();
 	return S_OK;
@@ -74,9 +74,9 @@ HRESULT CSword::Init(void) {
 //=============================================================================
 void CSword::Uninit(void) {
 	//メッシュ軌道の破棄
-	if (m_pMeshorbit != NULL) {
+	if (m_pMeshorbit != nullptr) {
 		m_pMeshorbit->Uninit();
-		m_pMeshorbit = NULL;
+		m_pMeshorbit = nullptr;
 	}
 	//武器の終了処理
 	CWeapon::Uninit();
@@ -86,17 +86,17 @@ void CSword::Uninit(void) {
 // 剣の更新処理
 //=============================================================================
 void CSword::Update(void) {
-	if (m_pMeshorbit != NULL) {
-		//メッシュ軌道が不可視の場合
-		if (m_pMeshorbit->GetVisible() == false || m_pMeshorbit->GetBindPos() == true) {
+	if (m_pMeshorbit != nullptr) {
+		//メッシュ軌道が不可視状態か原点の位置が固定されている場合
+		if (!m_pMeshorbit->GetVisible() || m_pMeshorbit->GetBindPos()) {
 			//攻撃中の場合
-			if (GetAttack() == true) {
+			if (GetAttack()) {
 				m_pMeshorbit->SetVisible(true);	//メッシュ軌道を可視化
 			}
 		}
 		else {
 			//攻撃中でない場合
-			if (GetAttack() == false) {
+			if (!GetAttack()) {
 				m_pMeshorbit->SetBindPos();	//メッシュ軌道の原点の位置を固定
 			}
 		}
@@ -135,7 +135,7 @@ void CSword::GetPosCollision(D3DXVECTOR3** ppPosCollision, int* const pNumCollis
 	CModel* pModel = CSceneModel::GetPtrModel();
 
 	//武器のモデルがない場合終了
-	if (pModel == NULL) return;
+	if (pModel == nullptr) return;
 
 	D3DXMATRIX mtxWeapon;	//武器のモデルのワールドマトリックス
 

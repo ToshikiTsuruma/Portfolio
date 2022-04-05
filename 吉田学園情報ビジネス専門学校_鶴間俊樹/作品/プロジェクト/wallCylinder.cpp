@@ -55,7 +55,7 @@ CWallCylinder::~CWallCylinder()
 CWallCylinder* CWallCylinder::Create(D3DXVECTOR3 pos, float fRadius) {
 	CWallCylinder* pWallCylinder;
 	pWallCylinder = new CWallCylinder(pos, fRadius);
-	if (pWallCylinder != NULL) {
+	if (pWallCylinder != nullptr) {
 		pWallCylinder->Init();
 	}
 
@@ -143,18 +143,18 @@ void CWallCylinder::Draw(void) {
 // 円柱の壁との当たり判定
 //=============================================================================
 bool CWallCylinder::Collision(D3DXVECTOR3* pPos, D3DXVECTOR3 lastPos, float fRadius) {
-	if (pPos == NULL) return false;
+	if (pPos == nullptr) return false;
 
 	CScene* pScene;	//オブジェクトへのポインタ
 	pScene = GetSceneTopObjtype(OBJ_TYPE::WALL);	//壁のオブジェクトタイプのリストの先頭を取得
 
-	while (pScene != NULL) {
+	while (pScene != nullptr) {
 		CScene* pSceneNext = GetSceneNextObjtype(pScene);	//リストの次のオブジェクトのポインタを取得
 		CWallCylinder* pWallCylinder = dynamic_cast<CWallCylinder*>(pScene);	//円柱の壁クラスにキャスト
 		//キャスト成功時
-		if (pWallCylinder != NULL) {
+		if (pWallCylinder != nullptr) {
 			//死亡フラグが立っていない場合
-			if (pWallCylinder->GetDeath() == false) {
+			if (!pWallCylinder->GetDeath()) {
 				float fRadiusWall = pWallCylinder->GetRadius();
 				D3DXVECTOR3 posWallCylinder = pWallCylinder->GetPos();
 				//当たり判定
@@ -183,18 +183,18 @@ bool CWallCylinder::Collision(D3DXVECTOR3* pPos, D3DXVECTOR3 lastPos, float fRad
 // 壁と線分の交点（壁の内側から外側へのベクトルのみ）
 //=============================================================================
 void CWallCylinder::CrossPoint(D3DXVECTOR2* pPosCross, const D3DXVECTOR3* pPosStart, const D3DXVECTOR3* pPosEnd, float fDelta) {
-	if (pPosStart == NULL || pPosEnd == NULL) return;
+	if (pPosStart == nullptr || pPosEnd == nullptr) return;
 
 	CScene* pScene;	//オブジェクトへのポインタ
 	pScene = GetSceneTopObjtype(OBJ_TYPE::WALL);	//壁のオブジェクトタイプのリストの先頭を取得
 
-	while (pScene != NULL) {
+	while (pScene != nullptr) {
 		CScene* pSceneNext = GetSceneNextObjtype(pScene);	//リストの次のオブジェクトのポインタを取得
 		CWallCylinder* pWallCylinder = dynamic_cast<CWallCylinder*>(pScene);	//円柱の壁クラスにキャスト
 		//キャスト成功時
-		if (pWallCylinder != NULL) {
+		if (pWallCylinder != nullptr) {
 			//死亡フラグが立っていない場合
-			if (pWallCylinder->GetDeath() == false) {
+			if (!pWallCylinder->GetDeath()) {
 				float fRadiusWall = pWallCylinder->GetRadius();
 				//壁の位置
 				D3DXVECTOR3 posWallCylinder = pWallCylinder->GetPos();
@@ -203,7 +203,7 @@ void CWallCylinder::CrossPoint(D3DXVECTOR2* pPosCross, const D3DXVECTOR3* pPosSt
 				bool bOutEnd = (sqrtf(powf(pPosEnd->x - posWallCylinder.x, 2.0f) + powf(pPosEnd->z - posWallCylinder.z, 2.0f))) > (fRadiusWall - fDelta);		//線分の終点が壁の外側かどうか
 				
 				//線分が壁の内側から外側の場合
-				if (bOutStart == false && bOutEnd == true) {
+				if (!bOutStart && bOutEnd) {
 					D3DXVECTOR2 vecCenterToStart = D3DXVECTOR2(pPosStart->x - posWallCylinder.x, pPosStart->z - posWallCylinder.z);	//円の中心から線分の始点のベクトル
 					D3DXVECTOR2 vecNorLine = D3DXVECTOR2(-(pPosEnd->z - pPosStart->z), pPosEnd->x - pPosStart->x);	//線分の法線ベクトル
 					//法線ベクトルを正規化

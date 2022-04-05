@@ -11,8 +11,8 @@
 //=============================================================================
 // 静的メンバ変数宣言
 //=============================================================================
-CLight* CLight::m_pTop = NULL;
-CLight* CLight::m_pCur = NULL;
+CLight* CLight::m_pTop = nullptr;
+CLight* CLight::m_pCur = nullptr;
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -25,12 +25,12 @@ CLight::CLight()
 
 	//ライトのリストの初期設定
 	m_pPrev = m_pCur;	//前のポインタの設定
-	m_pNext = NULL;		//次のポインタの設定
-	if (m_pTop == NULL) {
+	m_pNext = nullptr;		//次のポインタの設定
+	if (m_pTop == nullptr) {
 		m_pTop = this;				//topが存在しない場合、このオブジェクトをtopにする
 		m_nIdx = 0;
 	}
-	if (m_pCur != NULL) {
+	if (m_pCur != nullptr) {
 		m_pCur->m_pNext = this;		//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
 		m_nIdx = m_pCur->m_nIdx + 1;
 	}
@@ -47,8 +47,8 @@ CLight::~CLight()
 	//ライトのリスト
 	if (m_pTop == this) m_pTop = m_pNext;	//このライトがtopだった場合、次のライトをtopにする
 	if (m_pCur == this) m_pCur = m_pPrev;	//このライトがcurだった場合、前のライトをcurにする
-	if (m_pPrev != NULL) m_pPrev->m_pNext = m_pNext;	//前のライトのpNextに、このライトのpNextを代入
-	if (m_pNext != NULL) m_pNext->m_pPrev = m_pPrev;	//次のライトのpPrevに、このライトのpPrevを代入
+	if (m_pPrev != nullptr) m_pPrev->m_pNext = m_pNext;	//前のライトのpNextに、このライトのpNextを代入
+	if (m_pNext != nullptr) m_pNext->m_pPrev = m_pPrev;	//次のライトのpPrevに、このライトのpPrevを代入
 }
 
 //=============================================================================
@@ -57,7 +57,7 @@ CLight::~CLight()
 CLight* CLight::Create(D3DXVECTOR3 vecDir, D3DXCOLOR col) {
 	CLight* pLight;
 	pLight = new CLight;
-	if (pLight != NULL) {
+	if (pLight != nullptr) {
 		pLight->Init(vecDir, col);
 	}
 
@@ -115,9 +115,9 @@ void CLight::Update(void) {
 //次のライトのインデックスを設定
 //=============================================================================
 void CLight::SetIdxNext(CLight* pLight) {
-	if (pLight != NULL) {
+	if (pLight != nullptr) {
 		CLight* pNext = pLight->m_pNext;	//次のライト
-		if (pNext != NULL) {
+		if (pNext != nullptr) {
 			//次の次のライトのライトのインデックスを設定する
 			SetIdxNext(pNext);
 			//次のライトのインデックスを設定する

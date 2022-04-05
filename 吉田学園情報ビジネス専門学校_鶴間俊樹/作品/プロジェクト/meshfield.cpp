@@ -37,7 +37,7 @@ CMeshfield::~CMeshfield()
 CMeshfield* CMeshfield::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nNumX, int nNumZ, float fWidth, float fDepth) {
 	CMeshfield* pMeshfield;
 	pMeshfield = new CMeshfield;
-	if (pMeshfield != NULL) {
+	if (pMeshfield != nullptr) {
 		pMeshfield->SetPos(pos);
 		pMeshfield->SetRot(rot);
 		pMeshfield->m_nNumX = nNumX;
@@ -77,17 +77,17 @@ HRESULT CMeshfield::Init(void) {
 	int nNumIdx = GetNumIdx();	//インデックス数の取得
 
 	//頂点バッファの生成
-	if (*ppVtxBuff == NULL) {
+	if (*ppVtxBuff == nullptr) {
 		pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * nNumVtx,
 			D3DUSAGE_WRITEONLY,
 			FVF_VERTEX_3D,
 			D3DPOOL_MANAGED,
 			ppVtxBuff,
-			NULL);
+			nullptr);
 	}
 
 	//頂点バッファの設定
-	if (*ppVtxBuff != NULL) {
+	if (*ppVtxBuff != nullptr) {
 		VERTEX_3D *pVtx;	//頂点バッファのポインタ
 		//頂点バッファをロック
 		(*ppVtxBuff)->Lock(0, 0, (void**)&pVtx, 0);
@@ -114,16 +114,16 @@ HRESULT CMeshfield::Init(void) {
 	LPDIRECT3DINDEXBUFFER9* ppIdxBuff = GetPtrIdxBuff();
 
 	//インデックスバッファの生成
-	if (*ppIdxBuff == NULL) {
+	if (*ppIdxBuff == nullptr) {
 		pDevice->CreateIndexBuffer(sizeof(WORD) * nNumIdx,
 			D3DUSAGE_WRITEONLY,
 			D3DFMT_INDEX16,
 			D3DPOOL_MANAGED,
 			ppIdxBuff,
-			NULL);
+			nullptr);
 	}
 	//インデックスバッファの設定
-	if (*ppIdxBuff != NULL) {
+	if (*ppIdxBuff != nullptr) {
 		WORD *pIdx;	//インデックス情報へのポインタ
 		//インデックスバッファをロックし、番号データへのポインタを取得
 		(*ppIdxBuff)->Lock(0, 0, (void**)&pIdx, 0);

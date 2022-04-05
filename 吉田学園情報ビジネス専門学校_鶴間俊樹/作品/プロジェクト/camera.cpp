@@ -45,7 +45,7 @@ CCamera::~CCamera()
 CCamera* CCamera::Create(void) {
 	CCamera* pCamera;
 	pCamera = new CCamera;
-	if (pCamera != NULL) {
+	if (pCamera != nullptr) {
 		pCamera->Init();
 	}
 
@@ -82,7 +82,7 @@ HRESULT CCamera::Init(void) {
 		D3DXToRadian(45.0f),						//画角 360度
 		(float)SCREEN_WIDTH / (float)SCREEN_HEIGHT,	//画面比率
 		10.0f,										//手前の位置
-		10000.0f);									//奥の位置
+		MAX_FOG_DISTANCE + 100.0f);					//奥の位置
 
 	//プロジェクションマトリックスの設定
 	pDevice->SetTransform(D3DTS_PROJECTION, &m_mtxProjection);

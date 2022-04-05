@@ -50,7 +50,7 @@ CMeshcylinder::~CMeshcylinder()
 CMeshcylinder* CMeshcylinder::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nNumXZ, float fRadius, int nNumY, float fHeight,  bool bOut, D3DXCOLOR col) {
 	CMeshcylinder* pMeshcylinder;
 	pMeshcylinder = new CMeshcylinder(pos, rot, nNumXZ, fRadius, nNumY, fHeight, bOut, col);
-	if (pMeshcylinder != NULL) {
+	if (pMeshcylinder != nullptr) {
 		pMeshcylinder->Init();
 	}
 
@@ -78,17 +78,17 @@ HRESULT CMeshcylinder::Init(void) {
 	int nNumVtx = GetNumVtx();	//頂点数の取得
 
 	//頂点バッファの生成
-	if (*ppVtxBuff == NULL) {
+	if (*ppVtxBuff == nullptr) {
 		pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * nNumVtx,
 			D3DUSAGE_WRITEONLY,
 			FVF_VERTEX_3D,
 			D3DPOOL_MANAGED,
 			ppVtxBuff,
-			NULL);
+			nullptr);
 	}
 
 	//頂点バッファの設定
-	if (*ppVtxBuff != NULL) {
+	if (*ppVtxBuff != nullptr) {
 		VERTEX_3D *pVtx;	//頂点バッファのポインタ
 		//頂点バッファをロック
 		(*ppVtxBuff)->Lock(0, 0, (void**)&pVtx, 0);
@@ -97,7 +97,7 @@ HRESULT CMeshcylinder::Init(void) {
 			float fRotXZ = ((nCntVtx % (m_nNumXZ + 1)) / (float)m_nNumXZ) * (D3DX_PI * 2);	//Y軸から見た角度
 
 			//ポリゴンの向きが外向きの場合
-			if (m_bOut == true) {
+			if (m_bOut) {
 				//逆向きに回転
 				fRotXZ *= -1.0f;
 			}
@@ -113,7 +113,7 @@ HRESULT CMeshcylinder::Init(void) {
 			pVtx[nCntVtx].nor = vecNor;	//正規化したベクトルを設定
 
 			//円柱が内向きの場合
-			if (m_bOut == false) {
+			if (!m_bOut) {
 				//法線を逆に設定
 				pVtx[nCntVtx].nor.x *= -1;
 				pVtx[nCntVtx].nor.y *= -1;
@@ -134,16 +134,16 @@ HRESULT CMeshcylinder::Init(void) {
 	int nNumIdx = GetNumIdx();	//インデックス数の取得
 
 	//インデックスバッファの生成
-	if (*ppIdxBuff == NULL) {
+	if (*ppIdxBuff == nullptr) {
 		pDevice->CreateIndexBuffer(sizeof(WORD) * nNumIdx,
 			D3DUSAGE_WRITEONLY,
 			D3DFMT_INDEX16,
 			D3DPOOL_MANAGED,
 			ppIdxBuff,
-			NULL);
+			nullptr);
 	}
 	//インデックスバッファの設定
-	if (*ppIdxBuff != NULL) {
+	if (*ppIdxBuff != nullptr) {
 		WORD *pIdx;	//インデックス情報へのポインタ
 		//インデックスバッファをロックし、番号データへのポインタを取得
 		(*ppIdxBuff)->Lock(0, 0, (void**)&pIdx, 0);
@@ -207,7 +207,7 @@ void CMeshcylinder::SetColor(D3DXCOLOR col) {
 	int nNumVtx = GetNumVtx();	
 
 	//頂点バッファの設定
-	if (*ppVtxBuff != NULL) {
+	if (*ppVtxBuff != nullptr) {
 		//色の設定
 		m_col = col;
 

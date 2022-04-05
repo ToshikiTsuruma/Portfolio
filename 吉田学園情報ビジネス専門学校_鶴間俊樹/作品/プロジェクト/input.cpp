@@ -9,7 +9,7 @@
 //=============================================================================
 //静的メンバ変数宣言
 //=============================================================================
-LPDIRECTINPUT8 CInput::m_pInput = NULL;
+LPDIRECTINPUT8 CInput::m_pInput = nullptr;
 
 //******************************************************************************************************************
 // インプットクラス
@@ -19,7 +19,7 @@ LPDIRECTINPUT8 CInput::m_pInput = NULL;
 //=============================================================================
 CInput::CInput()
 {
-	m_pDevice = NULL;
+	m_pDevice = nullptr;
 }
 
 //=============================================================================
@@ -33,7 +33,7 @@ CInput::~CInput()
 // インプットの初期化処理
 //=============================================================================
 HRESULT CInput::Init(HINSTANCE hInstance, HWND hWnd) {
-	if (m_pInput == NULL) {
+	if (m_pInput == nullptr) {
 		//DirectInputオブジェクトの作成
 		if (FAILED(DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&m_pInput, NULL))) {
 			return E_FAIL;
@@ -47,15 +47,15 @@ HRESULT CInput::Init(HINSTANCE hInstance, HWND hWnd) {
 //=============================================================================
 void CInput::Uninit(void) {
 	//入力デバイスの開放
-	if (m_pDevice != NULL) {
+	if (m_pDevice != nullptr) {
 		m_pDevice->Unacquire();
 		m_pDevice->Release();
-		m_pDevice = NULL;
+		m_pDevice = nullptr;
 	}
 	//DirectInputオブジェクトの開放
-	if (m_pInput != NULL) {
+	if (m_pInput != nullptr) {
 		m_pInput->Release();
-		m_pInput = NULL;
+		m_pInput = nullptr;
 	}
 }
 
@@ -145,14 +145,14 @@ void CInputKeyboard::Update(void) {
 // キーボードのプレス判定
 //=============================================================================
 bool CInputKeyboard::GetPress(int nKey) {
-	return (m_aKeyState[nKey] & 0x80) ? true : false;
+	return m_aKeyState[nKey] & 0x80;
 }
 
 //=============================================================================
 // キーボードのトリガー判定
 //=============================================================================
 bool CInputKeyboard::GetTrigger(int nKey) {
-	return (m_aKeyStateTrigger[nKey] & 0x80) ? true : false;
+	return m_aKeyStateTrigger[nKey] & 0x80;
 }
 
 //=============================================================================
@@ -163,90 +163,90 @@ bool CInputKeyboard::GetPress(CODE code) {
 	{
 		//選択
 	case CODE::SELECT:
-		if (GetPress(DIK_SPACE) == true || GetPress(DIK_RETURN) == true) {
+		if (GetPress(DIK_SPACE) || GetPress(DIK_RETURN)) {
 			return true;
 		}
 		break;
 
 		//戻る
 	case CODE::BACK:
-		if (GetPress(DIK_ESCAPE) == true) {
+		if (GetPress(DIK_ESCAPE)) {
 			return true;
 		}
 		break;
 
 		//上下左右
 	case CODE::UP:
-		if (GetPress(DIK_UP) == true || GetPress(DIK_W) == true) {
+		if (GetPress(DIK_UP) || GetPress(DIK_W)) {
 			return true;
 		}
 		break;
 	case CODE::DOWN:
-		if (GetPress(DIK_DOWN) == true || GetPress(DIK_S) == true) {
+		if (GetPress(DIK_DOWN) || GetPress(DIK_S)) {
 			return true;
 		}
 		break;
 	case CODE::LEFT:
-		if (GetPress(DIK_LEFT) == true || GetPress(DIK_A) == true) {
+		if (GetPress(DIK_LEFT) || GetPress(DIK_A)) {
 			return true;
 		}
 		break;
 	case CODE::RIGHT:
-		if (GetPress(DIK_RIGHT) == true || GetPress(DIK_D) == true) {
+		if (GetPress(DIK_RIGHT) || GetPress(DIK_D)) {
 			return true;
 		}
 		break;
 
 		//インタラクト
 	case CODE::INTERACT:
-		if (GetPress(DIK_E) == true) {
+		if (GetPress(DIK_E)) {
 			return true;
 		}
 		break;
 		//ダッシュ
 	case CODE::DASH:
-		if (GetPress(DIK_LSHIFT) == true) {
+		if (GetPress(DIK_LSHIFT)) {
 			return true;
 		}
 		break;
 		//回避
 	case CODE::DODGE:
-		if (GetPress(DIK_SPACE) == true) {
+		if (GetPress(DIK_SPACE)) {
 			return true;
 		}
 		break;
 		//アイテム使用
 	case CODE::USE_ITME:
-		if (GetPress(DIK_O) == true) {
+		if (GetPress(DIK_O)) {
 			return true;
 		}
 		break;
 
 		//ポーズ
 	case CODE::PAUSE:
-		if (GetPress(DIK_P) == true) {
+		if (GetPress(DIK_P)) {
 			return true;
 		}
 		break;
 
 		//カメラの上下左右
 	case CODE::CAMERA_UP:
-		if (GetPress(DIK_I) == true) {
+		if (GetPress(DIK_I)) {
 			return true;
 		}
 		break;
 	case CODE::CAMERA_DOWN:
-		if (GetPress(DIK_K) == true) {
+		if (GetPress(DIK_K)) {
 			return true;
 		}
 		break;
 	case CODE::CAMERA_LEFT:
-		if (GetPress(DIK_J) == true) {
+		if (GetPress(DIK_J)) {
 			return true;
 		}
 		break;
 	case CODE::CAMERA_RIGHT:
-		if (GetPress(DIK_L) == true) {
+		if (GetPress(DIK_L)) {
 			return true;
 		}
 		break;
@@ -262,74 +262,74 @@ bool CInputKeyboard::GetTrigger(CODE code) {
 	{
 		//選択
 	case CODE::SELECT:
-		if (GetTrigger(DIK_SPACE) == true || GetTrigger(DIK_RETURN) == true) {
+		if (GetTrigger(DIK_SPACE) || GetTrigger(DIK_RETURN)) {
 			return true;
 		}
 		break;
 
 		//戻る
 	case CODE::BACK:
-		if (GetTrigger(DIK_ESCAPE) == true) {
+		if (GetTrigger(DIK_ESCAPE)) {
 			return true;
 		}
 		break;
 
 		//上下左右
 	case CODE::UP:
-		if (GetTrigger(DIK_UP) == true || GetTrigger(DIK_W) == true) {
+		if (GetTrigger(DIK_UP) || GetTrigger(DIK_W)) {
 			return true;
 		}
 		break;
 	case CODE::DOWN:
-		if (GetTrigger(DIK_DOWN) == true || GetTrigger(DIK_S) == true) {
+		if (GetTrigger(DIK_DOWN) || GetTrigger(DIK_S)) {
 			return true;
 		}
 		break;
 	case CODE::LEFT:
-		if (GetTrigger(DIK_LEFT) == true || GetTrigger(DIK_A) == true) {
+		if (GetTrigger(DIK_LEFT) || GetTrigger(DIK_A)) {
 			return true;
 		}
 		break;
 	case CODE::RIGHT:
-		if (GetTrigger(DIK_RIGHT) == true || GetTrigger(DIK_D) == true) {
+		if (GetTrigger(DIK_RIGHT) || GetTrigger(DIK_D)) {
 			return true;
 		}
 		break;
 
 		//インタラクト
 	case CODE::INTERACT:
-		if (GetTrigger(DIK_E) == true) {
+		if (GetTrigger(DIK_E)) {
 			return true;
 		}
 		break;
 		//回避
 	case CODE::DODGE:
-		if (GetTrigger(DIK_SPACE) == true) {
+		if (GetTrigger(DIK_SPACE)) {
 			return true;
 		}
 		break;
 		//攻撃
 	case CODE::ATTACK:
-		if (GetTrigger(DIK_U) == true) {
+		if (GetTrigger(DIK_U)) {
 			return true;
 		}
 		break;
 		//アイテムの使用
 	case CODE::USE_ITME:
-		if (GetTrigger(DIK_O) == true) {
+		if (GetTrigger(DIK_O)) {
 			return true;
 		}
 		break;
 		//武器の変更
 	case CODE::CHANGE_WEAPON:
-		if (GetTrigger(DIK_Q) == true) {
+		if (GetTrigger(DIK_Q)) {
 			return true;
 		}
 		break;
 
 		//ポーズ
 	case CODE::PAUSE:
-		if (GetTrigger(DIK_P) == true) {
+		if (GetTrigger(DIK_P)) {
 			return true;
 		}
 		break;
@@ -423,7 +423,7 @@ void CInputGamepadX::Update(void) {
 		m_nCntVibration--;
 	}
 	//バイブレーションの終了
-	if (m_nCntVibration <= 0 && m_bVibration == true) {
+	if (m_nCntVibration <= 0 && m_bVibration) {
 		SetVibration(0, 0, 0);
 		m_bVibration = false;
 	}
@@ -440,30 +440,30 @@ bool CInputGamepadX::GetConnectGamepad(void) {
 // ゲームパッドのボタンのプレス判定(Xinput)
 //=============================================================================
 bool CInputGamepadX::GetButtonPress(int nButton) {
-	if (m_bConnect == false) return false;	//接続されていない場合falseを返す
-	return m_state.Gamepad.wButtons & nButton ? true : false;
+	if (!m_bConnect) return false;	//接続されていない場合falseを返す
+	return m_state.Gamepad.wButtons & nButton;
 }
 
 //=============================================================================
 // ゲームパッドのボタンのトリガー判定(Xinput)
 //=============================================================================
 bool CInputGamepadX::GetButtonTrigger(int nButton) {
-	if (m_bConnect == false) return false;	//接続されていない場合falseを返す
-	return (((m_stateLast.Gamepad.wButtons & nButton) == false) && (m_state.Gamepad.wButtons & nButton)) ? true : false;
+	if (!m_bConnect) return false;	//接続されていない場合falseを返す
+	return !(m_stateLast.Gamepad.wButtons & nButton) && (m_state.Gamepad.wButtons & nButton);
 }
 
 //=============================================================================
 // ゲームパッドのトリガーのプレス判定(Xinput)
 //=============================================================================
 bool CInputGamepadX::GetTriggerPress(TRIGGER_TYPE type) {
-	if (m_bConnect == false) return false;	//接続されていない場合falseを返す
+	if (!m_bConnect) return false;	//接続されていない場合falseを返す
 	switch (type)
 	{
 	case TRIGGER_TYPE::RIGHT:
-		return m_state.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD ? true : false;
+		return m_state.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD;
 		break;
 	case TRIGGER_TYPE::LEFT:
-		return m_state.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD ? true : false;
+		return m_state.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD;
 		break;
 	default:
 		return false;
@@ -475,14 +475,14 @@ bool CInputGamepadX::GetTriggerPress(TRIGGER_TYPE type) {
 // ゲームパッドのトリガーのトリガー判定(Xinput)
 //=============================================================================
 bool CInputGamepadX::GetTriggerTrigger(TRIGGER_TYPE type) {
-	if (m_bConnect == false) return false;	//接続されていない場合falseを返す
+	if (!m_bConnect) return false;	//接続されていない場合falseを返す
 	switch (type)
 	{
 	case TRIGGER_TYPE::RIGHT:
-		return (((m_stateLast.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) == false) && (m_state.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)) ? true : false;
+		return !(m_stateLast.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) && (m_state.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
 		break;
 	case TRIGGER_TYPE::LEFT:
-		return (((m_stateLast.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) == false) && (m_state.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)) ? true : false;
+		return !(m_stateLast.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) && (m_state.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
 		break;
 	default:
 		return false;
@@ -494,21 +494,21 @@ bool CInputGamepadX::GetTriggerTrigger(TRIGGER_TYPE type) {
 // ゲームパッドの左スティックの判定(Xinput)
 //=============================================================================
 bool CInputGamepadX::GetLeftStick(STICK_TYPE type) {
-	if (m_bConnect == false) return false;	//接続されていない場合falseを返す
+	if (!m_bConnect) return false;	//接続されていない場合falseを返す
 
 	switch (type)
 	{
 	case STICK_TYPE::UP:
-		return m_state.Gamepad.sThumbLY > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE ? true : false;
+		return m_state.Gamepad.sThumbLY > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 		break;
 	case STICK_TYPE::DOWN:
-		return m_state.Gamepad.sThumbLY < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE ? true : false;
+		return m_state.Gamepad.sThumbLY < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 		break;
 	case STICK_TYPE::LEFT:
-		return m_state.Gamepad.sThumbLX < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE ? true : false;
+		return m_state.Gamepad.sThumbLX < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 		break; 
 	case STICK_TYPE::RIGHT:
-		return m_state.Gamepad.sThumbLX > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE ? true : false;
+		return m_state.Gamepad.sThumbLX > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 		break;
 
 	default:
@@ -521,20 +521,20 @@ bool CInputGamepadX::GetLeftStick(STICK_TYPE type) {
 // ゲームパッドの左スティックの判定(Xinput)
 //=============================================================================
 bool CInputGamepadX::GetRightStick(STICK_TYPE type) {
-	if (m_bConnect == false) return false;	//接続されていない場合falseを返す
+	if (!m_bConnect) return false;	//接続されていない場合falseを返す
 	switch ((STICK_TYPE)type)
 	{
 	case STICK_TYPE::UP:
-		return m_state.Gamepad.sThumbRY > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ? true : false;
+		return m_state.Gamepad.sThumbRY > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 		break;
 	case STICK_TYPE::DOWN:
-		return m_state.Gamepad.sThumbRY < -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ? true : false;
+		return m_state.Gamepad.sThumbRY < -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 		break;
 	case STICK_TYPE::LEFT:
-		return m_state.Gamepad.sThumbRX < -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ? true : false;
+		return m_state.Gamepad.sThumbRX < -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 		break;
 	case STICK_TYPE::RIGHT:
-		return m_state.Gamepad.sThumbRX > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ? true : false;
+		return m_state.Gamepad.sThumbRX > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 		break;
 
 	default:
@@ -551,90 +551,90 @@ bool CInputGamepadX::GetPress(CODE code) {
 	{
 		//選択
 	case CODE::SELECT:
-		if (GetButtonPress(XINPUT_GAMEPAD_A) == true || GetButtonPress(XINPUT_GAMEPAD_START) == true) {
+		if (GetButtonPress(XINPUT_GAMEPAD_A) || GetButtonPress(XINPUT_GAMEPAD_START)) {
 			return true;
 		}
 		break;
 
 		//戻る
 	case CODE::BACK:
-		if (GetButtonPress(XINPUT_GAMEPAD_B) == true || GetButtonPress(XINPUT_GAMEPAD_BACK) == true) {
+		if (GetButtonPress(XINPUT_GAMEPAD_B) || GetButtonPress(XINPUT_GAMEPAD_BACK)) {
 			return true;
 		}
 		break;
 
 		//上下左右 プレスでDPADを使用することは今のところないのでスティックにしている
 	case CODE::UP:
-		if (GetLeftStick(STICK_TYPE::UP) == true) {
+		if (GetLeftStick(STICK_TYPE::UP)) {
 			return true;
 		}
 		break;
 	case CODE::DOWN:
-		if (GetLeftStick(STICK_TYPE::DOWN) == true) {
+		if (GetLeftStick(STICK_TYPE::DOWN)) {
 			return true;
 		}
 		break;
 	case CODE::LEFT:
-		if (GetLeftStick(STICK_TYPE::LEFT) == true) {
+		if (GetLeftStick(STICK_TYPE::LEFT)) {
 			return true;
 		}
 		break;
 	case CODE::RIGHT:
-		if (GetLeftStick(STICK_TYPE::RIGHT) == true) {
+		if (GetLeftStick(STICK_TYPE::RIGHT)) {
 			return true;
 		}
 		break;
 
 		//インタラクト
 	case CODE::INTERACT:
-		if (GetButtonPress(XINPUT_GAMEPAD_A) == true) {
+		if (GetButtonPress(XINPUT_GAMEPAD_A)) {
 			return true;
 		}
 		break;
 		//ダッシュ
 	case CODE::DASH:
-		if (GetTriggerPress(TRIGGER_TYPE::LEFT) == true) {
+		if (GetTriggerPress(TRIGGER_TYPE::LEFT)) {
 			return true;
 		}
 		break;
 		//回避
 	case CODE::DODGE:
-		if (GetButtonPress(XINPUT_GAMEPAD_L) == true) {
+		if (GetButtonPress(XINPUT_GAMEPAD_L)) {
 			return true;
 		}
 		break;
 		//アイテムの使用
 	case CODE::USE_ITME:
-		if (GetButtonPress(XINPUT_GAMEPAD_B) == true) {
+		if (GetButtonPress(XINPUT_GAMEPAD_B)) {
 			return true;
 		}
 		break;
 
 		//ポーズ
 	case CODE::PAUSE:
-		if (GetButtonPress(XINPUT_GAMEPAD_START) == true) {
+		if (GetButtonPress(XINPUT_GAMEPAD_START)) {
 			return true;
 		}
 		break;
 
 		//カメラの上下左右
 	case CODE::CAMERA_UP:
-		if (GetRightStick(STICK_TYPE::UP) == true) {
+		if (GetRightStick(STICK_TYPE::UP)) {
 			return true;
 		}
 		break;
 	case CODE::CAMERA_DOWN:
-		if (GetRightStick(STICK_TYPE::DOWN) == true) {
+		if (GetRightStick(STICK_TYPE::DOWN)) {
 			return true;
 		}
 		break;
 	case CODE::CAMERA_LEFT:
-		if (GetRightStick(STICK_TYPE::LEFT) == true) {
+		if (GetRightStick(STICK_TYPE::LEFT)) {
 			return true;
 		}
 		break;
 	case CODE::CAMERA_RIGHT:
-		if (GetRightStick(STICK_TYPE::RIGHT) == true) {
+		if (GetRightStick(STICK_TYPE::RIGHT)) {
 			return true;
 		}
 		break;
@@ -650,74 +650,74 @@ bool CInputGamepadX::GetTrigger(CODE code) {
 	{
 		//選択
 	case CODE::SELECT:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_A) == true || GetButtonTrigger(XINPUT_GAMEPAD_START) == true) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_A) || GetButtonTrigger(XINPUT_GAMEPAD_START)) {
 			return true;
 		}
 		break;
 
 		//戻る
 	case CODE::BACK:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_B) == true || GetButtonTrigger(XINPUT_GAMEPAD_BACK) == true) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_B) || GetButtonTrigger(XINPUT_GAMEPAD_BACK)) {
 			return true;
 		}
 		break;
 
 		//上下左右
 	case CODE::UP:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_DPAD_UP) == true) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_DPAD_UP)) {
 			return true;
 		}
 		break;
 	case CODE::DOWN:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_DPAD_DOWN) == true) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_DPAD_DOWN)) {
 			return true;
 		}
 		break;
 	case CODE::LEFT:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_DPAD_LEFT) == true) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_DPAD_LEFT)) {
 			return true;
 		}
 		break;
 	case CODE::RIGHT:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_DPAD_RIGHT) == true) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_DPAD_RIGHT)) {
 			return true;
 		}
 		break;
 
 		//インタラクト
 	case CODE::INTERACT:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_A) == true) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_A)) {
 			return true;
 		}
 		break;
 		//回避
 	case CODE::DODGE:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_L) == true) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_L)) {
 			return true;
 		}
 		break;
 		//攻撃
 	case CODE::ATTACK:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_R) == true) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_R)) {
 			return true;
 		}
 		break;
 		//アイテムの使用
 	case CODE::USE_ITME:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_B) == true) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_B)) {
 			return true;
 		}
 		break;
 		//武器の変更
 	case CODE::CHANGE_WEAPON:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_X) == true) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_X)) {
 			return true;
 		}
 		break;
 
 		//ポーズ
 	case CODE::PAUSE:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_START) == true) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_START)) {
 			return true;
 		}
 		break;

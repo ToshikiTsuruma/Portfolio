@@ -42,7 +42,7 @@ CItemApple::~CItemApple()
 CItemApple* CItemApple::Create(D3DXVECTOR3 pos) {
 	CItemApple* pItemApple;
 	pItemApple = new CItemApple(pos);
-	if (pItemApple != NULL) {
+	if (pItemApple != nullptr) {
 		pItemApple->Init();
 	}
 
@@ -89,10 +89,10 @@ float CItemApple::GetRadius(void) {
 // リンゴアイテムがオブジェクトと衝突したときの処理
 //=============================================================================
 void CItemApple::CollisionObject(CScene* pScene) {
-	if (pScene != NULL) {
+	if (pScene != nullptr) {
 		bool bGetItem = false;	//アイテムが取得されたかどうか
 		bGetItem = pScene->GetItem((int)ITEM_TYPE::APPLE);
-		if (bGetItem == true) {
+		if (bGetItem) {
 			//エフェクトの生成
 			CEffect::Create(D3DXVECTOR3(GetPos().x, GetPos().y + 25.0f, GetPos().z), CEffect::EFFECT_TYPE::GET_ITEM, 50.0f, 50.0f);
 			//アイテムの破棄

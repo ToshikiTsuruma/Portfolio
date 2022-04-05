@@ -20,8 +20,8 @@ CScene3D::CScene3D()
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXMatrixIdentity(&m_mtxWorld);
-	m_pVtxBuff = NULL;
-	m_pIdxBuff = NULL;
+	m_pVtxBuff = nullptr;
+	m_pIdxBuff = nullptr;
 	m_nNumVtx = 0;
 	m_nNumIdx = 0;
 }
@@ -40,7 +40,7 @@ CScene3D::~CScene3D()
 CScene3D* CScene3D::Create(void) {
 	CScene3D* pScene3D;
 	pScene3D = new CScene3D;
-	if (pScene3D != NULL) {
+	if (pScene3D != nullptr) {
 		pScene3D->Init();
 	}
 
@@ -60,14 +60,14 @@ HRESULT CScene3D::Init(void) {
 //=============================================================================
 void CScene3D::Uninit(void) {
 	//頂点バッファの破棄
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		m_pVtxBuff->Release();
-		m_pVtxBuff = NULL;
+		m_pVtxBuff = nullptr;
 	}
 	//インデックスバッファの破棄
-	if (m_pIdxBuff != NULL) {
+	if (m_pIdxBuff != nullptr) {
 		m_pIdxBuff->Release();
-		m_pIdxBuff = NULL;
+		m_pIdxBuff = nullptr;
 	}
 	//オブジェクトの破棄
 	Release();
@@ -198,7 +198,7 @@ int CScene3D::GetNumIdx(void) {
 // 色の設定
 //=============================================================================
 void CScene3D::SetColor(D3DXCOLOR col) {
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		VERTEX_3D *pVtx;
 		//頂点バッファのロック
 		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);

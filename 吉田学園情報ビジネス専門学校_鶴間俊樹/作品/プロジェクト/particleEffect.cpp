@@ -48,7 +48,7 @@ CParticleEffect::~CParticleEffect()
 CParticleEffect* CParticleEffect::Create(PARTICLE_INFO particleInfo, D3DXVECTOR3 pos, int nLife, int nSpanCreate, float fAngleEmit) {
 	CParticleEffect* pParticleEffect;
 	pParticleEffect = new CParticleEffect(particleInfo, pos, nLife, nSpanCreate, fAngleEmit);
-	if (pParticleEffect != NULL) {
+	if (pParticleEffect != nullptr) {
 		pParticleEffect->Init();
 	}
 
@@ -76,7 +76,7 @@ void CParticleEffect::Uninit(void) {
 //=============================================================================
 void CParticleEffect::Update(void) {
 	//ループしない場合
-	if (m_bLoop == false) {
+	if (!m_bLoop) {
 		//ライフが０以下
 		if (m_nLife <= 0) {
 			//エフェクト破棄

@@ -32,10 +32,10 @@ CModel::CModel()
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXMatrixIdentity(&m_mtxWorld);
-	m_pParent = NULL;
+	m_pParent = nullptr;
 	m_nIdxParent = -1;
 	m_bOutline = false;
-	m_pCloneMesh = NULL;
+	m_pCloneMesh = nullptr;
 }
 
 //=============================================================================
@@ -52,7 +52,7 @@ CModel::~CModel()
 CModel* CModel::Create(MODELTYPE type, D3DXVECTOR3 pos, D3DXVECTOR3 rot, CModel* pParent, bool bOutLine) {
 	CModel* pModel;
 	pModel = new CModel;
-	if (pModel != NULL) {
+	if (pModel != nullptr) {
 		pModel->m_modelType = type;
 		pModel->m_pos = pos;
 		pModel->m_rot = rot;
@@ -95,13 +95,13 @@ HRESULT CModel::Load(void) {
 
 	pFile = fopen(TEXT_FILE_NAME_MODEL, "r");
 
-	if (pFile != NULL) {
-		while (fgets(sModelText, MAX_LOAD_TEXT_MODEL, pFile) != NULL) //一行ごとに文字列を取得
+	if (pFile != nullptr) {
+		while (fgets(sModelText, MAX_LOAD_TEXT_MODEL, pFile) != nullptr) //一行ごとに文字列を取得
 		{
 			pModelText = strtok(sModelText, " =\t\n");	//文字列の分割（空白 タブ 改行 ＝）
-			if (pModelText != NULL) {
+			if (pModelText != nullptr) {
 				//コメント
-				if (strstr(pModelText, "//") != NULL) {
+				if (strstr(pModelText, "//") != nullptr) {
 					continue;
 				}
 				//ディレクトリ名のコピー
@@ -124,14 +124,14 @@ HRESULT CModel::Load(void) {
 	for (int nCntModel = 0; nCntModel < (int)MODELTYPE::ENUM_MAX; nCntModel++) {
 		//すでにモデルが生成されていた場合
 		//マテリアルバッファの解放
-		if (m_aModelData[nCntModel].pBuffMat != NULL) {
+		if (m_aModelData[nCntModel].pBuffMat != nullptr) {
 			m_aModelData[nCntModel].pBuffMat->Release();
-			m_aModelData[nCntModel].pBuffMat = NULL;
+			m_aModelData[nCntModel].pBuffMat = nullptr;
 		}
 		//メッシュの解放
-		if (m_aModelData[nCntModel].pMesh != NULL) {
+		if (m_aModelData[nCntModel].pMesh != nullptr) {
 			m_aModelData[nCntModel].pMesh->Release();
-			m_aModelData[nCntModel].pMesh = NULL;
+			m_aModelData[nCntModel].pMesh = nullptr;
 		}
 
 		//モデルの生成
@@ -145,7 +145,7 @@ HRESULT CModel::Load(void) {
 			&m_aModelData[nCntModel].pMesh);
 
 		//テクスチャタイプの設定	
-		if (m_aModelData[nCntModel].pBuffMat == NULL || m_aModelData[nCntModel].nNumMat <= 0) continue;	//マテリアルバッファがNULLか、マテリアル数が0以下なら以降の処理を飛ばす
+		if (m_aModelData[nCntModel].pBuffMat == nullptr || m_aModelData[nCntModel].nNumMat <= 0) continue;	//マテリアルバッファがNULLか、マテリアル数が0以下なら以降の処理を飛ばす
 
 		D3DXMATERIAL *pMat;	//マテリアルへのポインタ
 		pMat = (D3DXMATERIAL*)m_aModelData[nCntModel].pBuffMat->GetBufferPointer();	//マテリアル情報に対するポインタを取得
@@ -154,7 +154,7 @@ HRESULT CModel::Load(void) {
 			//デフォルトのマテリアルを取得
 			m_aMatDefault[nCntModel][nCntMat] = pMat[nCntMat];
 
-			if (pMat[nCntMat].pTextureFilename != NULL) {
+			if (pMat[nCntMat].pTextureFilename != nullptr) {
 				//テクスチャクラスのパスと比較
 				for (int nCntTex = 1; nCntTex < (int)CTexture::TEXTURE_TYPE::ENUM_MAX; nCntTex++) {
 					//文字列が一致でテクスチャの番号を決める
@@ -176,14 +176,14 @@ HRESULT CModel::Load(void) {
 void CModel::Unload(void) {
 	for (int nCnt = 0; nCnt < (int)MODELTYPE::ENUM_MAX; nCnt++) {
 		//マテリアルバッファの解放
-		if (m_aModelData[nCnt].pBuffMat != NULL) {
+		if (m_aModelData[nCnt].pBuffMat != nullptr) {
 			m_aModelData[nCnt].pBuffMat->Release();
-			m_aModelData[nCnt].pBuffMat = NULL;
+			m_aModelData[nCnt].pBuffMat = nullptr;
 		}
 		//メッシュの解放
-		if (m_aModelData[nCnt].pMesh != NULL) {
+		if (m_aModelData[nCnt].pMesh != nullptr) {
 			m_aModelData[nCnt].pMesh->Release();
-			m_aModelData[nCnt].pMesh = NULL;
+			m_aModelData[nCnt].pMesh = nullptr;
 		}
 	}
 }
@@ -215,14 +215,14 @@ HRESULT CModel::Init(void) {
 	if (pRenderer != nullptr) pDevice = pRenderer->GetDevice();
 
 	//輪郭がある場合
-	if (m_bOutline == true && pDevice != nullptr) {
+	if (m_bOutline && pDevice != nullptr) {
 		//メッシュの複製
-		if (m_aModelData[(int)m_modelType].pMesh != NULL) {
+		if (m_aModelData[(int)m_modelType].pMesh != nullptr) {
 			//普通の複製だと法線の取得方法を知らないのでFVFを指定して複製
 			m_aModelData[(int)m_modelType].pMesh->CloneMeshFVF(D3DXMESH_SYSTEMMEM, FVF_VERTEX_3D, pDevice, &m_pCloneMesh);
 		}
 
-		if (m_pCloneMesh != NULL) {
+		if (m_pCloneMesh != nullptr) {
 			//頂点数の取得
 			int nNumVtx = 0;
 			nNumVtx = m_pCloneMesh->GetNumVertices();
@@ -255,9 +255,9 @@ HRESULT CModel::Init(void) {
 //=============================================================================
 void CModel::Uninit(void) {
 	//複製メッシュの破棄
-	if (m_pCloneMesh != NULL) {
+	if (m_pCloneMesh != nullptr) {
 		m_pCloneMesh->Release();
-		m_pCloneMesh = NULL;
+		m_pCloneMesh = nullptr;
 	}
 }
 
@@ -284,7 +284,7 @@ void CModel::Draw(void) {
 	if (pDevice == nullptr) return;
 
 	//モデルの情報が正しく確保されていない場合描画終了
-	if (m_aModelData[(int)m_modelType].pBuffMat == NULL || m_aModelData[(int)m_modelType].pMesh == NULL || m_aModelData[(int)m_modelType].nNumMat <= 0)return;
+	if (m_aModelData[(int)m_modelType].pBuffMat == nullptr || m_aModelData[(int)m_modelType].pMesh == nullptr || m_aModelData[(int)m_modelType].nNumMat <= 0)return;
 
 	//----------------------------------------------------
 	//マトリックスの設定
@@ -293,7 +293,7 @@ void CModel::Draw(void) {
 	D3DXMATRIX mtxParent;			//親のマトリックス
 
 	//各パーツの親のマトリックスを設定
-	if (m_pParent != NULL) {
+	if (m_pParent != nullptr) {
 		mtxParent = m_pParent->GetMtxWorld();	//親のモデルからマトリックスを取得
 	}
 	else {
@@ -324,7 +324,7 @@ void CModel::Draw(void) {
 	pDevice->GetMaterial(&matDef);
 
 	//輪郭の描画
-	if (m_bOutline == true && m_pCloneMesh != NULL) {
+	if (m_bOutline && m_pCloneMesh != nullptr) {
 		//裏面
 		pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
 		//ライトを無効
@@ -340,7 +340,7 @@ void CModel::Draw(void) {
 		*/
 
 		//テクスチャの設定
-		pDevice->SetTexture(0, NULL);
+		pDevice->SetTexture(0, nullptr);
 
 		for (int nCntMat = 0; nCntMat < (int)m_aModelData[(int)m_modelType].nNumMat; nCntMat++) {
 			//モデル（パーツ）の描画	
@@ -354,7 +354,7 @@ void CModel::Draw(void) {
 	}
 
 	//モデルの描画
-	if (m_aModelData[(int)m_modelType].pMesh != NULL) {
+	if (m_aModelData[(int)m_modelType].pMesh != nullptr) {
 		for (int nCntMat = 0; nCntMat < (int)m_aModelData[(int)m_modelType].nNumMat; nCntMat++) {
 			//マテリアルの設定
 			pDevice->SetMaterial(&m_aMat[nCntMat].MatD3D);
@@ -411,7 +411,7 @@ void CModel::UpdateMtxWorld(void) {
 	D3DXMATRIX mtxParent;			//親のマトリックス
 
 	//各パーツの親のマトリックスを設定
-	if (m_pParent != NULL) {
+	if (m_pParent != nullptr) {
 		mtxParent = m_pParent->GetMtxWorld();	//親のモデルからマトリックスを取得
 	}
 	else {
@@ -477,14 +477,14 @@ float CModel::GetMaterialAlpha(void) {
 // 輪郭の色の指定
 //=============================================================================
 void CModel::SetColorOutline(D3DXCOLOR col) {
-	if (m_pCloneMesh == NULL) return;
+	if (m_pCloneMesh == nullptr) return;
 	//頂点数の取得
 	int nNumVtx = 0;
 	nNumVtx = m_pCloneMesh->GetNumVertices();
 
 	VERTEX_3D *pVtx;	//FVFを変更して複製したのでそれに合わせた構造体の頂点バッファのポインタ
 
-						//頂点バッファのロック
+	//頂点バッファのロック
 	m_pCloneMesh->LockVertexBuffer(0, (void**)&pVtx);
 
 	for (int nCnt = 0; nCnt < nNumVtx; nCnt++) {

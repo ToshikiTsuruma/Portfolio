@@ -62,13 +62,13 @@ HRESULT CTexture::Load(void) {
 	//ファイルを開く
 	pFile = fopen(TEXT_FILE_NAME_TEXTURE, "r");
 
-	if (pFile != NULL) {
-		while (fgets(sLoadText, MAX_LOAD_TEXT_TEXTURE, pFile) != NULL) //一行ごとに文字列を取得
+	if (pFile != nullptr) {
+		while (fgets(sLoadText, MAX_LOAD_TEXT_TEXTURE, pFile) != nullptr) //一行ごとに文字列を取得
 		{
 			pLoadText = strtok(sLoadText, " =\t\n");	//文字列の分割（空白 タブ 改行 ＝）
-			if (pLoadText != NULL) {
+			if (pLoadText != nullptr) {
 				//コメント
-				if (strstr(pLoadText, "//") != NULL) {
+				if (strstr(pLoadText, "//") != nullptr) {
 					continue;
 				}
 				//ディレクトリ名のコピー
@@ -89,9 +89,9 @@ HRESULT CTexture::Load(void) {
 	for (int nCnt = 1; nCnt < (int)TEXTURE_TYPE::ENUM_MAX; nCnt++)
 	{
 		//すでにテクスチャが生成されていた場合破棄
-		if (m_apTexture[nCnt] != NULL) {
+		if (m_apTexture[nCnt] != nullptr) {
 			m_apTexture[nCnt]->Release();
-			m_apTexture[nCnt] = NULL;
+			m_apTexture[nCnt] = nullptr;
 		}
 
 		//テクスチャの生成
@@ -110,10 +110,10 @@ void CTexture::Unload(void) {
 	//テクスチャの破棄
 	for (int nCnt = 0; nCnt < (int)TEXTURE_TYPE::ENUM_MAX; nCnt++)
 	{
-		if (m_apTexture[nCnt] != NULL)
+		if (m_apTexture[nCnt] != nullptr)
 		{
 			m_apTexture[nCnt]->Release();
-			m_apTexture[nCnt] = NULL;
+			m_apTexture[nCnt] = nullptr;
 		}
 	}
 }

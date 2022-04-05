@@ -116,7 +116,7 @@ HRESULT CGame::Init(void) {
 	if (pTerrain != nullptr) pTerrain->SetDrawPriority(CScene::DRAW_PRIORITY::BG);	//描画順の設定
 	//海の生成
 	CMeshfield* pMeshField = CMeshfield::Create(D3DXVECTOR3(0.0f, HEIGHT_SEA, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 1, 1, 30000.0f, 30000.0f);
-	if (pMeshField != NULL) {
+	if (pMeshField != nullptr) {
 		pMeshField->SetColor(D3DXCOLOR(0.0f, 0.2f, 0.6f, 1.0f));
 		pMeshField->SetDrawPriority(CScene::DRAW_PRIORITY::BG);	//描画順の設定
 	}
@@ -254,14 +254,14 @@ void CGame::Update(void) {
 
 	if (pPause != nullptr) {
 		//ポーズ中だった場合更新しない
-		if (pPause->GetPause() == true) return;
+		if (pPause->GetPause()) return;
 	}
 
 	if (pFade != nullptr) {
 		//ステージの切り替え時のフェード中
-		if (m_bChangeStage == true) {
+		if (m_bChangeStage) {
 			//ステージの切り替え
-			if (pFade->GetChangeFade() == true) SetNextStage();
+			if (pFade->GetChangeFade()) SetNextStage();
 		}
 	}
 
@@ -290,24 +290,24 @@ void CGame::Update(void) {
 	}
 
 	//タイマーが０以下でゲームオーバー
-	if (m_bGameOver == false && m_pTimer != nullptr) {
+	if (!m_bGameOver && m_pTimer != nullptr) {
 		if (m_pTimer->GetTime() <= 0) {
 			GameOver();
 		}
 	}
 
 	//ゲームオーバー時、ゲームクリア時ではない場合
-	if (m_bGameOver == false && m_bGameClear == false) {
+	if (!m_bGameOver && !m_bGameClear) {
 		//ポーズ
 		if (pFade != nullptr) {
-			if (pFade->GetFade() == false && pInput->GetTrigger(CInput::CODE::PAUSE)) {
+			if (!pFade->GetFade() && pInput->GetTrigger(CInput::CODE::PAUSE)) {
 				pPause->SetPause(true);
 			}
 		}
 	}
 
 	//ゲームクリア時
-	if (m_bGameClear == true) {
+	if (m_bGameClear) {
 		//ゲームクリアから数フレーム後
 		if (m_nCntFinish == GAMECLEAR_START) {
 
@@ -315,7 +315,7 @@ void CGame::Update(void) {
 	}
 
 	//ゲームオーバー時
-	if (m_bGameOver == true) {
+	if (m_bGameOver) {
 		if (m_nCntFinish == GAMEOVER_START) {
 			//効果音の再生
 			if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::GAMEOVER);
@@ -333,16 +333,16 @@ void CGame::Update(void) {
 	}
 
 	//ゲームクリア時かゲームオーバー時のフェードまでのカウント
-	if (pFade != nullptr && (m_bGameClear == true || m_bGameOver == true)) {
+	if (pFade != nullptr && (m_bGameClear || m_bGameOver)) {
 		//ゲームクリア時
-		if (m_bGameClear == true) {
+		if (m_bGameClear) {
 			//フェード開始
 			if (m_nCntFinish == COUNT_FADE_GAMECLEAR) {
 				pFade->SetFade(CManager::MODE::RESULT, FADE_SPEED);
 			}
 		}
 		//ゲームオーバー時
-		else if (m_bGameOver == true) {
+		else if (m_bGameOver) {
 			//フェード開始
 			if (m_nCntFinish == COUNT_FADE_GAMEOVER + GAMEOVER_TIME) {
 				pFade->SetFade(CManager::MODE::TITLE, FADE_SPEED);
@@ -428,7 +428,7 @@ void CGame::SetNextStage(void) {
 	CBoss::Create(D3DXVECTOR3(0.0f, HEIGHT_SEA, 400.0f));
 
 	//プレイヤーの設定
-	if (m_pPlayer != NULL) {
+	if (m_pPlayer != nullptr) {
 		//プレイヤーの位置を設定
 		m_pPlayer->SetPos(D3DXVECTOR3(0.0f, HEIGHT_SEA, -1500.0f));
 		//プレイヤーの角度を設定
@@ -453,7 +453,7 @@ void CGame::DeadBoss(void) {
 	CSound *pSound = nullptr;
 	if (pManager != nullptr) pSound = pManager->GetSound();
 
-	if (m_pTimer != NULL) {
+	if (m_pTimer != nullptr) {
 		//タイマーの停止
 		m_pTimer->SetStop(true);
 	}
@@ -469,7 +469,7 @@ void CGame::DeadBoss(void) {
 //=============================================================================
 void CGame::GameOver(void) {
 	//タイマーの停止
-	if (m_pTimer != NULL) m_pTimer->SetStop(true);
+	if (m_pTimer != nullptr) m_pTimer->SetStop(true);
 
 	//マネージャーの取得
 	CManager* pManager = CManager::GetManager();
@@ -485,7 +485,7 @@ void CGame::GameOver(void) {
 	}
 
 	//プレイヤーにゲームオーバー時の処理を行わせる
-	if (m_pPlayer != NULL) {
+	if (m_pPlayer != nullptr) {
 		m_pPlayer->GameOver();
 	}
 
@@ -508,7 +508,7 @@ void CGame::GameClear(void) {
 	if (pManager != nullptr) pSound = pManager->GetSound();
 
 	int nTimeClear = 0;	//クリア時のタイム
-	if (m_pTimer != NULL) {
+	if (m_pTimer != nullptr) {
 		//クリア時のタイムの取得
 		nTimeClear = m_pTimer->GetTime();
 	}
@@ -523,9 +523,9 @@ void CGame::GameClear(void) {
 	//ゲームクリア表示の生成
 	m_pGameClear = CScene2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f - 100.0f, 0.0f), CTexture::TEXTURE_TYPE::TEXT_GAMECLEAR, 800.0f, 200.0f);
 	//描画順を最前
-	if (m_pGameClear != NULL) m_pGameClear->SetDrawPriority(CScene2D::DRAW_PRIORITY::FRONT);
+	if (m_pGameClear != nullptr) m_pGameClear->SetDrawPriority(CScene2D::DRAW_PRIORITY::FRONT);
 	//プレイヤーにゲームクリア時の処理を行わせる
-	if (m_pPlayer != NULL) {
+	if (m_pPlayer != nullptr) {
 		m_pPlayer->GameClear();
 	}
 
@@ -549,7 +549,7 @@ CPlayer* CGame::GetPlayer(void) {
 // ゲームが持つプレイヤーへのポインタをNULLにする
 //=============================================================================
 void CGame::ReleasePlayer(void) {
-	m_pPlayer = NULL;
+	m_pPlayer = nullptr;
 }
 
 //=============================================================================
@@ -563,7 +563,7 @@ CBoss* CGame::GetBoss(void) {
 // ゲームが持つボスへのポインタをNULLにする
 //=============================================================================
 void CGame::ReleaseBoss(void) {
-	m_pBoss = NULL;
+	m_pBoss = nullptr;
 }
 
 //=============================================================================

@@ -23,9 +23,9 @@
 //=============================================================================
 CPause::CPause()
 {
-	m_pPauseBg = NULL;
+	m_pPauseBg = nullptr;
 	for (int nCnt = 0; nCnt < NUM_CHOICE; nCnt++) {
-		m_apChoice[nCnt] = NULL;
+		m_apChoice[nCnt] = nullptr;
 	}
 	m_bPause = false;
 	m_nChoice = 0;
@@ -54,7 +54,12 @@ HRESULT CPause::Init(void) {
 // ポーズの終了処理
 //=============================================================================
 void CPause::Uninit(void) {
-
+	for (int nCnt = 0; nCnt < NUM_CHOICE; nCnt++) {
+		if (m_apChoice[nCnt] != nullptr) {
+			m_apChoice[nCnt]->Uninit();
+			m_apChoice[nCnt] = nullptr;
+		}
+	}
 }
 
 //=============================================================================
@@ -62,7 +67,7 @@ void CPause::Uninit(void) {
 //=============================================================================
 void CPause::Update(void) {
 	//ポーズ中ではない場合中断
-	if (m_bPause == false) return;
+	if (!m_bPause) return;
 
 	//マネージャーの取得
 	CManager* pManager = CManager::GetManager();
@@ -82,8 +87,8 @@ void CPause::Update(void) {
 	}
 
 	//入力処理
-	if (pInput != NULL && pFade != NULL && m_bLockInput == false && m_apChoice[0] != NULL && m_apChoice[1] != NULL && m_apChoice[2] != NULL) {
-		if (pFade->GetFade() == false) {
+	if (pInput != nullptr && pFade != nullptr && !m_bLockInput && m_apChoice[0] != nullptr && m_apChoice[1] != nullptr && m_apChoice[2] != nullptr) {
+		if (!pFade->GetFade()) {
 			//----------------------------------------
 			//選択切り替え
 			//----------------------------------------
@@ -92,7 +97,7 @@ void CPause::Update(void) {
 				//選択から外れるポリゴンの色を戻す
 				m_apChoice[m_nChoice]->SetColor(DEFAULT_COLOR);
 				//効果音の再生
-				if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_SWITCH);
+				if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_SWITCH);
 				//選択を変更
 				if (m_nChoice <= 0) {
 					m_nChoice = NUM_CHOICE - 1;
@@ -108,7 +113,7 @@ void CPause::Update(void) {
 				//選択から外れるポリゴンの色を戻す
 				m_apChoice[m_nChoice]->SetColor(DEFAULT_COLOR);
 				//効果音の再生
-				if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_SWITCH);
+				if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_SWITCH);
 				//選択を変更
 				if (m_nChoice >= NUM_CHOICE - 1) {
 					m_nChoice = 0;
@@ -130,17 +135,17 @@ void CPause::Update(void) {
 				//ゲーム再開
 				case 0:
 					//効果音の再生
-					if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::PAUSE_SELECT);
+					if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::PAUSE_SELECT);
 					SetPause(false);	//ポーズの終了
 					break;
 
 				//リトライ
 				case 1:
 					//効果音の再生
-					if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::PAUSE_SELECT);
+					if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::PAUSE_SELECT);
 
 					//ゲームを再ロード
-					if (pFade != NULL) {
+					if (pFade != nullptr) {
 						pFade->SetFade(CManager::MODE::GAME, FADE_SPEED);
 					}
 					break;
@@ -148,10 +153,10 @@ void CPause::Update(void) {
 				//終了
 				case 2:
 					//効果音の再生
-					if (pSound != NULL) pSound->PlaySound(CSound::SOUND_LABEL::PAUSE_SELECT);
+					if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::PAUSE_SELECT);
 
 					//タイトルに切り替え
-					if (pFade != NULL) {
+					if (pFade != nullptr) {
 						pFade->SetFade(CManager::MODE::TITLE, FADE_SPEED);
 					}
 					break;
@@ -161,7 +166,7 @@ void CPause::Update(void) {
 	}//NULL
 
 	 //入力処理のロックを解除
-	if (m_bLockInput == true)m_bLockInput = false;
+	if (m_bLockInput) m_bLockInput = false;
 }
 
 //=============================================================================
@@ -176,7 +181,7 @@ void CPause::SetPause(bool bPause) {
 	CSound *pSound = nullptr;
 	if (pManager != nullptr) pSound = pManager->GetSound();
 
-	if (bPause == true) {
+	if (bPause) {
 		m_nChoice = 0;
 		m_bLockInput = true;	//入力処理をロック
 		//効果音の再生
@@ -185,7 +190,7 @@ void CPause::SetPause(bool bPause) {
 		//背景ポリゴンの生成
 		m_pPauseBg = CScene2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f), CTexture::TEXTURE_TYPE::PAUSE_BG, SCREEN_WIDTH, SCREEN_HEIGHT);
 		//背景ポリゴンの設定
-		if (m_pPauseBg != NULL) {
+		if (m_pPauseBg != nullptr) {
 			m_pPauseBg->SetDrawPriority(CScene2D::DRAW_PRIORITY::FRONT);	//描画順を最前面
 		}
 
@@ -195,30 +200,30 @@ void CPause::SetPause(bool bPause) {
 		m_apChoice[2] = CScene2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, 500.0f , 0.0f), CTexture::TEXTURE_TYPE::PAUSE_QUIT, 280.0f, 50.0f);
 		//選択肢ポリゴンの設定
 		for (int nCnt = 0; nCnt < NUM_CHOICE; nCnt++) {
-			if (m_apChoice[nCnt] != NULL) {
+			if (m_apChoice[nCnt] != nullptr) {
 				m_apChoice[nCnt]->SetDrawPriority(CScene2D::DRAW_PRIORITY::FRONT);	//描画順を最前面
 				m_apChoice[nCnt]->SetColor(DEFAULT_COLOR);	//未選択時の色の変更
 			}
 		}
 		//選択中のポリゴンの色を変更
-		if (m_apChoice[m_nChoice] != NULL) {
+		if (m_apChoice[m_nChoice] != nullptr) {
 			m_apChoice[m_nChoice]->SetColor(SELECT_COLOR);
 		}
 
 		//曲の一時停止
 		if (pSound != nullptr) pSound->PauseSound(CSound::GetBGM());
 	}
-	else if (bPause == false) {
+	else {
 		//背景ポリゴンの破棄
-		if (m_pPauseBg != NULL) {
+		if (m_pPauseBg != nullptr) {
 			m_pPauseBg->Uninit();
-			m_pPauseBg = NULL;
+			m_pPauseBg = nullptr;
 		}
 		//選択肢ポリゴンの破棄
 		for (int nCnt = 0; nCnt < NUM_CHOICE; nCnt++) {
-			if (m_apChoice[nCnt] != NULL) {
+			if (m_apChoice[nCnt] != nullptr) {
 				m_apChoice[nCnt]->Uninit();
-				m_apChoice[nCnt] = NULL;
+				m_apChoice[nCnt] = nullptr;
 			}
 		}
 

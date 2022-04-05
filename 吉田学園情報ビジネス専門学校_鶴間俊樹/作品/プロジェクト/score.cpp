@@ -46,9 +46,9 @@ CScore::~CScore()
 CScore* CScore::Create(int nNumDigit, CTexture::TEXTURE_TYPE type, D3DXVECTOR3 pos, float fSize, float fSpace, int nLife) {
 	CScore* pScore;
 	pScore = new CScore(nNumDigit, type);
-	if (pScore != NULL) {
+	if (pScore != nullptr) {
 		//ナンバーの初期化
-		if (pScore->m_pNumberArray != NULL) {
+		if (pScore->m_pNumberArray != nullptr) {
 			for (int nCnt = 0; nCnt < pScore->m_nNumDigit; nCnt++) {
 				pScore->m_pNumberArray[nCnt].Init(D3DXVECTOR3(pos.x - nCnt * fSpace, pos.y, pos.z), fSize);
 			}
@@ -73,12 +73,12 @@ HRESULT CScore::Init(void) {
 // スコアの終了処理
 //=============================================================================
 void CScore::Uninit(void) {
-	if (m_pNumberArray != NULL) {
+	if (m_pNumberArray != nullptr) {
 		for (int nCnt = 0; nCnt < m_nNumDigit; nCnt++) {
 			m_pNumberArray[nCnt].Uninit();
 		}
 		delete[] m_pNumberArray;
-		m_pNumberArray = NULL;
+		m_pNumberArray = nullptr;
 	}
 	//オブジェクトの破棄
 	Release();
@@ -88,7 +88,7 @@ void CScore::Uninit(void) {
 // スコアの更新処理
 //=============================================================================
 void CScore::Update(void) {
-	if (m_pNumberArray != NULL) {
+	if (m_pNumberArray != nullptr) {
 		for (int nCnt = 0; nCnt < m_nNumDigit; nCnt++) {
 			m_pNumberArray[nCnt].Update();
 		}
@@ -108,7 +108,7 @@ void CScore::Update(void) {
 // スコアの描画処理
 //=============================================================================
 void CScore::Draw(void) {
-	if (m_pNumberArray != NULL) {
+	if (m_pNumberArray != nullptr) {
 		for (int nCnt = 0; nCnt < m_nNumDigit; nCnt++) {
 			m_pNumberArray[nCnt].Draw();
 		}
@@ -120,7 +120,7 @@ void CScore::Draw(void) {
 //=============================================================================
 void CScore::SetScore(int nScore) {
 	m_nScore = nScore;
-	if (m_pNumberArray != NULL) {
+	if (m_pNumberArray != nullptr) {
 		for (int nCnt = 0; nCnt < m_nNumDigit; nCnt++) {
 			m_pNumberArray[nCnt].SetNumber((m_nScore % (int)pow(10, nCnt + 1)) / (int)pow(10, nCnt));
 		}
@@ -134,7 +134,7 @@ void CScore::AddScore(int nValue) {
 	m_nScore += nValue;
 	if (m_nScore < 0)m_nScore = 0;	//0未満の場合は0
 
-	if (m_pNumberArray != NULL) {
+	if (m_pNumberArray != nullptr) {
 		for (int nCnt = 0; nCnt < m_nNumDigit; nCnt++) {
 			m_pNumberArray[nCnt].SetNumber((m_nScore % (int)pow(10, nCnt + 1)) / (int)pow(10, nCnt));
 		}
@@ -152,7 +152,7 @@ int CScore::GetScore(void) {
 // スコアの色の設定
 //=============================================================================
 void CScore::SetColor(D3DXCOLOR col) {
-	if (m_pNumberArray != NULL) {
+	if (m_pNumberArray != nullptr) {
 		for (int nCnt = 0; nCnt < m_nNumDigit; nCnt++) {
 			m_pNumberArray[nCnt].SetColor(col);
 		}

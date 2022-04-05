@@ -9,8 +9,8 @@
 //=============================================================================
 // 静的メンバ変数宣言
 //=============================================================================
-CScene* CScene::m_pTopAll = NULL;
-CScene* CScene::m_pCurAll = NULL;
+CScene* CScene::m_pTopAll = nullptr;
+CScene* CScene::m_pCurAll = nullptr;
 CScene* CScene::m_apTopObjType[(int)OBJ_TYPE::ENUM_MAX] = {};
 CScene* CScene::m_apCurObjType[(int)OBJ_TYPE::ENUM_MAX] = {};
 CScene* CScene::m_apTopUpdate[(int)UPDATE_PRIORITY::ENUM_MAX] = {};
@@ -32,30 +32,30 @@ CScene::CScene()
 
 	//全オブジェクトのリストの初期設定
 	m_pPrevAll = m_pCurAll;	//前のポインタの設定
-	m_pNextAll = NULL;		//次のポインタの設定
-	if (m_pTopAll == NULL) m_pTopAll = this;				//topが存在しない場合、このオブジェクトをtopにする
-	if (m_pCurAll != NULL) m_pCurAll->m_pNextAll = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
+	m_pNextAll = nullptr;		//次のポインタの設定
+	if (m_pTopAll == nullptr) m_pTopAll = this;				//topが存在しない場合、このオブジェクトをtopにする
+	if (m_pCurAll != nullptr) m_pCurAll->m_pNextAll = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
 	m_pCurAll = this;		//最後尾のポインタの設定
 
-							//オブジェクトタイプリストの初期設定
+	//オブジェクトタイプリストの初期設定
 	m_pPrevObjtype = m_apCurObjType[(int)m_objType];	//前のポインタの設定
-	m_pNextObjtype = NULL;						//次のポインタの設定
-	if (m_apTopObjType[(int)m_objType] == NULL) m_apTopObjType[(int)m_objType] = this;				//topが存在しない場合、このオブジェクトをtopにする
-	if (m_apCurObjType[(int)m_objType] != NULL) m_apCurObjType[(int)m_objType]->m_pNextObjtype = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
+	m_pNextObjtype = nullptr;						//次のポインタの設定
+	if (m_apTopObjType[(int)m_objType] == nullptr) m_apTopObjType[(int)m_objType] = this;				//topが存在しない場合、このオブジェクトをtopにする
+	if (m_apCurObjType[(int)m_objType] != nullptr) m_apCurObjType[(int)m_objType]->m_pNextObjtype = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
 	m_apCurObjType[(int)m_objType] = this;		//最後尾のポインタの設定
 
-											//更新順のリストの初期設定
+	//更新順のリストの初期設定
 	m_pPrevUpdate = m_apCurUpdate[(int)m_updatePriority];	//前のポインタの設定
-	m_pNextUpdate = NULL;								//次のポインタの設定
-	if (m_apTopUpdate[(int)m_updatePriority] == NULL) m_apTopUpdate[(int)m_updatePriority] = this;				//topが存在しない場合、このオブジェクトをtopにする
-	if (m_apCurUpdate[(int)m_updatePriority] != NULL) m_apCurUpdate[(int)m_updatePriority]->m_pNextUpdate = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
+	m_pNextUpdate = nullptr;								//次のポインタの設定
+	if (m_apTopUpdate[(int)m_updatePriority] == nullptr) m_apTopUpdate[(int)m_updatePriority] = this;				//topが存在しない場合、このオブジェクトをtopにする
+	if (m_apCurUpdate[(int)m_updatePriority] != nullptr) m_apCurUpdate[(int)m_updatePriority]->m_pNextUpdate = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
 	m_apCurUpdate[(int)m_updatePriority] = this;			//最後尾のポインタの設定
 
-													//描画順のリストの初期設定
+	//描画順のリストの初期設定
 	m_pPrevDraw = m_apCurDraw[(int)m_drawPriority];	//前のポインタの設定
-	m_pNextDraw = NULL;							//次のポインタの設定
-	if (m_apTopDraw[(int)m_drawPriority] == NULL) m_apTopDraw[(int)m_drawPriority] = this;				//topが存在しない場合、このオブジェクトをtopにする
-	if (m_apCurDraw[(int)m_drawPriority] != NULL) m_apCurDraw[(int)m_drawPriority]->m_pNextDraw = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
+	m_pNextDraw = nullptr;							//次のポインタの設定
+	if (m_apTopDraw[(int)m_drawPriority] == nullptr) m_apTopDraw[(int)m_drawPriority] = this;				//topが存在しない場合、このオブジェクトをtopにする
+	if (m_apCurDraw[(int)m_drawPriority] != nullptr) m_apCurDraw[(int)m_drawPriority]->m_pNextDraw = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
 	m_apCurDraw[(int)m_drawPriority] = this;			//最後尾のポインタの設定
 }
 
@@ -68,26 +68,26 @@ CScene::~CScene()
 	//全オブジェクトリスト
 	if (m_pTopAll == this) m_pTopAll = m_pNextAll;	//このオブジェクトがtopだった場合、次のオブジェクトをtopにする
 	if (m_pCurAll == this) m_pCurAll = m_pPrevAll;	//このオブジェクトがcurだった場合、前のオブジェクトをcurにする
-	if (m_pPrevAll != NULL) m_pPrevAll->m_pNextAll = m_pNextAll;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
-	if (m_pNextAll != NULL) m_pNextAll->m_pPrevAll = m_pPrevAll;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
+	if (m_pPrevAll != nullptr) m_pPrevAll->m_pNextAll = m_pNextAll;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
+	if (m_pNextAll != nullptr) m_pNextAll->m_pPrevAll = m_pPrevAll;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
 
 	//オブジェクトタイプリスト
 	if (m_apTopObjType[(int)m_objType] == this) m_apTopObjType[(int)m_objType] = m_pNextObjtype;	//このオブジェクトがtopだった場合、次のオブジェクトをtopにする
 	if (m_apCurObjType[(int)m_objType] == this) m_apCurObjType[(int)m_objType] = m_pPrevObjtype;	//このオブジェクトがcurだった場合、前のオブジェクトをcurにする
-	if (m_pPrevObjtype != NULL) m_pPrevObjtype->m_pNextObjtype = m_pNextObjtype;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
-	if (m_pNextObjtype != NULL) m_pNextObjtype->m_pPrevObjtype = m_pPrevObjtype;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
+	if (m_pPrevObjtype != nullptr) m_pPrevObjtype->m_pNextObjtype = m_pNextObjtype;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
+	if (m_pNextObjtype != nullptr) m_pNextObjtype->m_pPrevObjtype = m_pPrevObjtype;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
 
 	//更新順リスト
 	if (m_apTopUpdate[(int)m_updatePriority] == this) m_apTopUpdate[(int)m_updatePriority] = m_pNextUpdate;	//このオブジェクトがtopだった場合、次のオブジェクトをtopにする
 	if (m_apCurUpdate[(int)m_updatePriority] == this) m_apCurUpdate[(int)m_updatePriority] = m_pPrevUpdate;	//このオブジェクトがcurだった場合、前のオブジェクトをcurにする
-	if (m_pPrevUpdate != NULL) m_pPrevUpdate->m_pNextUpdate = m_pNextUpdate;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
-	if (m_pNextUpdate != NULL) m_pNextUpdate->m_pPrevUpdate = m_pPrevUpdate;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
+	if (m_pPrevUpdate != nullptr) m_pPrevUpdate->m_pNextUpdate = m_pNextUpdate;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
+	if (m_pNextUpdate != nullptr) m_pNextUpdate->m_pPrevUpdate = m_pPrevUpdate;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
 
 	//描画順リスト
 	if (m_apTopDraw[(int)m_drawPriority] == this) m_apTopDraw[(int)m_drawPriority] = m_pNextDraw;	//このオブジェクトがtopだった場合、次のオブジェクトをtopにする
 	if (m_apCurDraw[(int)m_drawPriority] == this) m_apCurDraw[(int)m_drawPriority] = m_pPrevDraw;	//このオブジェクトがcurだった場合、前のオブジェクトをcurにする
-	if (m_pPrevDraw != NULL) m_pPrevDraw->m_pNextDraw = m_pNextDraw;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
-	if (m_pNextDraw != NULL) m_pNextDraw->m_pPrevDraw = m_pPrevDraw;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
+	if (m_pPrevDraw != nullptr) m_pPrevDraw->m_pNextDraw = m_pNextDraw;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
+	if (m_pNextDraw != nullptr) m_pNextDraw->m_pPrevDraw = m_pPrevDraw;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
 }
 
 //=============================================================================
@@ -101,10 +101,10 @@ CScene* CScene::GetSceneTopAll(void) {
 // 全オブジェクトのリストのNextを取得
 //=============================================================================
 CScene* CScene::GetSceneNextAll(CScene* pScene) {
-	if (pScene != NULL) {
+	if (pScene != nullptr) {
 		return pScene->m_pNextAll;
 	}
-	return NULL;
+	return nullptr;
 }
 
 //=============================================================================
@@ -118,10 +118,10 @@ CScene* CScene::GetSceneTopObjtype(OBJ_TYPE objType) {
 // オブジェクトタイプのリストのNextを取得
 //=============================================================================
 CScene* CScene::GetSceneNextObjtype(CScene* pScene) {
-	if (pScene != NULL) {
+	if (pScene != nullptr) {
 		return pScene->m_pNextObjtype;
 	}
-	return NULL;
+	return nullptr;
 }
 
 //=============================================================================
@@ -129,7 +129,7 @@ CScene* CScene::GetSceneNextObjtype(CScene* pScene) {
 //=============================================================================
 void CScene::ReleaseAll(void) {
 	CScene* pSceneAll = m_pTopAll;	//全オブジェクトのポインタを先頭から順に代入
-	while (pSceneAll != NULL)
+	while (pSceneAll != nullptr)
 	{
 		CScene* pSceneNext = pSceneAll->m_pNextAll;
 		//死亡フラグが立っていなかった場合
@@ -141,22 +141,22 @@ void CScene::ReleaseAll(void) {
 	}
 
 	//リストの先頭と最後尾を空にする
-	m_pTopAll = NULL;
-	m_pCurAll = NULL;
+	m_pTopAll = nullptr;
+	m_pCurAll = nullptr;
 	for (int nCnt = 0; nCnt < (int)OBJ_TYPE::ENUM_MAX; nCnt++)
 	{
-		m_apTopObjType[nCnt] = NULL;
-		m_apCurObjType[nCnt] = NULL;
+		m_apTopObjType[nCnt] = nullptr;
+		m_apCurObjType[nCnt] = nullptr;
 	}
 	for (int nCnt = 0; nCnt < (int)UPDATE_PRIORITY::ENUM_MAX; nCnt++)
 	{
-		m_apTopUpdate[nCnt] = NULL;
-		m_apCurUpdate[nCnt] = NULL;
+		m_apTopUpdate[nCnt] = nullptr;
+		m_apCurUpdate[nCnt] = nullptr;
 	}
 	for (int nCnt = 0; nCnt < (int)DRAW_PRIORITY::ENUM_MAX; nCnt++)
 	{
-		m_apTopDraw[nCnt] = NULL;
-		m_apCurDraw[nCnt] = NULL;
+		m_apTopDraw[nCnt] = nullptr;
+		m_apCurDraw[nCnt] = nullptr;
 	}
 }
 
@@ -165,7 +165,7 @@ void CScene::ReleaseAll(void) {
 //=============================================================================
 void CScene::ReleaseObjtype(OBJ_TYPE objtype) {
 	CScene* pSceneObjtype = m_apTopObjType[(int)objtype];	//指定したタイプのオブジェクトのポインタを先頭から順に代入
-	while (pSceneObjtype != NULL)
+	while (pSceneObjtype != nullptr)
 	{
 		CScene* pSceneNext = pSceneObjtype->m_pNextObjtype;
 		//死亡フラグが立っていなかった場合
@@ -177,8 +177,8 @@ void CScene::ReleaseObjtype(OBJ_TYPE objtype) {
 	}
 
 	//リストの先頭と最後尾を空にする
-	m_apTopObjType[(int)objtype] = NULL;
-	m_apCurObjType[(int)objtype] = NULL;
+	m_apTopObjType[(int)objtype] = nullptr;
+	m_apCurObjType[(int)objtype] = nullptr;
 }
 
 //=============================================================================
@@ -187,19 +187,19 @@ void CScene::ReleaseObjtype(OBJ_TYPE objtype) {
 void CScene::UpdateAll(void) {
 	for (int nCnt = 0; nCnt < (int)UPDATE_PRIORITY::ENUM_MAX; nCnt++) {
 		CScene* pSceneUpdate = m_apTopUpdate[nCnt];	//更新するオブジェクト
-		while (pSceneUpdate != NULL) {
+		while (pSceneUpdate != nullptr) {
 			CScene* pSceneNext = pSceneUpdate->m_pNextUpdate;
-			if (pSceneUpdate->m_bDeath == false) pSceneUpdate->Update();	//死亡フラグが立っていない場合更新
+			if (!pSceneUpdate->m_bDeath) pSceneUpdate->Update();	//死亡フラグが立っていない場合更新
 			pSceneUpdate = pSceneNext;
 		}
 	}
 	//死亡フラグが立ったオブジェクトを破棄
 	CScene* pSceneAll = m_pTopAll;	//全オブジェクトのポインタを先頭から順に代入
-	while (pSceneAll != NULL)
+	while (pSceneAll != nullptr)
 	{
 		CScene* pSceneNext = pSceneAll->m_pNextAll;
 		//死亡していた場合破棄
-		if (pSceneAll->m_bDeath == true) {
+		if (pSceneAll->m_bDeath) {
 			delete pSceneAll;	//オブジェクトの破棄
 		}
 		pSceneAll = pSceneNext;
@@ -212,7 +212,7 @@ void CScene::UpdateAll(void) {
 void CScene::DrawAll(void) {
 	for (int nCnt = 0; nCnt < (int)DRAW_PRIORITY::ENUM_MAX; nCnt++) {
 		CScene* pScene = m_apTopDraw[nCnt];
-		while (pScene != NULL) {
+		while (pScene != nullptr) {
 			CScene* pSceneNext = pScene->m_pNextDraw;
 			pScene->Draw();
 			pScene = pSceneNext;
@@ -241,15 +241,15 @@ void CScene::SetObjType(OBJ_TYPE objType) {
 	//変更前のオブジェクトタイプリストの設定
 	if (m_apTopObjType[(int)m_objType] == this) m_apTopObjType[(int)m_objType] = m_pNextObjtype;	//このオブジェクトがtopだった場合、次のオブジェクトをtopにする
 	if (m_apCurObjType[(int)m_objType] == this) m_apCurObjType[(int)m_objType] = m_pPrevObjtype;	//このオブジェクトがcurだった場合、前のオブジェクトをcurにする
-	if (m_pPrevObjtype != NULL) m_pPrevObjtype->m_pNextObjtype = m_pNextObjtype;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
-	if (m_pNextObjtype != NULL) m_pNextObjtype->m_pPrevObjtype = m_pPrevObjtype;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
+	if (m_pPrevObjtype != nullptr) m_pPrevObjtype->m_pNextObjtype = m_pNextObjtype;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
+	if (m_pNextObjtype != nullptr) m_pNextObjtype->m_pPrevObjtype = m_pPrevObjtype;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
 
 	//オブジェクトタイプのリストを変更
 	m_objType = objType;
 	m_pPrevObjtype = m_apCurObjType[(int)m_objType];	//前のポインタの設定
-	m_pNextObjtype = NULL;						//次のポインタの設定
-	if (m_apTopObjType[(int)m_objType] == NULL) m_apTopObjType[(int)m_objType] = this;				//topが存在しない場合、このオブジェクトをtopにする
-	if (m_apCurObjType[(int)m_objType] != NULL) m_apCurObjType[(int)m_objType]->m_pNextObjtype = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
+	m_pNextObjtype = nullptr;						//次のポインタの設定
+	if (m_apTopObjType[(int)m_objType] == nullptr) m_apTopObjType[(int)m_objType] = this;				//topが存在しない場合、このオブジェクトをtopにする
+	if (m_apCurObjType[(int)m_objType] != nullptr) m_apCurObjType[(int)m_objType]->m_pNextObjtype = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
 	m_apCurObjType[(int)m_objType] = this;			//最後尾のポインタの設定
 }
 
@@ -267,15 +267,15 @@ void CScene::SetUpdatePriority(UPDATE_PRIORITY priority) {
 	//変更前の更新優先順のオブジェクトのリストの設定
 	if (m_apTopUpdate[(int)m_updatePriority] == this) m_apTopUpdate[(int)m_updatePriority] = m_pNextUpdate;	//このオブジェクトがtopだった場合、次のオブジェクトをtopにする
 	if (m_apCurUpdate[(int)m_updatePriority] == this) m_apCurUpdate[(int)m_updatePriority] = m_pPrevUpdate;	//このオブジェクトがcurだった場合、前のオブジェクトをcurにする
-	if (m_pPrevUpdate != NULL) m_pPrevUpdate->m_pNextUpdate = m_pNextUpdate;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
-	if (m_pNextUpdate != NULL) m_pNextUpdate->m_pPrevUpdate = m_pPrevUpdate;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
+	if (m_pPrevUpdate != nullptr) m_pPrevUpdate->m_pNextUpdate = m_pNextUpdate;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
+	if (m_pNextUpdate != nullptr) m_pNextUpdate->m_pPrevUpdate = m_pPrevUpdate;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
 
 	//更新優先順のリストを変更
 	m_updatePriority = priority;
 	m_pPrevUpdate = m_apCurUpdate[(int)m_updatePriority];	//前のポインタの設定
-	m_pNextUpdate = NULL;								//次のポインタの設定
-	if (m_apTopUpdate[(int)m_updatePriority] == NULL) m_apTopUpdate[(int)m_updatePriority] = this;				//topが存在しない場合、このオブジェクトをtopにする
-	if (m_apCurUpdate[(int)m_updatePriority] != NULL) m_apCurUpdate[(int)m_updatePriority]->m_pNextUpdate = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
+	m_pNextUpdate = nullptr;								//次のポインタの設定
+	if (m_apTopUpdate[(int)m_updatePriority] == nullptr) m_apTopUpdate[(int)m_updatePriority] = this;				//topが存在しない場合、このオブジェクトをtopにする
+	if (m_apCurUpdate[(int)m_updatePriority] != nullptr) m_apCurUpdate[(int)m_updatePriority]->m_pNextUpdate = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
 	m_apCurUpdate[(int)m_updatePriority] = this;			//最後尾のポインタの設定
 }
 
@@ -286,37 +286,45 @@ void CScene::SetDrawPriority(DRAW_PRIORITY priority) {
 	//変更前の描画優先順のオブジェクトのリストの設定
 	if (m_apTopDraw[(int)m_drawPriority] == this) m_apTopDraw[(int)m_drawPriority] = m_pNextDraw;	//このオブジェクトがtopだった場合、次のオブジェクトをtopにする
 	if (m_apCurDraw[(int)m_drawPriority] == this) m_apCurDraw[(int)m_drawPriority] = m_pPrevDraw;	//このオブジェクトがcurだった場合、前のオブジェクトをcurにする
-	if (m_pPrevDraw != NULL) m_pPrevDraw->m_pNextDraw = m_pNextDraw;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
-	if (m_pNextDraw != NULL) m_pNextDraw->m_pPrevDraw = m_pPrevDraw;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
+	if (m_pPrevDraw != nullptr) m_pPrevDraw->m_pNextDraw = m_pNextDraw;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
+	if (m_pNextDraw != nullptr) m_pNextDraw->m_pPrevDraw = m_pPrevDraw;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
 
 	//描画優先順のリストを変更
 	m_drawPriority = priority;	//描画優先順の設定
 	m_pPrevDraw = m_apCurDraw[(int)m_drawPriority];	//前のポインタの設定
-	m_pNextDraw = NULL;							//次のポインタの設定
-	if (m_apTopDraw[(int)m_drawPriority] == NULL) m_apTopDraw[(int)m_drawPriority] = this;				//topが存在しない場合、このオブジェクトをtopにする
-	if (m_apCurDraw[(int)m_drawPriority] != NULL) m_apCurDraw[(int)m_drawPriority]->m_pNextDraw = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
+	m_pNextDraw = nullptr;							//次のポインタの設定
+	if (m_apTopDraw[(int)m_drawPriority] == nullptr) m_apTopDraw[(int)m_drawPriority] = this;				//topが存在しない場合、このオブジェクトをtopにする
+	if (m_apCurDraw[(int)m_drawPriority] != nullptr) m_apCurDraw[(int)m_drawPriority]->m_pNextDraw = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
 	m_apCurDraw[(int)m_drawPriority] = this;			//最後尾のポインタの設定
 }
 
-//当たり判定の使用状態の設定
+//=============================================================================
+// 当たり判定の使用状態の設定
+//=============================================================================
 void CScene::SetEnableCollision(bool bUse) {
 	m_bEnableCollision = bUse;
 }
 
-//当たり判定の使用状態の取得
+//=============================================================================
+// 当たり判定の使用状態の取得
+//=============================================================================
 bool CScene::GetEnableCollision(void) {
 	return m_bEnableCollision;
 }
 
-//テクスチャの設定
+//=============================================================================
+// テクスチャの設定
+//=============================================================================
 void CScene::SetTexType(CTexture::TEXTURE_TYPE type) {
 	m_texType = type;
 }
-//テクスチャの種類の取得
+
+//=============================================================================
+// テクスチャの種類の取得
+//=============================================================================
 CTexture::TEXTURE_TYPE CScene::GetTexType(void) {
 	return m_texType;
 }
-
 
 //=============================================================================
 //仮想関数

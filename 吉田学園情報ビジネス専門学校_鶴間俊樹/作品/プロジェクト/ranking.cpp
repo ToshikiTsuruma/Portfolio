@@ -21,10 +21,10 @@
 CRanking::CRanking()
 {
 	for (int nCnt = 0; nCnt < MAX_RANKING; nCnt++) {
-		m_apScore[nCnt] = NULL;
+		m_apScore[nCnt] = nullptr;
 		m_aRankingData[nCnt] = NULL;
 	}
-	m_pScoreOutRank = NULL;
+	m_pScoreOutRank = nullptr;
 	m_fSpaceScore = 0.0f;
 }
 
@@ -42,7 +42,7 @@ CRanking::~CRanking()
 CRanking* CRanking::Create(CTexture::TEXTURE_TYPE type, D3DXVECTOR3 pos, float fSize, float fSpace, float fSpaceScore) {
 	CRanking* pRanking;
 	pRanking = new CRanking;
-	if (pRanking != NULL) {
+	if (pRanking != nullptr) {
 		pRanking->m_numberData.type = type;
 		pRanking->m_numberData.pos = pos;
 		pRanking->m_numberData.fSize = fSize;
@@ -58,14 +58,14 @@ CRanking* CRanking::Create(CTexture::TEXTURE_TYPE type, D3DXVECTOR3 pos, float f
 // ランキングの初期化処理
 //=============================================================================
 HRESULT CRanking::Init(void) {
-	FILE *pFile = NULL;	//ファイルへのポインタ
+	FILE *pFile = nullptr;	//ファイルへのポインタ
 
 	//---------------------------------------
 	//ランキングデータのロード
 	//---------------------------------------
 	//ファイルの読み込み
 	pFile = fopen(TEXT_FILE_NAME_SAVE_RANKING, "r");
-	if (pFile != NULL) {
+	if (pFile != nullptr) {
 		for (int nCnt = 0; nCnt < MAX_RANKING; nCnt++) {
 			fscanf(pFile, "%d", &m_aRankingData[nCnt]);
 		}
@@ -119,7 +119,7 @@ HRESULT CRanking::Init(void) {
 	//---------------------------------------
 	//ファイルの読み込み
 	pFile = fopen(TEXT_FILE_NAME_SAVE_RANKING, "w");
-	if (pFile != NULL) {
+	if (pFile != nullptr) {
 		for (int nCnt = 0; nCnt < MAX_RANKING; nCnt++) {
 			fprintf(pFile, "%d\n", m_aRankingData[nCnt]);
 		}
@@ -147,7 +147,7 @@ HRESULT CRanking::Init(void) {
 	//スコアの初期化
 	//---------------------------------------
 	for (int nCnt = 0; nCnt < MAX_RANKING; nCnt++) {
-		if (m_apScore[nCnt] != NULL) {
+		if (m_apScore[nCnt] != nullptr) {
 			//初期化
 			m_apScore[nCnt]->Init();
 			//スコアの値の設定
@@ -176,7 +176,7 @@ HRESULT CRanking::Init(void) {
 		//スコアの値の設定
 		m_pScoreOutRank->SetScore(nScoreResult);
 		//スコアの色の設定
-		if (m_pScoreOutRank != NULL) {
+		if (m_pScoreOutRank != nullptr) {
 			m_pScoreOutRank->SetColor(RANK_COLOR);
 		}
 	}
@@ -190,15 +190,15 @@ HRESULT CRanking::Init(void) {
 void CRanking::Uninit(void) {
 	//ランキングスコアの解放
 	for (int nCnt = 0; nCnt < MAX_RANKING; nCnt++) {
-		if (m_apScore[nCnt] != NULL) {
+		if (m_apScore[nCnt] != nullptr) {
 			m_apScore[nCnt]->Uninit();
-			m_apScore[nCnt] = NULL;
+			m_apScore[nCnt] = nullptr;
 		}
 	}
 	//ランク外スコアの解放
-	if (m_pScoreOutRank != NULL) {
+	if (m_pScoreOutRank != nullptr) {
 		m_pScoreOutRank->Uninit();
-		m_pScoreOutRank = NULL;
+		m_pScoreOutRank = nullptr;
 	}
 	//オブジェクトの破棄
 	Release();

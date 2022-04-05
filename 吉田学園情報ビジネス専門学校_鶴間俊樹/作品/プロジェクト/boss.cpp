@@ -79,15 +79,15 @@ CBoss::CBoss() : CSceneMotion(m_pPartsInfoArray, m_nNumParts, &m_aMotionInfo[0],
 	m_pGaugeLifeBg = CScene2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, 45.0f, 0.0f), CTexture::TEXTURE_TYPE::NONE, 862.5f, 20.0f);	//背景
 	m_pGaugeLifeFrame = CScene2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, 45.0f, 0.0f), CTexture::TEXTURE_TYPE::GAUGE_LIFE_BOSS, 900.0f, 25.0f);	//枠
 	//体力ゲージの設定 順番厳守
-	if (m_pGaugeLifeBg != NULL) {	//背景
+	if (m_pGaugeLifeBg != nullptr) {	//背景
 		m_pGaugeLifeBg->SetDrawPriority(DRAW_PRIORITY::UI);
 		m_pGaugeLifeBg->SetColor(D3DXCOLOR(0.6f, 0.6f, 0.6f, 1.0f));
 	}
-	if (m_pGaugeLife != NULL) {	//ゲージ
+	if (m_pGaugeLife != nullptr) {	//ゲージ
 		m_pGaugeLife->SetDrawPriority(DRAW_PRIORITY::UI);
 		m_pGaugeLife->SetColor(COLOR_LIFE_GAUGE);
 	}
-	if (m_pGaugeLifeFrame != NULL) {	//枠
+	if (m_pGaugeLifeFrame != nullptr) {	//枠
 		m_pGaugeLifeFrame->SetDrawPriority(DRAW_PRIORITY::UI);
 	}
 }
@@ -120,7 +120,7 @@ CBoss::~CBoss()
 CBoss* CBoss::Create(D3DXVECTOR3 pos) {
 	CBoss* pBoss;
 	pBoss = new CBoss();
-	if (pBoss != NULL) {
+	if (pBoss != nullptr) {
 		pBoss->CSceneMotion::SetPos(pos);
 		pBoss->Init();
 	}
@@ -146,18 +146,18 @@ void CBoss::UnloadMotionInfo(void) {
 	m_nIdxWeapon = -1;
 
 	//パーツ情報の解放
-	if (m_pPartsInfoArray != NULL) {
+	if (m_pPartsInfoArray != nullptr) {
 		delete[] m_pPartsInfoArray;
-		m_pPartsInfoArray = NULL;
+		m_pPartsInfoArray = nullptr;
 	}
 	//モーション情報の解放
 	for (int nCntMotionInfo = 0; nCntMotionInfo < (int)MOTION_TYPE::ENUM_MAX; nCntMotionInfo++)
 	{
 		for (int nCntKeyInfo = 0; nCntKeyInfo < MAX_KEY_MOTION; nCntKeyInfo++)
 		{
-			if (m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray != NULL) {
+			if (m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray != nullptr) {
 				delete[] m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray;
-				m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray = NULL;
+				m_aMotionInfo[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray = nullptr;
 			}
 		}
 	}
@@ -219,11 +219,11 @@ void CBoss::Update(void) {
 		//プレイヤーのスタン状態の取得
 		bStunPlayer = pPlayer->GetStun();
 		//プレイヤーがスタンしたら通常攻撃のカウントをリセット
-		if (bStunPlayer == true) m_nCntNormalAttack = 0;
+		if (bStunPlayer) m_nCntNormalAttack = 0;
 	}
 
 	//スタン終了で待機終了
-	if (m_bStay == true) m_bStay = bStunPlayer;
+	if (m_bStay) m_bStay = bStunPlayer;
 
 	//敵とプレイヤーの距離を求める
 	D3DXVECTOR2 vecPlayer = D3DXVECTOR2(posPlayer.x - GetPos().x, posPlayer.z - GetPos().z);	//敵からプレイヤーへのベクトル
@@ -234,12 +234,12 @@ void CBoss::Update(void) {
 	//----------------------------
 	//死亡時
 	//----------------------------
-	if (m_bDead == true) {
+	if (m_bDead) {
 		m_nCntDead++;
 
 		if (m_nCntDead == FALLDOWN_TIME) {
 			//倒れる音
-			if (pSound != NULL)pSound->PlaySound(CSound::SOUND_LABEL::STUN);
+			if (pSound != nullptr)pSound->PlaySound(CSound::SOUND_LABEL::STUN);
 		}
 
 		//エネミーの破棄
@@ -248,7 +248,7 @@ void CBoss::Update(void) {
 			bool bEndFade = false;
 			bEndFade = FadeModelAll(0.0f, -0.01f);
 			//フェード終了時
-			if (bEndFade == true) {
+			if (bEndFade) {
 				//ゲームクリア
 				if (pGame != nullptr) pGame->GameClear();
 				//終了処理
@@ -263,9 +263,10 @@ void CBoss::Update(void) {
 	}
 
 	//----------------------------
-	//プレイヤー発見時
+	//プレイヤー発見
 	//----------------------------
-	if (m_bEncounterPlayer == false) {
+	//プレイヤー未発見時
+	if (!m_bEncounterPlayer) {
 		//待機モーション時にプレイヤーが一定以上近づいた場合
 		if (fDistPlayer < DISTANCE_ENCOUNTER_PLAYER && GetMotionType() == (int)MOTION_TYPE::WAIT) {
 			//ニュートラルモーションの設定
@@ -282,7 +283,7 @@ void CBoss::Update(void) {
 		//待機モーションではなかった場合（ニュートラルモーション）
 		if (GetMotionType() != (int)MOTION_TYPE::WAIT) {
 			//モーションの遷移が終わっていたら
-			if (GetTransMotion() == false) {
+			if (!GetTransMotion()) {
 				m_bEncounterPlayer = true;
 			}
 		}
@@ -293,9 +294,9 @@ void CBoss::Update(void) {
 	//----------------------------
 	bool bAttackRush = false;	//突進攻撃が攻撃可能かどうか
 
-	if (m_bLockAct == true) {
+	if (m_bLockAct) {
 		//モーションの遷移が完了した場合
-		if (GetTransMotion() == false) {
+		if (!GetTransMotion()) {
 			//硬直の解除
 			m_bLockAct = false;
 
@@ -316,7 +317,7 @@ void CBoss::Update(void) {
 	bool bAngleAttackUnder = false;	//下攻撃できる角度にいるかどうか
 
 	//硬直中ではない場合
-	if (m_bLockAct == false && bStunPlayer == false) {
+	if (!m_bLockAct && !bStunPlayer) {
 		//--------------------------
 		//プレイヤーとの角度を計算
 		//--------------------------
@@ -348,16 +349,16 @@ void CBoss::Update(void) {
 		//--------------------------
 		if (GetMotionCategory() != MOTION_CATEGORY::ATTACK) {
 			//突進攻撃
-			if (bAttackRush == true) {
+			if (bAttackRush) {
 				m_nCntAttackRush = 0;
 				StartAttack(ATTACK_TYPE::RUSH);
 			}
 			//前方攻撃
-			else if (bAngleAttackFront == true && fDistPlayer < DISTANCE_ATTACK_FRONT && fDistPlayer >= DISTANCE_ATTACK_UNDER) {
+			else if (bAngleAttackFront && fDistPlayer < DISTANCE_ATTACK_FRONT && fDistPlayer >= DISTANCE_ATTACK_UNDER) {
 				StartAttack(ATTACK_TYPE::FRONT);
 			}
 			//下攻撃できる角度かつ一定の距離以内。または角度関係なく攻撃できる一定の距離以内
-			else if ((bAngleAttackUnder == true && fDistPlayer < DISTANCE_ATTACK_UNDER) || fDistPlayer < DISTANCE_ATTACK_UNDER_ALL) {
+			else if ((bAngleAttackUnder && fDistPlayer < DISTANCE_ATTACK_UNDER) || fDistPlayer < DISTANCE_ATTACK_UNDER_ALL) {
 				StartAttack(ATTACK_TYPE::UNDER);
 			}
 		}
@@ -366,9 +367,9 @@ void CBoss::Update(void) {
 	//----------------------------
 	//目標角度と移動量の設定
 	//----------------------------
-	if (m_bLockAct == false && m_bEncounterPlayer == true) {
+	if (!m_bLockAct && m_bEncounterPlayer) {
 		//スタン中に一定以上離れた場合待機
-		if (m_bStay == false && bStunPlayer == true && fDistPlayer > DISTANCE_STAY) {
+		if (!m_bStay && bStunPlayer && fDistPlayer > DISTANCE_STAY) {
 			//ニュートラルモーションモーションを設定
 			SetMotion((int)MOTION_TYPE::NEUTRAL);
 			//移動量の設定
@@ -377,7 +378,7 @@ void CBoss::Update(void) {
 			m_bStay = true;
 		}
 		//攻撃モーション中ではない場合で、待機中でなはい場合	突進攻撃時は可能
-		if ((GetMotionCategory() != MOTION_CATEGORY::ATTACK || GetMotionType() == (int)MOTION_TYPE::ATTACK_RUSH) && m_bStay == false) {
+		if ((GetMotionCategory() != MOTION_CATEGORY::ATTACK || GetMotionType() == (int)MOTION_TYPE::ATTACK_RUSH) && !m_bStay) {
 			//移動モーション中ではなかったら
 			if (GetMotionCategory() != MOTION_CATEGORY::MOVE && GetMotionType() != (int)MOTION_TYPE::ATTACK_RUSH) {
 				//移動時のモーションを設定
@@ -394,11 +395,11 @@ void CBoss::Update(void) {
 		}
 
 		//攻撃モーション中ではないか、攻撃中に回転できる場合
-		if (GetMotionCategory() != MOTION_CATEGORY::ATTACK || m_bRotateAttack == true) {
+		if (GetMotionCategory() != MOTION_CATEGORY::ATTACK || m_bRotateAttack) {
 			//目標角度をプレイヤーの向きへ向ける（逆向き）
 			m_rotDestY = fRotPlayerY;
 			//プレイヤーがスタン中ではない場合か、スタン中に待機が完了した場合正しい向きに治す
-			if (bStunPlayer == false || (bStunPlayer == true && m_bStay == true)) {
+			if (!bStunPlayer || (bStunPlayer && m_bStay)) {
 				//モデルが反対なので反対向きに向ける
 				if (m_rotDestY >= 0.0f) {
 					m_rotDestY -= D3DX_PI;
@@ -414,11 +415,11 @@ void CBoss::Update(void) {
 	//回転
 	//----------------------------
 	//硬直中ではないとき
-	if (m_bLockAct == false && m_bEncounterPlayer == true) {
+	if (!m_bLockAct && m_bEncounterPlayer) {
 		//目標角度と角度が不一致の場合
 		if (m_rotDestY != GetRot().y) {
 			//攻撃モーション中ではない場合で、待機中でなはい場合
-			if (GetMotionCategory() != MOTION_CATEGORY::ATTACK && m_bStay == false) {
+			if (GetMotionCategory() != MOTION_CATEGORY::ATTACK && !m_bStay) {
 				//移動モーションではなかったら
 				if (GetMotionCategory() != MOTION_CATEGORY::MOVE) {
 					//移動時のモーションを設定
@@ -427,7 +428,7 @@ void CBoss::Update(void) {
 			}
 
 			//攻撃モーション中ではないか、攻撃モーション中に回転できる場合
-			if (GetMotionCategory() != MOTION_CATEGORY::ATTACK || m_bRotateAttack == true) {
+			if (GetMotionCategory() != MOTION_CATEGORY::ATTACK || m_bRotateAttack) {
 				//目標角度へ回転させる
 				D3DXVECTOR3 rot = GetRot();	//角度の取得
 				float fRotY = rot.y;	//Y軸の角度
@@ -497,7 +498,7 @@ void CBoss::Update(void) {
 
 	bLand = CTerrain::Collision(&posColTerrain, vecStart, vecEnd);
 	//接地時
-	if (bLand == true) {
+	if (bLand) {
 		SetPos(posColTerrain);	//位置の移動
 	}
 
@@ -509,7 +510,7 @@ void CBoss::Update(void) {
 	//----------------------------
 	//モーション終了時
 	//----------------------------
-	if (GetEndMotion() == true) {
+	if (GetEndMotion()) {
 		switch ((MOTION_TYPE)GetMotionType())
 		{
 			//前方攻撃
@@ -517,7 +518,7 @@ void CBoss::Update(void) {
 			m_bValidAttack = false;
 
 			//下攻撃できる角度かつ一定の距離以内。または角度関係なく攻撃できる一定の距離以内
-			if ((bAngleAttackUnder == true && fDistPlayer < DISTANCE_ATTACK_UNDER) || fDistPlayer < DISTANCE_ATTACK_UNDER_ALL) {
+			if ((bAngleAttackUnder && fDistPlayer < DISTANCE_ATTACK_UNDER) || fDistPlayer < DISTANCE_ATTACK_UNDER_ALL) {
 				//下攻撃
 				StartAttack(ATTACK_TYPE::UNDER);
 			}
@@ -540,7 +541,7 @@ void CBoss::Update(void) {
 			//突進攻撃
 		case MOTION_TYPE::ATTACK_RUSH:
 			//一定の回数連続で攻撃する
-			if (m_nCntAttackRush < MAX_CONTINUE_RUSH_ATTACK && bStunPlayer == false) {
+			if (m_nCntAttackRush < MAX_CONTINUE_RUSH_ATTACK && !bStunPlayer) {
 				//突進攻撃
 				StartAttack(ATTACK_TYPE::RUSH);
 			}
@@ -565,9 +566,9 @@ void CBoss::Update(void) {
 		//前方攻撃
 	case MOTION_TYPE::ATTACK_FRONT:
 		//攻撃のタイミングだった場合
-		if ((GetCurrentKey() == 1 || GetCurrentKey() == 2) && GetTransMotion() == false) {
+		if ((GetCurrentKey() == 1 || GetCurrentKey() == 2) && !GetTransMotion()) {
 			//攻撃開始時
-			if (m_bValidAttack == false) {
+			if (!m_bValidAttack) {
 				m_bRotateAttack = false;	//回転を制限
 				bBeginAttack = true;	//攻撃開始
 			}
@@ -582,9 +583,9 @@ void CBoss::Update(void) {
 		//下攻撃
 	case MOTION_TYPE::ATTACK_UNDER:
 		//攻撃のタイミングだった場合
-		if ((GetCurrentKey() == 1) && GetTransMotion() == false) {
+		if ((GetCurrentKey() == 1) && !GetTransMotion()) {
 			//攻撃開始時
-			if (m_bValidAttack == false) {
+			if (!m_bValidAttack) {
 				bBeginAttack = true;
 			}
 			m_bValidAttack = true;
@@ -598,9 +599,9 @@ void CBoss::Update(void) {
 		//突進攻撃
 	case MOTION_TYPE::ATTACK_RUSH:
 		//攻撃のタイミングだった場合
-		if ((GetCurrentKey() == 0 || GetCurrentKey() == 2) && GetTransMotion() == false) {
+		if ((GetCurrentKey() == 0 || GetCurrentKey() == 2) && !GetTransMotion()) {
 			//攻撃開始時
-			if (m_bValidAttack == false) {
+			if (!m_bValidAttack) {
 				bBeginAttack = true;
 			}
 			m_bValidAttack = true;
@@ -617,14 +618,14 @@ void CBoss::Update(void) {
 	}
 
 	//攻撃開始時
-	if (bBeginAttack == true) {
+	if (bBeginAttack) {
 		InitObjAttacked();	//攻撃済みリストの初期化
 	}
 
 	//----------------------------
 	//攻撃のタイミング
 	//----------------------------
-	if (m_bValidAttack == true) {
+	if (m_bValidAttack) {
 		//オブジェクトの全モデルのワールドマトリックスを更新
 		UpdateMtxWorldAll();	//当たり判定取得時に位置のズレが生じるため
 
@@ -660,9 +661,9 @@ void CBoss::Update(void) {
 			}
 
 			//攻撃開始時
-			if (bBeginAttack == true) {
+			if (bBeginAttack) {
 				//攻撃音の再生
-				if (pSound != NULL) pSound->CSound::PlaySound(CSound::SOUND_LABEL::ATTACK_BOSS);
+				if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::ATTACK_BOSS);
 			}
 		}
 			break;
@@ -696,9 +697,9 @@ void CBoss::Update(void) {
 			}
 
 			//攻撃開始時
-			if (bBeginAttack == true) {
+			if (bBeginAttack) {
 				//攻撃音の再生
-				if (pSound != NULL) pSound->CSound::PlaySound(CSound::SOUND_LABEL::ATTACK_BOSS);
+				if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::ATTACK_BOSS);
 			}
 		}
 			break;
@@ -757,13 +758,13 @@ void CBoss::Update(void) {
 			{
 				if (nCntAttack >= nNumColHand) fSizeCol = 60.0f;	//足の当たり判定のサイズは少し大きくする
 				//攻撃
-				Attack(OBJ_TYPE::PLAYER, aPosCol[nCntAttack], fSizeCol, nDamageAttack, DAMAGE_TYPE::ENEMY, NULL);
+				Attack(OBJ_TYPE::PLAYER, aPosCol[nCntAttack], fSizeCol, nDamageAttack, DAMAGE_TYPE::ENEMY, nullptr);
 			}
 
 			//攻撃開始時
-			if (bBeginAttack == true) {
+			if (bBeginAttack) {
 				//攻撃音の再生
-				if (pSound != NULL) pSound->CSound::PlaySound(CSound::SOUND_LABEL::ATTACK_BOSS);
+				if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::ATTACK_BOSS);
 			}
 		}
 		break;
@@ -882,14 +883,14 @@ void CBoss::GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECTOR3**
 	}
 
 	//当たり判定の数を設定
-	if (pNumCol != NULL) *pNumCol = nNumCol;
+	if (pNumCol != nullptr) *pNumCol = nNumCol;
 	//当たり判定の半径を設定
-	if (pRadiusCol != NULL) *pRadiusCol = fRadiusCol;
+	if (pRadiusCol != nullptr) *pRadiusCol = fRadiusCol;
 
 	//当たり判定の位置の配列を設定
-	if (ppPosColArray != NULL) {
+	if (ppPosColArray != nullptr) {
 		//posのポインタが空だった場合
-		if (*ppPosColArray == NULL) {
+		if (*ppPosColArray == nullptr) {
 			//posの変数を当たり判定の数分配列で確保
 			*ppPosColArray = new D3DXVECTOR3[nNumCol];
 
@@ -922,7 +923,7 @@ void CBoss::StartAttack(ATTACK_TYPE type) {
 		//攻撃準備中は回転できる
 		m_bRotateAttack = true;
 		//振り上げ音の再生
-		if (pSound != NULL) pSound->CSound::PlaySound(CSound::SOUND_LABEL::SWISH_PUNCH);
+		if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::SWISH_PUNCH);
 		//通常攻撃のカウンタの加算
 		m_nCntNormalAttack++;
 		break;
@@ -934,7 +935,7 @@ void CBoss::StartAttack(ATTACK_TYPE type) {
 		//攻撃中回転できない
 		m_bRotateAttack = false;
 		//振り上げ音の再生
-		if (pSound != NULL) pSound->CSound::PlaySound(CSound::SOUND_LABEL::SWISH_PUNCH);
+		if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::SWISH_PUNCH);
 		//通常攻撃のカウンタの加算
 		m_nCntNormalAttack++;
 		break;
@@ -965,7 +966,7 @@ void CBoss::StartAttack(ATTACK_TYPE type) {
 // ボスのダメージ処理
 //=============================================================================
 void CBoss::Damage(int nDamage, bool* pDead) {
-	if (m_bDead == true) return;
+	if (m_bDead) return;
 
 	//マネージャーの取得
 	CManager* pManager = CManager::GetManager();
@@ -976,7 +977,7 @@ void CBoss::Damage(int nDamage, bool* pDead) {
 	//ライフの減少
 	m_nLife -= nDamage;
 	//体力ゲージの設定
-	if (m_pGaugeLife != NULL) {
+	if (m_pGaugeLife != nullptr) {
 		m_pGaugeLife->SetRatioWidth((float)m_nLife / (float)MAX_LIFE);
 	}
 	//死亡

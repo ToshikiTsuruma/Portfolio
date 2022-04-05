@@ -16,8 +16,8 @@
 //=============================================================================
 CRenderer::CRenderer()
 {
-	m_pD3D = NULL;
-	m_pD3DDevice = NULL;
+	m_pD3D = nullptr;
+	m_pD3DDevice = nullptr;
 }
 
 //=============================================================================
@@ -27,24 +27,24 @@ CRenderer::~CRenderer()
 {
 #ifdef _DEBUG
 	// デバッグ情報表示用フォントの破棄
-	if (m_pFont != NULL)
+	if (m_pFont != nullptr)
 	{
 		m_pFont->Release();
-		m_pFont = NULL;
+		m_pFont = nullptr;
 	}
 #endif
 	// デバイスの破棄
-	if (m_pD3DDevice != NULL)
+	if (m_pD3DDevice != nullptr)
 	{
 		m_pD3DDevice->Release();
-		m_pD3DDevice = NULL;
+		m_pD3DDevice = nullptr;
 	}
 
 	// Direct3Dオブジェクトの破棄
-	if (m_pD3D != NULL)
+	if (m_pD3D != nullptr)
 	{
 		m_pD3D->Release();
-		m_pD3D = NULL;
+		m_pD3D = nullptr;
 	}
 }
 
@@ -57,7 +57,7 @@ HRESULT CRenderer::Init(HWND hWnd, bool bWindow) {
 
 	// Direct3Dオブジェクトの作成
 	m_pD3D = Direct3DCreate9(D3D_SDK_VERSION);
-	if (m_pD3D == NULL)
+	if (m_pD3D == nullptr)
 	{
 		return E_FAIL;
 	}
@@ -166,25 +166,25 @@ HRESULT CRenderer::Init(HWND hWnd, bool bWindow) {
 void CRenderer::Uninit(void) {
 #ifdef _DEBUG
 	// デバッグ情報表示用フォントの破棄
-	if (m_pFont != NULL)
+	if (m_pFont != nullptr)
 	{
 		m_pFont->Release();
-		m_pFont = NULL;
+		m_pFont = nullptr;
 	}
 #endif
 
 	// デバイスの破棄
-	if (m_pD3DDevice != NULL)
+	if (m_pD3DDevice != nullptr)
 	{
 		m_pD3DDevice->Release();
-		m_pD3DDevice = NULL;
+		m_pD3DDevice = nullptr;
 	}
 
 	// Direct3Dオブジェクトの破棄
-	if (m_pD3D != NULL)
+	if (m_pD3D != nullptr)
 	{
 		m_pD3D->Release();
-		m_pD3D = NULL;
+		m_pD3D = nullptr;
 	}
 }
 
@@ -212,7 +212,7 @@ void CRenderer::Draw(void) {
 
 	// バックバッファ＆Ｚバッファのクリア
 	m_pD3DDevice->Clear(0,
-		NULL,
+		nullptr,
 		(D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER),
 		D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
 
@@ -220,11 +220,11 @@ void CRenderer::Draw(void) {
 	if (SUCCEEDED(m_pD3DDevice->BeginScene()))
 	{
 		//カメラのセット
-		if (pCamera != NULL) pCamera->SetCamera();
+		if (pCamera != nullptr) pCamera->SetCamera();
 		//各オブジェクトの描画処理
 		CScene::DrawAll();
 		//フェードの描画
-		if (pFade != NULL) pFade->Draw();
+		if (pFade != nullptr) pFade->Draw();
 
 #ifdef _DEBUG
 		// FPS表示
@@ -235,7 +235,7 @@ void CRenderer::Draw(void) {
 	}
 
 	// バックバッファとフロントバッファの入れ替え
-	m_pD3DDevice->Present(NULL, NULL, NULL, NULL);
+	m_pD3DDevice->Present(nullptr, nullptr, nullptr, nullptr);
 }
 
 #ifdef _DEBUG
@@ -249,7 +249,7 @@ void CRenderer::DrawFPS(void) {
 	wsprintf(str, "FPS:%d\n", GetFPS());
 
 	// テキスト描画
-	m_pFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0xff, 0xff));
+	m_pFont->DrawText(nullptr, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0xff, 0xff));
 }
 
 #endif

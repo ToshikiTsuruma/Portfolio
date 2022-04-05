@@ -27,7 +27,7 @@ CTerrain::CTerrain()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CTerrain::CTerrain(CModel::MODELTYPE typeModel) : CSceneModel(typeModel, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), NULL, false)
+CTerrain::CTerrain(CModel::MODELTYPE typeModel) : CSceneModel(typeModel, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), nullptr, false)
 {
 	SetObjType(OBJ_TYPE::TERRAIN);	//オブジェクトタイプの設定
 
@@ -59,7 +59,7 @@ CTerrain* CTerrain::Create(TERRAIN_TYPE typeTerrain) {
 
 	CTerrain* pTerrain;
 	pTerrain = new CTerrain(typeModel);
-	if (pTerrain != NULL) {
+	if (pTerrain != nullptr) {
 		pTerrain->Init();
 	}
 
@@ -103,18 +103,18 @@ bool CTerrain::Collision(D3DXVECTOR3* pPosCollision, D3DXVECTOR3 vecStart, D3DXV
 	CScene* pScene;	//オブジェクトへのポインタ
 	pScene = GetSceneTopObjtype(OBJ_TYPE::TERRAIN);	//地形のオブジェクトタイプのリストの先頭を取得
 
-	while (pScene != NULL) {
+	while (pScene != nullptr) {
 		CScene* pSceneNext = GetSceneNextObjtype(pScene);	//リストの次のオブジェクトのポインタを取得
 		CTerrain* pTerrain = dynamic_cast<CTerrain*>(pScene);	//地形クラスにキャスト
 		//キャスト成功時
-		if (pTerrain != NULL) {
+		if (pTerrain != nullptr) {
 			//死亡フラグが立っていない場合
 			if (pTerrain->GetDeath() == false) {
 				//地形のモデルデータの取得
 				CModel::MODELTYPE modelType = pTerrain->GetModelType();	//モデルの種類の取得
 				CModel::ModelData modelData = CModel::GetModelData(modelType);	//モデルのデータの取得
 				LPD3DXMESH pMesh = modelData.pMesh;	//メッシュデータの取得
-				if (pMesh == NULL) return false;	//メッシュデータが無効の場合終了			
+				if (pMesh == nullptr) return false;	//メッシュデータが無効の場合終了			
 
 				D3DXVECTOR3 posTerrain = pTerrain->GetPos();//地形の位置				
 				D3DXVECTOR3 rotTerrain = pTerrain->GetRot();//地形の回転				
@@ -131,7 +131,7 @@ bool CTerrain::Collision(D3DXVECTOR3* pPosCollision, D3DXVECTOR3 vecStart, D3DXV
 				D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
 
 				//地形の行列の逆行列を計算
-				D3DXMatrixInverse(&mtxWorld, NULL, &mtxWorld);	
+				D3DXMatrixInverse(&mtxWorld, nullptr, &mtxWorld);
 				//レイに地形の逆行列をかける
 				D3DXVec3TransformCoord(&vecStart, &vecStart, &mtxWorld);
 				D3DXVec3TransformCoord(&vecEnd, &vecEnd, &mtxWorld);
@@ -143,7 +143,7 @@ bool CTerrain::Collision(D3DXVECTOR3* pPosCollision, D3DXVECTOR3 vecStart, D3DXV
 				float fU, fV;	//交差した三角形の重心座標?
 
 				//当たり判定
-				D3DXIntersect(pMesh, &vecStart, &vecDir, &bHit, &faceIdx, &fU, &fV, NULL, NULL, NULL);
+				D3DXIntersect(pMesh, &vecStart, &vecDir, &bHit, &faceIdx, &fU, &fV, nullptr, nullptr, nullptr);
 
 				//レイ衝突時
 				if (bHit == TRUE) {
@@ -168,8 +168,8 @@ bool CTerrain::Collision(D3DXVECTOR3* pPosCollision, D3DXVECTOR3 vecStart, D3DXV
 
 					DWORD dwStride = pMesh->GetNumBytesPerVertex();	//頂点ごとのバイト数
 
-					BYTE* pbVtx = NULL;	
-					float* pfVtx = NULL;
+					BYTE* pbVtx = nullptr;
+					float* pfVtx = nullptr;
 
 					//頂点バッファのロック
 					pMesh->LockVertexBuffer(D3DLOCK_READONLY, (void**)&pbVtx);

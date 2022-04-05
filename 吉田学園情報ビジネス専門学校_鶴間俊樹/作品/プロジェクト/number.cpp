@@ -18,7 +18,7 @@
 //=============================================================================
 CNumber::CNumber()
 {
-	m_pVtxBuff = NULL;
+	m_pVtxBuff = nullptr;
 }
 
 //=============================================================================
@@ -36,7 +36,7 @@ CNumber* CNumber::Create(CTexture::TEXTURE_TYPE type, int nNumDigit) {
 	CNumber* pNumberArray;
 	pNumberArray = new CNumber[nNumDigit];
 
-	if (pNumberArray != NULL) {
+	if (pNumberArray != nullptr) {
 		LPDIRECT3DDEVICE9 pDevice = nullptr;	//デバイスへのポインタ
 		//マネージャーの取得
 		CManager* pManager = CManager::GetManager();	
@@ -55,7 +55,7 @@ CNumber* CNumber::Create(CTexture::TEXTURE_TYPE type, int nNumDigit) {
 					FVF_VERTEX_2D,
 					D3DPOOL_MANAGED,
 					&(pNumberArray[nCnt].m_pVtxBuff),
-					NULL);
+					nullptr);
 
 				pNumberArray[nCnt].m_texType = type;
 				pNumberArray[nCnt].Init(D3DXVECTOR3(0.0f, 0.0f, 0.0f), 0.0f);
@@ -72,7 +72,7 @@ CNumber* CNumber::Create(CTexture::TEXTURE_TYPE type, int nNumDigit) {
 HRESULT CNumber::Init(D3DXVECTOR3 pos, float fSize) {
 	VERTEX_2D *pVtx;
 
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 		// 頂点情報を設定 ポリゴンの右上が基準
 		pVtx[0].pos = D3DXVECTOR3(pos.x - fSize, pos.y, 0.0f);
@@ -106,9 +106,9 @@ HRESULT CNumber::Init(D3DXVECTOR3 pos, float fSize) {
 // ナンバーの終了処理
 //=============================================================================
 void CNumber::Uninit(void) {
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		m_pVtxBuff->Release();
-		m_pVtxBuff = NULL;
+		m_pVtxBuff = nullptr;
 	}
 }
 

@@ -29,19 +29,19 @@ CManager* CManager::m_pManager = nullptr;
 // デフォルトコンストラクタ
 //=============================================================================
 CManager::CManager() {
-	m_pRenderer = NULL;
-	m_pInputCur = NULL;
-	m_pInputKeyboard = NULL;
-	m_pInputGamepadX = NULL;
-	m_pCamera = NULL;
+	m_pRenderer = nullptr;
+	m_pInputCur = nullptr;
+	m_pInputKeyboard = nullptr;
+	m_pInputGamepadX = nullptr;
+	m_pCamera = nullptr;
 	m_apLight[NUM_LIGHT] = {};
-	m_pSound = NULL;
-	m_pFade = NULL;
+	m_pSound = nullptr;
+	m_pFade = nullptr;
 	m_mode = MODE::TITLE;
-	m_pTitle = NULL;
-	m_pGame = NULL;
-	m_pResult = NULL;
-	m_pPause = NULL;
+	m_pTitle = nullptr;
+	m_pGame = nullptr;
+	m_pResult = nullptr;
+	m_pPause = nullptr;
 }
 
 //=============================================================================
@@ -81,21 +81,21 @@ CManager* CManager::GetManager(void) {
 //=============================================================================
 HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, bool bWindow) {
 	//乱数の種の初期化
-	srand((unsigned)time(NULL));
+	srand((unsigned)time(nullptr));
 
 	//------------------------------
 	//インスタンス生成
 	//------------------------------
 	//キーボードの生成
 	m_pInputKeyboard = new CInputKeyboard;
-	if (m_pInputKeyboard != NULL) m_pInputKeyboard->Init(hInstance, hWnd);
+	if (m_pInputKeyboard != nullptr) m_pInputKeyboard->Init(hInstance, hWnd);
 	//ゲームパッドの生成(Xinput)
 	m_pInputGamepadX = new CInputGamepadX;
-	if (m_pInputGamepadX != NULL) m_pInputGamepadX->Init();
+	if (m_pInputGamepadX != nullptr) m_pInputGamepadX->Init();
 	//現在の入力デバイスの設定
-	if (m_pInputGamepadX != NULL) {
+	if (m_pInputGamepadX != nullptr) {
 		//ゲームパッドが接続されている場合
-		if (m_pInputGamepadX->GetConnectGamepad() == true) {
+		if (m_pInputGamepadX->GetConnectGamepad()) {
 			m_pInputCur = m_pInputGamepadX;
 		}
 		else {
@@ -104,10 +104,10 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, bool bWindow) {
 	}
 	//サウンドの生成
 	m_pSound = new CSound;
-	if (m_pSound != NULL)m_pSound->Init(hWnd);
+	if (m_pSound != nullptr)m_pSound->Init(hWnd);
 	//レンダラーのインスタンス生成
 	m_pRenderer = new CRenderer;
-	if (m_pRenderer != NULL) m_pRenderer->Init(hWnd, bWindow);
+	if (m_pRenderer != nullptr) m_pRenderer->Init(hWnd, bWindow);
 
 	//------------------------------
 	//ロード
@@ -128,10 +128,10 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, bool bWindow) {
 	m_apLight[2] = CLight::Create(D3DXVECTOR3(0.8f, -0.5f, -0.4f), D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f));
 	//ポーズの生成
 	m_pPause = new CPause;
-	if (m_pPause != NULL) m_pPause->Init();
+	if (m_pPause != nullptr) m_pPause->Init();
 	//フェードの生成
 	m_pFade = new CFade;
-	if (m_pFade != NULL) m_pFade->Init();
+	if (m_pFade != nullptr) m_pFade->Init();
 
 	//モードの設定
 	SetMode(m_mode);
@@ -148,30 +148,30 @@ void CManager::Uninit(void) {
 	CScene::ReleaseAll();
 
 	//フェードの破棄
-	if (m_pFade != NULL) {
+	if (m_pFade != nullptr) {
 		m_pFade->Uninit();
 		delete m_pFade;
-		m_pFade = NULL;
+		m_pFade = nullptr;
 	}
 	//ポーズの破棄
-	if (m_pPause != NULL) {
+	if (m_pPause != nullptr) {
 		m_pPause->Uninit();
 		delete m_pPause;
-		m_pPause = NULL;
+		m_pPause = nullptr;
 	}
 	//ライトの破棄
 	for (int nCnt = 0; nCnt < NUM_LIGHT; nCnt++) {
-		if (m_apLight[nCnt] != NULL) {
+		if (m_apLight[nCnt] != nullptr) {
 			m_apLight[nCnt]->Uninit();
 			delete m_apLight[nCnt];
-			m_apLight[nCnt] = NULL;
+			m_apLight[nCnt] = nullptr;
 		}
 	}
 	//カメラの破棄
-	if (m_pCamera != NULL) {
+	if (m_pCamera != nullptr) {
 		m_pCamera->Uninit();
 		delete m_pCamera;
-		m_pCamera = NULL;
+		m_pCamera = nullptr;
 	}
 
 	//モデルのアンロード
@@ -179,28 +179,28 @@ void CManager::Uninit(void) {
 	//テクスチャのアンロード
 	CTexture::Unload();
 	//レンダラーの破棄
-	if (m_pRenderer != NULL) {
+	if (m_pRenderer != nullptr) {
 		m_pRenderer->Uninit();
 		delete m_pRenderer;
-		m_pRenderer = NULL;
+		m_pRenderer = nullptr;
 	}
 	//サウンドの破棄
-	if (m_pSound != NULL) {
+	if (m_pSound != nullptr) {
 		m_pSound->Uninit();
 		delete m_pSound;
-		m_pSound = NULL;
+		m_pSound = nullptr;
 	}
 	//キーボードの破棄
-	if (m_pInputKeyboard != NULL) {
+	if (m_pInputKeyboard != nullptr) {
 		m_pInputKeyboard->Uninit();
 		delete m_pInputKeyboard;
-		m_pInputKeyboard = NULL;
+		m_pInputKeyboard = nullptr;
 	}
 	//ゲームパッドの破棄(Xinput)
-	if (m_pInputGamepadX != NULL) {
+	if (m_pInputGamepadX != nullptr) {
 		m_pInputGamepadX->Uninit();
 		delete m_pInputGamepadX;
-		m_pInputGamepadX = NULL;
+		m_pInputGamepadX = nullptr;
 	}
 }
 
@@ -209,17 +209,17 @@ void CManager::Uninit(void) {
 //=============================================================================
 void CManager::Update(void) {
 	//キーボードの更新処理
-	if (m_pInputKeyboard != NULL) {
+	if (m_pInputKeyboard != nullptr) {
 		m_pInputKeyboard->Update();
 	}
 	//ゲームパッドの更新処理(Xinput)
-	if (m_pInputGamepadX != NULL) {
+	if (m_pInputGamepadX != nullptr) {
 		m_pInputGamepadX->Update();
 	}
 	//現在の入力デバイスの設定
-	if (m_pInputGamepadX != NULL) {
+	if (m_pInputGamepadX != nullptr) {
 		//ゲームパッドが接続されている場合
-		if (m_pInputGamepadX->GetConnectGamepad() == true) {
+		if (m_pInputGamepadX->GetConnectGamepad()) {
 			m_pInputCur = m_pInputGamepadX;
 		}
 		else {
@@ -227,14 +227,14 @@ void CManager::Update(void) {
 		}
 	}
 
-	if (m_pPause != NULL) {
+	if (m_pPause != nullptr) {
 		//ポーズ中ではない場合のみ更新
-		if (m_pPause->GetPause() == false) {
+		if (!m_pPause->GetPause()) {
 			//カメラの更新
-			if (m_pCamera != NULL) m_pCamera->Update();
+			if (m_pCamera != nullptr) m_pCamera->Update();
 
 			//レンダラーの更新処理
-			if (m_pRenderer != NULL) {
+			if (m_pRenderer != nullptr) {
 				m_pRenderer->Update();
 			}
 
@@ -242,17 +242,17 @@ void CManager::Update(void) {
 			switch (m_mode)
 			{
 			case MODE::TITLE:
-				if (m_pTitle != NULL) {
+				if (m_pTitle != nullptr) {
 					m_pTitle->Update();
 				}
 				break;
 			case MODE::GAME:
-				if (m_pGame != NULL) {
+				if (m_pGame != nullptr) {
 					m_pGame->Update();
 				}
 				break;
 			case MODE::RESULT:
-				if (m_pResult != NULL) {
+				if (m_pResult != nullptr) {
 					m_pResult->Update();
 				}
 				break;
@@ -264,7 +264,7 @@ void CManager::Update(void) {
 	}
 
 	//フェードの更新処理
-	if (m_pFade != NULL) {
+	if (m_pFade != nullptr) {
 		m_pFade->Update();
 	}
 }
@@ -273,7 +273,7 @@ void CManager::Update(void) {
 // 描画処理
 //=============================================================================
 void CManager::Draw(void) {
-	if (m_pRenderer != NULL) {
+	if (m_pRenderer != nullptr) {
 		m_pRenderer->Draw();
 	}
 }
@@ -286,24 +286,24 @@ void CManager::SetMode(MODE mode) {
 	switch (m_mode)
 	{
 	case MODE::TITLE:
-		if (m_pTitle != NULL) {
+		if (m_pTitle != nullptr) {
 			m_pTitle->Uninit();
 			delete m_pTitle;
-			m_pTitle = NULL;
+			m_pTitle = nullptr;
 		}
 		break;
 	case MODE::GAME:
-		if (m_pGame != NULL) {
+		if (m_pGame != nullptr) {
 			m_pGame->Uninit();
 			delete m_pGame;
-			m_pGame = NULL;
+			m_pGame = nullptr;
 		}		
 		break;
 	case MODE::RESULT:
-		if (m_pResult != NULL) {
+		if (m_pResult != nullptr) {
 			m_pResult->Uninit();
 			delete m_pResult;
-			m_pResult = NULL;
+			m_pResult = nullptr;
 		}		
 		break;
 	}
@@ -314,19 +314,19 @@ void CManager::SetMode(MODE mode) {
 	{
 	case MODE::TITLE:
 		m_pTitle = new CTitle;
-		if (m_pTitle != NULL) {
+		if (m_pTitle != nullptr) {
 			m_pTitle->Init();
 		}
 		break;
 	case MODE::GAME:
 		m_pGame = new CGame;
-		if (m_pGame != NULL) {
+		if (m_pGame != nullptr) {
 			m_pGame->Init();
 		}		
 		break;
 	case MODE::RESULT:
 		m_pResult = new CResult;
-		if (m_pResult != NULL) {
+		if (m_pResult != nullptr) {
 			m_pResult->Init();
 		}
 		break;

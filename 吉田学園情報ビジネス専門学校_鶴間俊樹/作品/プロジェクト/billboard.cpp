@@ -71,7 +71,7 @@ CBillboard::~CBillboard()
 CBillboard* CBillboard::Create(D3DXVECTOR3 pos, CTexture::TEXTURE_TYPE type, float fWidth, float fHeight) {
 	CBillboard* pBillboard;
 	pBillboard = new CBillboard;
-	if (pBillboard != NULL) {
+	if (pBillboard != nullptr) {
 		pBillboard->m_pos = pos;
 		pBillboard->SetTexType(type);
 		pBillboard->m_fWidth = fWidth;
@@ -87,7 +87,7 @@ CBillboard* CBillboard::Create(D3DXVECTOR3 pos, CTexture::TEXTURE_TYPE type, flo
 //=============================================================================
 HRESULT CBillboard::Init(void) {
 	//頂点バッファの設定
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		VERTEX_3D *pVtx;	//頂点バッファのポインタ
 		//頂点バッファをロック
 		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
@@ -126,9 +126,9 @@ HRESULT CBillboard::Init(void) {
 //=============================================================================
 void CBillboard::Uninit(void) {
 	//頂点バッファの破棄
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		m_pVtxBuff->Release();
-		m_pVtxBuff = NULL;
+		m_pVtxBuff = nullptr;
 	}
 
 	//オブジェクトの破棄
@@ -146,7 +146,7 @@ void CBillboard::Update(void) {
 // ビルボードの描画処理
 //=============================================================================
 void CBillboard::Draw(void) {
-	if (m_bDraw == false) return;	//描画しない状態の場合終了
+	if (!m_bDraw) return;	//描画しない状態の場合終了
 
 	LPDIRECT3DDEVICE9 pDevice = nullptr;	//デバイスへのポインタ
 	//マネージャーの取得
@@ -160,7 +160,7 @@ void CBillboard::Draw(void) {
 	if (pDevice == nullptr) return;
 
 	//距離によっては描画せずに終了
-	if (m_bDrawAllDist == false) {
+	if (!m_bDrawAllDist) {
 		//ゲームの取得
 		CGame* pGame = nullptr;
 		if (pManager != nullptr) pGame = pManager->GetGame();
@@ -189,7 +189,7 @@ void CBillboard::Draw(void) {
 	//ワールドマトリックスの初期化
 	D3DXMatrixIdentity(&m_mtxWorld);
 	//ポリゴンをカメラに対して正面に向ける
-	D3DXMatrixInverse(&m_mtxWorld, NULL, &mtxView);//逆行列を求める
+	D3DXMatrixInverse(&m_mtxWorld, nullptr, &mtxView);//逆行列を求める
 	m_mtxWorld._41 = 0.0f;
 	m_mtxWorld._42 = 0.0f;
 	m_mtxWorld._43 = 0.0f;
@@ -209,17 +209,18 @@ void CBillboard::Draw(void) {
 
 	//ライトを無効
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
-	if (m_bEnableFog == false) {
-		//フォグを無効
-		pDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
-	}
-	if (m_bZtestAlways == true) {
+
+	if (m_bZtestAlways) {
 		//Zテスト
 		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 	}
-	if (m_bZwriteEnable == false) {
+	if (!m_bZwriteEnable) {
 		//Zバッファの更新
 		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+	}
+	if (!m_bEnableFog) {
+		//フォグを無効
+		pDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
 	}
 
 	//ポリゴンの描画
@@ -227,15 +228,15 @@ void CBillboard::Draw(void) {
 		0,
 		2);
 
-	if (m_bZtestAlways == true) {
+	if (m_bZtestAlways) {
 		//Zテスト
 		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 	}
-	if (m_bZwriteEnable == false) {
+	if (!m_bZwriteEnable) {
 		//Zバッファの更新
 		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	}
-	if (m_bEnableFog == false) {
+	if (!m_bEnableFog) {
 		//フォグを有効
 		pDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
 	}

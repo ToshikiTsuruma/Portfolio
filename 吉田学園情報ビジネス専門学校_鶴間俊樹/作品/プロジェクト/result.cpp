@@ -41,7 +41,7 @@ HRESULT CResult::Init(void) {
 	//ƒIƒuƒWƒFƒNƒg‚ÌƒCƒ“ƒXƒ^ƒ“ƒX¶¬
 	//”wŒi‚Ì¶¬
 	CScene2D* pBg = CScene2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f), CTexture::TEXTURE_TYPE::BG_RESULT , SCREEN_WIDTH, SCREEN_HEIGHT);
-	if (pBg != NULL) pBg->SetDrawPriority(CScene2D::DRAW_PRIORITY::BG);	//•`‰æ—Dæ“x‚ð”wŒi‚Æ‚µ‚ÄÝ’è
+	if (pBg != nullptr) pBg->SetDrawPriority(CScene2D::DRAW_PRIORITY::BG);	//•`‰æ—Dæ“x‚ð”wŒi‚Æ‚µ‚ÄÝ’è
 
 	//ƒ‰ƒ“ƒLƒ“ƒOƒeƒLƒXƒg‚Ì•\Ž¦
 	CScene2D::Create(D3DXVECTOR3(SCREEN_WIDTH - 400.0f, 80.0f, 0.0f), CTexture::TEXTURE_TYPE::TEXT_RANKING, 300.0f, 75.0f);
@@ -99,10 +99,10 @@ void CResult::Update(void) {
 	}
 
 
-	if (pInput != NULL) {
+	if (pInput != nullptr) {
 		if ((pInput->GetTrigger(CInput::CODE::SELECT) || m_nCntResult >= COUNT_FADE_FORCE) && m_nCntResult >= COUNT_FADE_ENABLE) {
 			//ƒQ[ƒ€‚Ìƒ‚[ƒh‚ÉØ‚è‘Ö‚¦
-			if (pFade != NULL) {
+			if (pFade != nullptr) {
 				pFade->SetFade(CManager::MODE::TITLE, FADE_SPEED);
 			}
 		}

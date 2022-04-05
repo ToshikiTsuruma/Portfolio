@@ -41,8 +41,8 @@ CSceneModel::~CSceneModel()
 //=============================================================================
 CSceneModel* CSceneModel::Create(CModel::MODELTYPE type, D3DXVECTOR3 pos, D3DXVECTOR3 rot) {
 	CSceneModel* pSceneModel;
-	pSceneModel = new CSceneModel(type, pos, rot, NULL , false);
-	if (pSceneModel != NULL) {
+	pSceneModel = new CSceneModel(type, pos, rot, nullptr, false);
+	if (pSceneModel != nullptr) {
 		pSceneModel->Init();
 	}
 
@@ -61,10 +61,10 @@ HRESULT CSceneModel::Init(void) {
 // モデルオブジェクトの終了処理
 //=============================================================================
 void CSceneModel::Uninit(void) {
-	if (m_pModel != NULL) {
+	if (m_pModel != nullptr) {
 		m_pModel->Uninit();
 		delete m_pModel;
-		m_pModel = NULL;
+		m_pModel = nullptr;
 	}
 	//オブジェクトの破棄
 	Release();
@@ -102,14 +102,14 @@ void CSceneModel::Draw(void) {
 	//-----------------------------------
 	//モデルの描画
 	//-----------------------------------
-	if (m_pModel != NULL) m_pModel->Draw();
+	if (m_pModel != nullptr) m_pModel->Draw();
 }
 
 //=============================================================================
 // モデルの種類の取得
 //=============================================================================
 CModel::MODELTYPE CSceneModel::GetModelType(void) {
-	if (m_pModel != NULL) return m_pModel->GetModelType();
+	if (m_pModel != nullptr) return m_pModel->GetModelType();
 	return (CModel::MODELTYPE) NULL;
 }
 
@@ -124,14 +124,14 @@ CModel* CSceneModel::GetPtrModel(void) {
 // モデルオブジェクトの位置情報の設定
 //=============================================================================
 void CSceneModel::SetPos(D3DXVECTOR3 pos) {	
-	if (m_pModel != NULL) m_pModel->SetPos(pos);
+	if (m_pModel != nullptr) m_pModel->SetPos(pos);
 }
 
 //=============================================================================
 // モデルオブジェクトの位置情報の取得
 //=============================================================================
 D3DXVECTOR3 CSceneModel::GetPos(void) {
-	if (m_pModel != NULL) return m_pModel->GetPos();
+	if (m_pModel != nullptr) return m_pModel->GetPos();
 	return D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 }
 
@@ -139,13 +139,13 @@ D3DXVECTOR3 CSceneModel::GetPos(void) {
 // モデルオブジェクトの角度の設定
 //=============================================================================
 void CSceneModel::SetRot(D3DXVECTOR3 rot) { 
-	if (m_pModel != NULL) m_pModel->SetRot(rot);
+	if (m_pModel != nullptr) m_pModel->SetRot(rot);
 }
 
 //=============================================================================
 // モデルオブジェクトの角度の取得
 //=============================================================================
 D3DXVECTOR3 CSceneModel::GetRot(void) {
-	if (m_pModel != NULL) return m_pModel->GetRot();
+	if (m_pModel != nullptr) return m_pModel->GetRot();
 	return D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 }

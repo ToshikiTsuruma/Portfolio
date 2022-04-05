@@ -60,7 +60,7 @@
 #define COLOR_ITEM_DEFAULT (D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	//アイテムカウンタの色のデフォルト
 #define COLOR_ITEM_NONE (D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f))		//アイテム無所持のカウンタの色
 #define COLOR_ITEM_MAX (D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f))		//アイテム上限時のカウンタの色
-#define COLOR_OUTLINE (D3DXCOLOR(0.0f, 1.0f, 0.9f, 1.0f))	//モデルの輪郭の色
+#define COLOR_OUTLINE (D3DXCOLOR(0.2f, 0.5f, 1.0f, 1.0f))	//モデルの輪郭の色
 #define DISTANCE_USE_RAFT (300.0f)			//ステージ移動できる筏との距離
 #define CAMERA_DISTANCE (500.0f)			//プレイヤーからカメラの距離
 #define CAMERA_ROTATE_SPEED_YAW (0.008f)	//カメラの回転速度(Y軸)
@@ -279,7 +279,7 @@ void CPlayer::Uninit(void) {
 	//ゲームの取得
 	CGame* pGame = nullptr;
 	if (pManager != nullptr) pGame = pManager->GetGame();
-	//ゲームが保持しているプレイヤーのポインタをNULLにする
+	//ゲームが保持しているプレイヤーのポインタをnullptrにする
 	if (pGame != nullptr) pGame->ReleasePlayer();
 	//終了処理
 	CSceneMotion::Uninit();
@@ -315,7 +315,7 @@ void CPlayer::Update(void) {
 	//ゲームクリア時かステージ変更時
 	//----------------------------
 	if (pGame != nullptr) {
-		if (pGame->GetGameClear() == true || pGame->GetChangeStage() == true) {
+		if (pGame->GetGameClear() || pGame->GetChangeStage()) {
 			//モーションの更新
 			CSceneMotion::Update();
 			return;
@@ -373,10 +373,10 @@ void CPlayer::Update(void) {
 	//----------------------------
 	//スタン時 (ゲームオーバー時含む)
 	//----------------------------
-	if (m_bStun == true) {
+	if (m_bStun) {
 		if (pGame != nullptr) {
 			//ゲームオーバー時なら死亡モーションのまま動かない
-			if (pGame->GetGameOver() == true) {
+			if (pGame->GetGameOver()) {
 				//モーションの更新
 				CSceneMotion::Update();
 				return;
@@ -403,7 +403,7 @@ void CPlayer::Update(void) {
 			SetMotion((int)MOTION_TYPE::NEUTRAL);
 		}
 		//ニュートラルモーションへの移行が終わった場合
-		if (GetMotionType() != (int)MOTION_TYPE::STUN && GetTransMotion() == false) {
+		if (GetMotionType() != (int)MOTION_TYPE::STUN && !GetTransMotion()) {
 			//スタン解除、そのまま更新
 			m_bStun = false;
 			return;
@@ -418,9 +418,9 @@ void CPlayer::Update(void) {
 	//----------------------------
 	//硬直中
 	//----------------------------
-	if (m_bLockAct == true) {
+	if (m_bLockAct) {
 		//モーションの遷移が完了した場合
-		if (GetTransMotion() == false) {
+		if (!GetTransMotion()) {
 			//硬直の解除
 			m_bLockAct = false;
 		}
@@ -439,7 +439,7 @@ void CPlayer::Update(void) {
 			//硬直状態にする
 			m_bLockAct = true;
 
-			if (m_bLand == true) {
+			if (m_bLand) {
 				m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);	//大きく重力をかける
 			}
 			else {
@@ -462,7 +462,7 @@ void CPlayer::Update(void) {
 
 		//移動終了
 		if (m_nCntAttackMove <= 0) {
-			if (m_bLand == true) {
+			if (m_bLand) {
 				m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);	//大きく重力をかける
 			}
 			else {
@@ -475,7 +475,7 @@ void CPlayer::Update(void) {
 		//----------------------------
 		//攻撃
 		//----------------------------
-		if (pInput->GetTrigger(CInput::CODE::ATTACK) && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bLockAct == false) {
+		if (pInput->GetTrigger(CInput::CODE::ATTACK) && GetMotionCategory() != MOTION_CATEGORY::DODGE && !m_bLockAct) {
 			//まだ攻撃していない場合
 			if (GetMotionCategory() != MOTION_CATEGORY::ATTACK) {
 				//モーションの設定
@@ -559,7 +559,7 @@ void CPlayer::Update(void) {
 		//----------------------------
 		//武器の変更
 		//----------------------------
-		if (pInput->GetTrigger(CInput::CODE::CHANGE_WEAPON) && GetMotionCategory() != MOTION_CATEGORY::ATTACK && m_bLockAct == false && GetMotionCategory() != MOTION_CATEGORY::DODGE) {
+		if (pInput->GetTrigger(CInput::CODE::CHANGE_WEAPON) && GetMotionCategory() != MOTION_CATEGORY::ATTACK && !m_bLockAct && GetMotionCategory() != MOTION_CATEGORY::DODGE) {
 			int nTypeWeapon = (int)m_typeWeapon;	//武器の種類
 			nTypeWeapon++;	//種類を次に進める
 			if (nTypeWeapon >= (int)WEAPONTYPE::ENUM_MAX) nTypeWeapon = 0;	//種類数の最大まで行ったら０に戻す
@@ -596,7 +596,7 @@ void CPlayer::Update(void) {
 				break;
 			}
 			//回避
-			if (bDodge == true) {
+			if (bDodge) {
 				m_nCntDodge = DODGE_TIME_BACK;
 				//後方回避モーションの設定
 				SetMotion((int)MOTION_TYPE::DODGE_BACK);
@@ -627,8 +627,8 @@ void CPlayer::Update(void) {
 		//----------------------------
 		//回避
 		//----------------------------
-		if (GetMotionCategory() != MOTION_CATEGORY::ATTACK  && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bLockAct == false) {
-			if (m_bLand == true && pInput->GetTrigger(CInput::CODE::DODGE)) {
+		if (GetMotionCategory() != MOTION_CATEGORY::ATTACK  && GetMotionCategory() != MOTION_CATEGORY::DODGE && !m_bLockAct) {
+			if (m_bLand && pInput->GetTrigger(CInput::CODE::DODGE)) {
 				m_nCntDodge = DODGE_TIME_FRONT;
 				float rotY = GetRot().y;
 				rotY += D3DX_PI;	//角度を前方にする
@@ -647,7 +647,7 @@ void CPlayer::Update(void) {
 				if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::CANSEL);
 			}
 
-			if (GetMotionCategory() != MOTION_CATEGORY::ATTACK && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bLockAct == false) {
+			if (GetMotionCategory() != MOTION_CATEGORY::ATTACK && GetMotionCategory() != MOTION_CATEGORY::DODGE && !m_bLockAct) {
 				//アイテム使用開始
 				if (pInput->GetTrigger(CInput::CODE::USE_ITME) && m_pCounterItem->GetScore() > 0 && m_nLife < MAX_LIFE) {
 					m_bUseItem = true;
@@ -656,9 +656,9 @@ void CPlayer::Update(void) {
 			}
 
 			//アイテム使用中
-			if (m_bUseItem == true) {
+			if (m_bUseItem) {
 				//アイテム使用継続
-				if (pInput->GetPress(CInput::CODE::USE_ITME) && GetMotionCategory() != MOTION_CATEGORY::ATTACK && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bLockAct == false) {
+				if (pInput->GetPress(CInput::CODE::USE_ITME) && GetMotionCategory() != MOTION_CATEGORY::ATTACK && GetMotionCategory() != MOTION_CATEGORY::DODGE && !m_bLockAct) {
 					if (m_nCntUseItem % SPAN_ITEM_USE_SOUND == 0) {
 						//アイテムゲージ進行音の再生
 						if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::GAUGE);
@@ -732,11 +732,11 @@ void CPlayer::Update(void) {
 	//移動
 	//----------------------------
 	//落下
-	if (m_bLand == false && GetMotionCategory() != MOTION_CATEGORY::DODGE) {
+	if (!m_bLand && GetMotionCategory() != MOTION_CATEGORY::DODGE) {
 		m_move.y -= POWER_GRAVITY;	//重力を加算
 	}
 
-	if (pInput != nullptr && GetMotionCategory() != MOTION_CATEGORY::ATTACK && GetMotionCategory() != MOTION_CATEGORY::DODGE && m_bLockAct == false) {
+	if (pInput != nullptr && GetMotionCategory() != MOTION_CATEGORY::ATTACK && GetMotionCategory() != MOTION_CATEGORY::DODGE && !m_bLockAct) {
 		//上下左右キー入力状態の取得
 		const bool bPressUp = pInput->GetPress(CInput::CODE::UP);
 		const bool bPressDown = pInput->GetPress(CInput::CODE::DOWN);
@@ -762,7 +762,7 @@ void CPlayer::Update(void) {
 			fMaxSpeed = MAX_MOVE_SPEED_WALK;
 		}
 		//空中
-		if (m_bLand == false) {
+		if (!m_bLand) {
 			fMaxSpeed = MAX_MOVE_SPEED_AIR;
 		}
 
@@ -858,7 +858,7 @@ void CPlayer::Update(void) {
 		//移動量の減速
 		//------------------------
 		float fDecSpeed = DEC_MOVE_SPEED_GROUND;	//減速量
-		if (m_bLand == false) fDecSpeed = DEC_MOVE_SPEED_AIR;	//空中
+		if (!m_bLand) fDecSpeed = DEC_MOVE_SPEED_AIR;	//空中
 		D3DXVECTOR2 vecMoveDec = D3DXVECTOR2(-m_move.x, -m_move.z);	//移動量ベクトルの逆
 		D3DXVec2Normalize(&vecMoveDec, &vecMoveDec);	//正規化
 		vecMoveDec *= fDecSpeed;	//移動量の加算
@@ -896,14 +896,14 @@ void CPlayer::Update(void) {
 		bool bInputMove = false;	//移動キーを押しているかどうか
 		bInputMove = bRotateUp || bRotateDown || bRotateLeft || bRotateRight;	//どれかが押されている場合
 		//移動キー押下中
-		if (bInputMove == true) {
+		if (bInputMove) {
 			//キーを押していた方向を目標の角度にする
 			//上
-			if (bRotateUp == true) {
-				if (bRotateRight == true) {
+			if (bRotateUp) {
+				if (bRotateRight) {
 					m_destRot.y = D3DX_PI * -0.75f + fRotCameraY;
 				}
-				else if (bRotateLeft == true) {
+				else if (bRotateLeft) {
 					m_destRot.y = D3DX_PI * 0.75f + fRotCameraY;
 				}
 				else {
@@ -911,11 +911,11 @@ void CPlayer::Update(void) {
 				}
 			}
 			//下
-			else if (bRotateDown == true) {
-				if (bRotateRight == true) {
+			else if (bRotateDown) {
+				if (bRotateRight) {
 					m_destRot.y = D3DX_PI * -0.25f + fRotCameraY;
 				}
-				else if (bRotateLeft == true) {
+				else if (bRotateLeft) {
 					m_destRot.y = D3DX_PI * 0.25f + fRotCameraY;
 				}
 				else {
@@ -924,10 +924,10 @@ void CPlayer::Update(void) {
 			}
 			//左右
 			else {
-				if (bRotateRight == true) {
+				if (bRotateRight) {
 					m_destRot.y = D3DX_PI * -0.5f + fRotCameraY;
 				}
-				else if (bRotateLeft == true) {
+				else if (bRotateLeft) {
 					m_destRot.y = D3DX_PI * 0.5f + fRotCameraY;
 				}
 			}
@@ -988,24 +988,24 @@ void CPlayer::Update(void) {
 		//------------------------
 		//地上にいる時のモーション切り替え
 		//------------------------
-		if (m_bLand == true) {
+		if (m_bLand) {
 			//移動キーを押している時のモーション切り替え
-			if (bInputMove == true) {
+			if (bInputMove) {
 				if (GetMotionCategory() != MOTION_CATEGORY::MOVE) {
 					SetMotion((int)MOTION_TYPE::WALK);
 				}
 				//歩きモーションと走りモーションの切り替え
 				if (GetMotionCategory() == MOTION_CATEGORY::MOVE) {
-					if (GetMotionType() == (int)MOTION_TYPE::WALK && pInput->GetPress(CInput::CODE::DASH) == true) {
+					if (GetMotionType() == (int)MOTION_TYPE::WALK && pInput->GetPress(CInput::CODE::DASH)) {
 						SetMotion((int)MOTION_TYPE::DASH);
 					}
-					else if (GetMotionType() == (int)MOTION_TYPE::DASH && pInput->GetPress(CInput::CODE::DASH) == false) {
+					else if (GetMotionType() == (int)MOTION_TYPE::DASH && !pInput->GetPress(CInput::CODE::DASH)) {
 						SetMotion((int)MOTION_TYPE::WALK);
 					}
 				}
 			}
 			//移動キーを押していない場合のモーション切り替え
-			if (bInputMove == false) {
+			if (!bInputMove) {
 				//モーションの設定
 				if (GetMotionCategory() == MOTION_CATEGORY::MOVE) {
 					SetMotion((int)MOTION_TYPE::NEUTRAL);
@@ -1029,7 +1029,7 @@ void CPlayer::Update(void) {
 	//アイテムとの当たり判定
 	CItem::Collision(this);
 	//死亡フラグが立った場合終了
-	if (GetDeath() == true) return;
+	if (GetDeath()) return;
 
 	//壁との当たり判定
 	CWallCylinder::Collision(pPosPlayer, m_lastPos, COLLISION_RADIUS);
@@ -1044,17 +1044,17 @@ void CPlayer::Update(void) {
 	bLand = CTerrain::Collision(&posColTerrain, vecStart, vecEnd);
 
 	//接地時
-	if (bLand == true) {
+	if (bLand) {
 		*pPosPlayer = posColTerrain;	//位置の移動
 		//着地
-		if (m_bLand == false) {
+		if (!m_bLand) {
 			m_bLand = true;
 		}
 	}
 	//落下
-	else if (bLand == false) {
+	else if (!bLand) {
 		//地上から空中
-		if (m_bLand == true) {
+		if (m_bLand) {
 			m_bLand = false;
 		}
 	}
@@ -1067,7 +1067,7 @@ void CPlayer::Update(void) {
 	//----------------------------
 	//モーション終了時
 	//----------------------------
-	if (GetEndMotion() == true) {
+	if (GetEndMotion()) {
 		switch ((MOTION_TYPE)GetMotionType())
 		{
 			//--------------------------
@@ -1094,9 +1094,7 @@ void CPlayer::Update(void) {
 			m_bValidAttack = false;
 			if (m_pWeapon != nullptr) {
 				//武器を攻撃していない状態にする
-				if (m_pWeapon->GetAttack() == true) {
-					m_pWeapon->SetAttack(false);
-				}
+				m_pWeapon->SetAttack(false);
 			}
 			break;
 		}
@@ -1116,9 +1114,9 @@ void CPlayer::Update(void) {
 		//パンチの攻撃 1
 	case MOTION_TYPE::PUNCH_1:
 		//攻撃のタイミングだった場合
-		if ((GetCurrentKey() == 0 || GetCurrentKey() == 1) && GetTransMotion() == false) {
+		if ((GetCurrentKey() == 0 || GetCurrentKey() == 1) && !GetTransMotion()) {
 			//攻撃開始時
-			if (m_bValidAttack == false) {
+			if (!m_bValidAttack) {
 				bBeginAttack = true;
 			}
 			m_bValidAttack = true;
@@ -1132,9 +1130,9 @@ void CPlayer::Update(void) {
 		//パンチの攻撃 2
 	case MOTION_TYPE::PUNCH_2:
 		//攻撃のタイミングだった場合
-		if ((GetCurrentKey() == 0 || GetCurrentKey() == 1) && GetTransMotion() == false) {
+		if ((GetCurrentKey() == 0 || GetCurrentKey() == 1) && !GetTransMotion()) {
 			//攻撃開始時
-			if (m_bValidAttack == false) {
+			if (!m_bValidAttack) {
 				bBeginAttack = true;
 			}
 			m_bValidAttack = true;
@@ -1151,9 +1149,9 @@ void CPlayer::Update(void) {
 		//剣の攻撃 1
 	case MOTION_TYPE::ATTACK_SWORD_1:
 		//攻撃のタイミングだった場合
-		if ((GetCurrentKey() == 0 || GetCurrentKey() == 1) && GetTransMotion() == false) {
+		if ((GetCurrentKey() == 0 || GetCurrentKey() == 1) && !GetTransMotion()) {
 			//攻撃開始時
-			if (m_bValidAttack == false) {
+			if (!m_bValidAttack) {
 				bBeginAttack = true;
 			}
 			m_bValidAttack = true;
@@ -1163,9 +1161,7 @@ void CPlayer::Update(void) {
 			m_bValidAttack = false;
 			if (m_pWeapon != nullptr) {
 				//武器を攻撃していない状態にする
-				if (m_pWeapon->GetAttack() == true) {
-					m_pWeapon->SetAttack(false);
-				}
+				m_pWeapon->SetAttack(false);
 			}
 		}
 		break;
@@ -1173,9 +1169,9 @@ void CPlayer::Update(void) {
 		//剣の攻撃 2
 	case MOTION_TYPE::ATTACK_SWORD_2:
 		//攻撃のタイミングだった場合
-		if ((GetCurrentKey() == 0 || GetCurrentKey() == 1) && GetTransMotion() == false) {
+		if ((GetCurrentKey() == 0 || GetCurrentKey() == 1) && !GetTransMotion()) {
 			//攻撃開始時
-			if (m_bValidAttack == false) {
+			if (!m_bValidAttack) {
 				bBeginAttack = true;
 			}
 			m_bValidAttack = true;
@@ -1185,9 +1181,7 @@ void CPlayer::Update(void) {
 			m_bValidAttack = false;
 			if (m_pWeapon != nullptr) {
 				//武器を攻撃していない状態にする
-				if (m_pWeapon->GetAttack() == true) {
-					m_pWeapon->SetAttack(false);
-				}
+				m_pWeapon->SetAttack(false);
 			}
 		}
 		break;
@@ -1196,9 +1190,9 @@ void CPlayer::Update(void) {
 		//剣の攻撃 3
 	case MOTION_TYPE::ATTACK_SWORD_3:
 		//攻撃のタイミングだった場合
-		if ((GetCurrentKey() == 0 || GetCurrentKey() == 1 || GetCurrentKey() == 2) && GetTransMotion() == false) {
+		if ((GetCurrentKey() == 0 || GetCurrentKey() == 1 || GetCurrentKey() == 2) && !GetTransMotion()) {
 			//攻撃開始時
-			if (m_bValidAttack == false) {
+			if (!m_bValidAttack) {
 				bBeginAttack = true;
 			}
 			m_bValidAttack = true;
@@ -1208,9 +1202,7 @@ void CPlayer::Update(void) {
 			m_bValidAttack = false;
 			if (m_pWeapon != nullptr) {
 				//武器を攻撃していない状態にする
-				if (m_pWeapon->GetAttack() == true) {
-					m_pWeapon->SetAttack(false);
-				}
+				m_pWeapon->SetAttack(false);			
 			}
 		}
 		break;
@@ -1223,7 +1215,7 @@ void CPlayer::Update(void) {
 		//攻撃のタイミングだった場合
 		if (GetCurrentKey() == 1 || GetCurrentKey() == 2) {
 			//攻撃開始時
-			if (m_bValidAttack == false) {
+			if (!m_bValidAttack) {
 				bBeginAttack = true;
 			}
 			m_bValidAttack = true;
@@ -1233,9 +1225,7 @@ void CPlayer::Update(void) {
 			m_bValidAttack = false;
 			if (m_pWeapon != nullptr) {
 				//武器を攻撃していない状態にする
-				if (m_pWeapon->GetAttack() == true) {
-					m_pWeapon->SetAttack(false);
-				}
+				m_pWeapon->SetAttack(false);
 			}
 		}
 		break;
@@ -1244,7 +1234,7 @@ void CPlayer::Update(void) {
 		//攻撃のタイミングだった場合
 		if (GetCurrentKey() == 1 || GetCurrentKey() == 2) {
 			//攻撃開始時
-			if (m_bValidAttack == false) {
+			if (!m_bValidAttack) {
 				bBeginAttack = true;
 			}
 			m_bValidAttack = true;
@@ -1254,9 +1244,7 @@ void CPlayer::Update(void) {
 			m_bValidAttack = false;
 			if (m_pWeapon != nullptr) {
 				//武器を攻撃していない状態にする
-				if (m_pWeapon->GetAttack() == true) {
-					m_pWeapon->SetAttack(false);
-				}
+				m_pWeapon->SetAttack(false);
 			}
 		}
 		break;
@@ -1265,7 +1253,7 @@ void CPlayer::Update(void) {
 		//攻撃のタイミングだった場合
 		if (GetCurrentKey() == 1) {
 			//攻撃開始時
-			if (m_bValidAttack == false) {
+			if (!m_bValidAttack) {
 				bBeginAttack = true;
 			}
 			m_bValidAttack = true;
@@ -1275,9 +1263,7 @@ void CPlayer::Update(void) {
 			m_bValidAttack = false;
 			if (m_pWeapon != nullptr) {
 				//武器を攻撃していない状態にする
-				if (m_pWeapon->GetAttack() == true) {
-					m_pWeapon->SetAttack(false);
-				}
+				m_pWeapon->SetAttack(false);
 			}
 		}
 		break;
@@ -1286,7 +1272,7 @@ void CPlayer::Update(void) {
 		//攻撃のタイミングだった場合
 		if (GetCurrentKey() == 0 || GetCurrentKey() == 1 || GetCurrentKey() == 4 || GetCurrentKey() == 5) {
 			//攻撃開始時
-			if (m_bValidAttack == false) {
+			if (!m_bValidAttack) {
 				bBeginAttack = true;
 			}
 			m_bValidAttack = true;
@@ -1296,9 +1282,7 @@ void CPlayer::Update(void) {
 			m_bValidAttack = false;
 			if (m_pWeapon != nullptr) {
 				//武器を攻撃していない状態にする
-				if (m_pWeapon->GetAttack() == true) {
-					m_pWeapon->SetAttack(false);
-				}
+				m_pWeapon->SetAttack(false);
 			}
 		}
 		break;
@@ -1309,14 +1293,14 @@ void CPlayer::Update(void) {
 	}
 
 	//攻撃開始時
-	if (bBeginAttack == true) {
+	if (bBeginAttack) {
 		InitObjAttacked();	//攻撃済みリストの初期化
 	}
 
 	//----------------------------
 	//攻撃のタイミング
 	//----------------------------
-	if (m_bValidAttack == true) {
+	if (m_bValidAttack) {
 		int nNumKillEnemy = 0;	//敵を倒した数
 
 		//オブジェクトの全モデルのワールドマトリックスを更新
@@ -1362,7 +1346,7 @@ void CPlayer::Update(void) {
 			CParticle::Create(aPosCol[nNumCol - 1], 20, 15.0f, -0.5f, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(0.0f, 0.5f, 1.0f, 1.0f), D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f));
 
 			//攻撃開始時
-			if (bBeginAttack == true) {
+			if (bBeginAttack) {
 				//拳を振る音の再生
 				if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::SWISH_PUNCH);
 			}
@@ -1388,11 +1372,11 @@ void CPlayer::Update(void) {
 						Attack(OBJ_TYPE::TREE, pPosColArray[nCntAttack], fRadiusCol, nDamageAttack, DAMAGE_TYPE::SWORD, nullptr);		//木
 					}
 					//攻撃開始時
-					if (bBeginAttack == true) {
+					if (bBeginAttack) {
 						//剣を振る音の再生
 						if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::SWISH_SWORD);
 						//武器を攻撃している状態にする
-						if (m_pWeapon->GetAttack() == false) {
+						if (!m_pWeapon->GetAttack()) {
 							m_pWeapon->SetAttack(true);
 						}
 					}
@@ -1425,11 +1409,11 @@ void CPlayer::Update(void) {
 						Attack(OBJ_TYPE::TREE, pPosColArray[nCntAttack], fRadiusCol, nDamageAttack, DAMAGE_TYPE::SWORD, nullptr);		//木
 					}
 					//攻撃開始時
-					if (bBeginAttack == true) {
+					if (bBeginAttack) {
 						//剣を振る音の再生
 						if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::SWISH_KATANA);
 						//武器を攻撃している状態にする
-						if (m_pWeapon->GetAttack() == false) {
+						if (!m_pWeapon->GetAttack()) {
 							m_pWeapon->SetAttack(true);
 						}
 					}
@@ -1512,7 +1496,25 @@ void CPlayer::Draw(void) {
 // プレイヤーのゲームクリア時の処理
 //=============================================================================
 void CPlayer::GameClear(void) {
+	//ニュートラルモーションの設定
 	SetMotion((int)MOTION_TYPE::NEUTRAL);
+
+	//移動量を重力のみにする
+	m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
+	m_bLockAct = false;
+
+	if (m_pWeapon != nullptr) {
+		//武器を攻撃していない状態にする
+		m_pWeapon->SetAttack(false);
+		//輪郭非表示
+		m_pWeapon->SetDrawOutline(false);
+	}
+
+	//アイテム使用中断
+	m_bUseItem = false;
+	m_nCntUseItem = 0;
+	//アイテム使用ゲージの更新
+	if (m_pGaugeUseItem != nullptr) m_pGaugeUseItem->SetRatioHeight(0.0f);
 }
 
 //=============================================================================
@@ -1527,11 +1529,12 @@ void CPlayer::GameOver(void) {
 	//移動量を重力のみにする
 	m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
 	m_bLockAct = false;
-	//武器を攻撃していない状態にする
+
 	if (m_pWeapon != nullptr) {
-		if (m_pWeapon->GetAttack() == true) {
-			m_pWeapon->SetAttack(false);
-		}
+		//武器を攻撃していない状態にする
+		m_pWeapon->SetAttack(false);
+		//輪郭非表示
+		m_pWeapon->SetDrawOutline(false);
 	}
 }
 
@@ -1581,10 +1584,10 @@ void CPlayer::Damage(int nDamage, bool* pDead) {
 
 	//ゲームクリア時、ステージ変更時の場合無効
 	if (pGame != nullptr) {
-		if (pGame->GetGameClear() == true || pGame->GetChangeStage() == true) return;
+		if (pGame->GetGameClear() || pGame->GetChangeStage()) return;
 	}
 	//スタン時の場合無効
-	if (m_bStun == true) return;
+	if (m_bStun) return;
 
 	//体力の減少
 	m_nLife -= nDamage;
@@ -1609,11 +1612,10 @@ void CPlayer::Damage(int nDamage, bool* pDead) {
 		//移動量を重力のみにする
 		m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
 		m_bLockAct = false;
-		//武器を攻撃していない状態にする
+
 		if (m_pWeapon != nullptr) {
-			if (m_pWeapon->GetAttack() == true) {
-				m_pWeapon->SetAttack(false);
-			}
+			//武器を攻撃していない状態にする
+			m_pWeapon->SetAttack(false);
 		}
 
 		//アイテム使用中断
@@ -1621,6 +1623,9 @@ void CPlayer::Damage(int nDamage, bool* pDead) {
 		m_nCntUseItem = 0;
 		//アイテム使用ゲージの更新
 		if (m_pGaugeUseItem != nullptr) m_pGaugeUseItem->SetRatioHeight(0.0f);
+
+		//輪郭非表示
+		if (m_pWeapon != nullptr) m_pWeapon->SetDrawOutline(false);
 	}
 }
 

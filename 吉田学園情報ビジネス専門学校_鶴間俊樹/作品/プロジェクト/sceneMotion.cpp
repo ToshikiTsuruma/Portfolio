@@ -37,11 +37,11 @@ CSceneMotion::CSceneMotion(const PARTS_INFO* pPartsInfoArray, int nNumParts, con
 {
 	//モデルのポインタの生成
 	m_ppModelArray = new CModel*[nNumParts];
-	if (m_ppModelArray != NULL && pPartsInfoArray != NULL) {
+	if (m_ppModelArray != nullptr && pPartsInfoArray != nullptr) {
 		//モデルを生成
 		for (int nCnt = 0; nCnt < nNumParts; nCnt++)
 		{
-			CModel* pParentParts = NULL;	//親モデルのポインタ
+			CModel* pParentParts = nullptr;	//親モデルのポインタ
 			int nIdxParent = pPartsInfoArray[nCnt].nIdxParent;	//親インデックス
 			if (nIdxParent >= 0 && nIdxParent < nNumParts) pParentParts = m_ppModelArray[nIdxParent];
 			m_ppModelArray[nCnt] = CModel::Create(pPartsInfoArray[nCnt].modelType, pPartsInfoArray[nCnt].offset, D3DXVECTOR3(0.0f, 0.0f, 0.0f), pParentParts, bOutline);
@@ -50,7 +50,7 @@ CSceneMotion::CSceneMotion(const PARTS_INFO* pPartsInfoArray, int nNumParts, con
 
 	//モーション更新情報の生成
 	m_pUpdateMotionInfoArray = new UPDATE_MOTION_INFO[nNumParts];
-	if (m_pUpdateMotionInfoArray != NULL) {
+	if (m_pUpdateMotionInfoArray != nullptr) {
 		//初期化
 		for (int nCnt = 0; nCnt < nNumParts; nCnt++)
 		{
@@ -58,13 +58,13 @@ CSceneMotion::CSceneMotion(const PARTS_INFO* pPartsInfoArray, int nNumParts, con
 			m_pUpdateMotionInfoArray[nCnt].deltaRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 			m_pUpdateMotionInfoArray[nCnt].curPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 			m_pUpdateMotionInfoArray[nCnt].curRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-			if (pPartsInfoArray != NULL) m_pUpdateMotionInfoArray[nCnt].offsetPos = pPartsInfoArray[nCnt].offset;
+			if (pPartsInfoArray != nullptr) m_pUpdateMotionInfoArray[nCnt].offsetPos = pPartsInfoArray[nCnt].offset;
 		}
 	}
 
 	//モーション情報の生成
 	m_pMotionInfoArray = new MOTION_INFO[nNumTypeMotion];
-	if (m_pMotionInfoArray != NULL && pMotionInfoArray != NULL) {
+	if (m_pMotionInfoArray != nullptr && pMotionInfoArray != nullptr) {
 		//モーション情報の設定
 		for (int nCntMotion = 0; nCntMotion < nNumTypeMotion; nCntMotion++)
 		{
@@ -77,7 +77,7 @@ CSceneMotion::CSceneMotion(const PARTS_INFO* pPartsInfoArray, int nNumParts, con
 				//キー情報の生成
 				m_pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeyInfo].pKeyArray = new KEY[nNumParts];
 
-				if (m_pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeyInfo].pKeyArray != NULL && pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeyInfo].pKeyArray != NULL) {
+				if (m_pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeyInfo].pKeyArray != nullptr && pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeyInfo].pKeyArray != nullptr) {
 					//情報の初期化
 					for (int nCntKey = 0; nCntKey < nNumParts; nCntKey++)
 					{
@@ -95,7 +95,7 @@ CSceneMotion::CSceneMotion(const PARTS_INFO* pPartsInfoArray, int nNumParts, con
 	m_bEndMotion = false;
 	for (int nCnt = 0; nCnt < MAX_ATTACK_OBJECT; nCnt++)
 	{
-		m_apObjAttacked[nCnt] = NULL;
+		m_apObjAttacked[nCnt] = nullptr;
 	}
 
 	m_nTypeMotion = 0;
@@ -111,26 +111,42 @@ CSceneMotion::CSceneMotion(const PARTS_INFO* pPartsInfoArray, int nNumParts, con
 //=============================================================================
 CSceneMotion::~CSceneMotion()
 {
-	if (m_ppModelArray != NULL) {
+	if (m_ppModelArray != nullptr) {
+		for (int nCntParts = 0; nCntParts < m_nNumParts; nCntParts++)
+		{
+			if (m_ppModelArray[nCntParts] != nullptr) {
+				//モデルの破棄
+				m_ppModelArray[nCntParts]->Uninit();
+				delete m_ppModelArray[nCntParts];
+				m_ppModelArray[nCntParts] = nullptr;
+			}
+		}
+		//モデルのポインタの配列の破棄
 		delete[] m_ppModelArray;
-		m_ppModelArray = NULL;
+		m_ppModelArray = nullptr;
 	}
-	if (m_pUpdateMotionInfoArray != NULL) {
+
+	if (m_pUpdateMotionInfoArray != nullptr) {
+		//モーションの更新情報の破棄
 		delete[] m_pUpdateMotionInfoArray;
-		m_pUpdateMotionInfoArray = NULL;
+		m_pUpdateMotionInfoArray = nullptr;
 	}
-	if (m_pMotionInfoArray != NULL) {
+
+	if (m_pMotionInfoArray != nullptr) {
 		for (int nCntMotion = 0; nCntMotion < m_nNumTypeMotion; nCntMotion++)
 		{
 			for (int nCntKeyInfo = 0; nCntKeyInfo < MAX_KEY_MOTION; nCntKeyInfo++)
 			{
-				if (m_pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeyInfo].pKeyArray != NULL) {
+				if (m_pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeyInfo].pKeyArray != nullptr) {
+					//モーション情報内のキーの配列の破棄
 					delete[] m_pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeyInfo].pKeyArray;
-					m_pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeyInfo].pKeyArray = NULL;
+					m_pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeyInfo].pKeyArray = nullptr;
 				}
 			}
 		}
+		//モーション情報の配列の破棄
 		delete[] m_pMotionInfoArray;
+		m_pMotionInfoArray = nullptr;
 	}
 }
 
@@ -147,7 +163,7 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 
 	//モデル取得に使用する変数
 	int nNumLoadModel = 0;	//ロードしたモデル数
-	CModel::MODELTYPE* pLoadModelTypeArray = NULL;	//ロードしたモデルの種類の配列のポインタ
+	CModel::MODELTYPE* pLoadModelTypeArray = nullptr;	//ロードしたモデルの種類の配列のポインタ
 	int nCntLoadModel = 0;	//モデルのディレクトリを読み込んだ数
 
 	//パーツ設定に使用する変数
@@ -167,12 +183,12 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 	//ファイルを開く
 	pFile = fopen(pLoadDirectory, "r");
 
-	if (pFile != NULL) {
+	if (pFile != nullptr) {
 		//読み込み開始位置まで行を飛ばす
-		while (fgets(sLoadText, MAX_LOAD_TEXT, pFile) != NULL) //一行ごとに文字列を取得
+		while (fgets(sLoadText, MAX_LOAD_TEXT, pFile) != nullptr) //一行ごとに文字列を取得
 		{
 			pLoadText = strtok(sLoadText, " =\t\n");	//文字列の分割（空白 タブ 改行 ＝）
-			if (pLoadText != NULL) {
+			if (pLoadText != nullptr) {
 				//読み込み開始
 				if (strcmp(pLoadText, "SCRIPT") == 0) {
 					break;
@@ -180,12 +196,12 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 			}
 		}
 
-		while (fgets(sLoadText, MAX_LOAD_TEXT, pFile) != NULL) //一行ごとに文字列を取得
+		while (fgets(sLoadText, MAX_LOAD_TEXT, pFile) != nullptr) //一行ごとに文字列を取得
 		{
 			pLoadText = strtok(sLoadText, " =\t\n");	//文字列の分割（空白 タブ 改行 ＝）
-			if (pLoadText != NULL) {
+			if (pLoadText != nullptr) {
 				//コメント
-				if (strstr(pLoadText, "#") != NULL) {
+				if (strstr(pLoadText, "#") != nullptr) {
 					continue;
 				}
 				//読み込み終了
@@ -198,17 +214,17 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 				//-------------------------------------------------
 				//モデル数設定
 				if (strcmp(pLoadText, "NUM_MODEL") == 0) {
-					pLoadText = strtok(NULL, " =#\t\n");	//文字列の分割
-					if (pLoadText != NULL) {
+					pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
+					if (pLoadText != nullptr) {
 						nNumLoadModel = atoi(pLoadText);	//文字列を数字に変換
 						pLoadModelTypeArray = new CModel::MODELTYPE[nNumLoadModel];	//読み込んだモデル数分のタイプ保存用の変数を生成
 					}
 					continue;
 				}
 				//モデルタイプ設定
-				if (strcmp(pLoadText, "MODEL_FILENAME") == 0 && pLoadModelTypeArray != NULL && nCntLoadModel < nNumLoadModel) {
-					pLoadText = strtok(NULL, " =#\t\n");	//文字列の分割
-					if (pLoadText != NULL) {
+				if (strcmp(pLoadText, "MODEL_FILENAME") == 0 && pLoadModelTypeArray != nullptr && nCntLoadModel < nNumLoadModel) {
+					pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
+					if (pLoadText != nullptr) {
 						for (int nCntModel = 0; nCntModel < (int)CModel::MODELTYPE::ENUM_MAX; nCntModel++)
 						{
 							//モデルのディレクトリ名と比較する
@@ -243,17 +259,17 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 						continue;
 					}
 					//武器を持つパーツのインデックス設定
-					if (strcmp(pLoadText, "INDEX_WEAPON") == 0 && pIdxWeapon != NULL) {
-						pLoadText = strtok(NULL, " =#\t\n");	//文字列の分割
-						if (pLoadText != NULL) {
+					if (strcmp(pLoadText, "INDEX_WEAPON") == 0 && pIdxWeapon != nullptr) {
+						pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
+						if (pLoadText != nullptr) {
 							*pIdxWeapon = atoi(pLoadText);	//文字列を数字に変換
 						}
 						continue;
 					}
 					//パーツ数設定
-					if (strcmp(pLoadText, "NUM_PARTS") == 0 && bSetNumParts == false && pMotionInfoArray != NULL) {
-						pLoadText = strtok(NULL, " =#\t\n");	//文字列の分割
-						if (pLoadText != NULL) {
+					if (strcmp(pLoadText, "NUM_PARTS") == 0 && !bSetNumParts && pMotionInfoArray != nullptr) {
+						pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
+						if (pLoadText != nullptr) {
 							*pNumParts = atoi(pLoadText);	//文字列を数字に変換
 							//パーツ情報をパーツ数分生成
 							*ppPartsInfoArray = new PARTS_INFO[*pNumParts];
@@ -271,7 +287,7 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 					}
 
 
-					if (*ppPartsInfoArray != NULL && bSetNumParts == true) {
+					if (*ppPartsInfoArray != nullptr && bSetNumParts) {
 						//-------------------------------------------------
 						//パーツ情報読み込み
 						//-------------------------------------------------
@@ -290,8 +306,8 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 							}
 							//番号設定
 							if (strcmp(pLoadText, "INDEX") == 0) {
-								pLoadText = strtok(NULL, " =#\t\n");	//文字列の分割
-								if (pLoadText != NULL) {
+								pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
+								if (pLoadText != nullptr) {
 									int nIdx = atoi(pLoadText);	//文字列を数字に変換
 									//インデックスの設定
 									(*ppPartsInfoArray)[nCntParts].nIdx = nIdx;
@@ -302,20 +318,20 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 							}
 							//親パーツの番号設定
 							if (strcmp(pLoadText, "PARENT") == 0) {
-								pLoadText = strtok(NULL, " =#\t\n");	//文字列の分割
-								if (pLoadText != NULL) {
+								pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
+								if (pLoadText != nullptr) {
 									(*ppPartsInfoArray)[nCntParts].nIdxParent = atoi(pLoadText);	//文字列を数字に変換
 								}
 								continue;
 							}
 							//オフセットの設定
 							if (strcmp(pLoadText, "POS") == 0) {
-								pLoadText = strtok(NULL, " =#\t\n");	//文字列の分割
-								if (pLoadText != NULL) {
+								pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
+								if (pLoadText != nullptr) {
 									(*ppPartsInfoArray)[nCntParts].offset.x = (float)atof(pLoadText);	//X座標の設定
-									pLoadText = strtok(NULL, " ");	//文字列の分割
+									pLoadText = strtok(nullptr, " ");	//文字列の分割
 									(*ppPartsInfoArray)[nCntParts].offset.y = (float)atof(pLoadText);	//Y座標の設定
-									pLoadText = strtok(NULL, " ");	//文字列の分割
+									pLoadText = strtok(nullptr, " ");	//文字列の分割
 									(*ppPartsInfoArray)[nCntParts].offset.z = (float)atof(pLoadText);	//Z座標の設定
 								}
 								continue;
@@ -326,7 +342,7 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 				//-------------------------------------------------
 				//モーションの読み込み
 				//-------------------------------------------------
-				if (pMotionInfoArray != NULL) {
+				if (pMotionInfoArray != nullptr) {
 					//モーションセット
 					if (strcmp(pLoadText, "MOTIONSET") == 0 && nCntMotion < nNumMotionType) {
 						bMotionSet = true;
@@ -342,16 +358,16 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 					if (bMotionSet) {
 						//ループ
 						if (strcmp(pLoadText, "LOOP") == 0) {
-							pLoadText = strtok(NULL, " =#\t\n");
-							if (pLoadText != NULL) {
+							pLoadText = strtok(nullptr, " =#\t\n");
+							if (pLoadText != nullptr) {
 								pMotionInfoArray[nCntMotion].bLoop = atoi(pLoadText) != 0;
 							}
 							continue;
 						}
 						//キー数
 						if (strcmp(pLoadText, "NUM_KEY") == 0) {
-							pLoadText = strtok(NULL, " =#\t\n");
-							if (pLoadText != NULL) {
+							pLoadText = strtok(nullptr, " =#\t\n");
+							if (pLoadText != nullptr) {
 								pMotionInfoArray[nCntMotion].nNumKey = atoi(pLoadText);
 							}
 							continue;
@@ -370,8 +386,8 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 						}
 						//フレーム
 						if (strcmp(pLoadText, "FRAME") == 0 && bKeySet) {
-							pLoadText = strtok(NULL, " =#\t\n");
-							if (pLoadText != NULL) {
+							pLoadText = strtok(nullptr, " =#\t\n");
+							if (pLoadText != nullptr) {
 								pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].nFrame = atoi(pLoadText);
 							}
 							continue;
@@ -387,35 +403,35 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 							nCntKey++;
 							continue;
 						}
-						if (pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray != NULL) {
+						if (pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray != nullptr) {
 							//位置座標の設定
 							if (strcmp(pLoadText, "POS") == 0 && bKeySet && bKey) {
-								pLoadText = strtok(NULL, " =#\t\n");
-								if (pLoadText != NULL) {
+								pLoadText = strtok(nullptr, " =#\t\n");
+								if (pLoadText != nullptr) {
 									pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].pos.x = (float)atof(pLoadText);
 								}
-								pLoadText = strtok(NULL, " =#\t\n");
-								if (pLoadText != NULL) {
+								pLoadText = strtok(nullptr, " =#\t\n");
+								if (pLoadText != nullptr) {
 									pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].pos.y = (float)atof(pLoadText);
 								}
-								pLoadText = strtok(NULL, " =#\t\n");
-								if (pLoadText != NULL) {
+								pLoadText = strtok(nullptr, " =#\t\n");
+								if (pLoadText != nullptr) {
 									pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].pos.z = (float)atof(pLoadText);
 								}
 								continue;
 							}
 							//角度の設定
 							if (strcmp(pLoadText, "ROT") == 0 && bMotionSet && bKeySet && bKey) {
-								pLoadText = strtok(NULL, " =#\t\n");
-								if (pLoadText != NULL) {
+								pLoadText = strtok(nullptr, " =#\t\n");
+								if (pLoadText != nullptr) {
 									pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].rot.x = (float)atof(pLoadText);
 								}
-								pLoadText = strtok(NULL, " =#\t\n");
-								if (pLoadText != NULL) {
+								pLoadText = strtok(nullptr, " =#\t\n");
+								if (pLoadText != nullptr) {
 									pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].rot.y = (float)atof(pLoadText);
 								}
-								pLoadText = strtok(NULL, " =#\t\n");
-								if (pLoadText != NULL) {
+								pLoadText = strtok(nullptr, " =#\t\n");
+								if (pLoadText != nullptr) {
 									pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].rot.z = (float)atof(pLoadText);
 								}
 								continue;
@@ -432,7 +448,7 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 		//ファイルの読み込み失敗時
 	}
 
-	if (pLoadModelTypeArray != NULL) {
+	if (pLoadModelTypeArray != nullptr) {
 		delete[] pLoadModelTypeArray;
 	}
 
@@ -443,14 +459,16 @@ void CSceneMotion::Load(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int
 //=============================================================================
 HRESULT CSceneMotion::Init(void) {
 	//モーションの0フレームの状態でスタートさせる
-	for (int nCntParts = 0; nCntParts < m_nNumParts; nCntParts++) {
-		if (m_ppModelArray[nCntParts] != NULL && m_pMotionInfoArray != NULL && m_pUpdateMotionInfoArray != NULL) {
-			if (m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray != NULL)
-			{
-				D3DXVECTOR3 rot;
-				rot = m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray[nCntParts].rot;
-				m_ppModelArray[nCntParts]->SetPos(m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray[nCntParts].pos + m_pUpdateMotionInfoArray[nCntParts].offsetPos);
-				m_ppModelArray[nCntParts]->SetRot(m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray[nCntParts].rot);
+	if (m_ppModelArray != nullptr) {
+		for (int nCntParts = 0; nCntParts < m_nNumParts; nCntParts++) {
+			if (m_ppModelArray[nCntParts] != nullptr && m_pMotionInfoArray != nullptr && m_pUpdateMotionInfoArray != nullptr) {
+				if (m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray != nullptr)
+				{
+					D3DXVECTOR3 rot;
+					rot = m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray[nCntParts].rot;
+					m_ppModelArray[nCntParts]->SetPos(m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray[nCntParts].pos + m_pUpdateMotionInfoArray[nCntParts].offsetPos);
+					m_ppModelArray[nCntParts]->SetRot(m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray[nCntParts].rot);
+				}
 			}
 		}
 	}
@@ -470,28 +488,29 @@ void CSceneMotion::Uninit(void) {
 // モーションオブジェクトの更新処理
 //=============================================================================
 void CSceneMotion::Update(void) {
-	//モデルがNULLの場合終了
+	if (m_ppModelArray == nullptr) return;	//モデルの配列がnullの場合終了
+	//モデルがnullの場合終了
 	for (int nCnt = 0; nCnt < m_nNumParts; nCnt++) {
-		if (m_ppModelArray[nCnt] == NULL) return;
+		if (m_ppModelArray[nCnt] == nullptr) return;
 	}
-	if (m_pMotionInfoArray == NULL || m_pUpdateMotionInfoArray == NULL) return;
+	if (m_pMotionInfoArray == nullptr || m_pUpdateMotionInfoArray == nullptr) return;
 	
 	for (int nCntMotion = 0; nCntMotion < m_nNumTypeMotion; nCntMotion++)
 	{
 		for (int nCntKey = 0; nCntKey < MAX_KEY_MOTION; nCntKey++)
 		{
-			if (m_pMotionInfoArray[nCntMotion].aKeyInfo[nCntKey].pKeyArray == NULL) return;
+			if (m_pMotionInfoArray[nCntMotion].aKeyInfo[nCntKey].pKeyArray == nullptr) return;
 		}
 	}
 	//----------------------------------------------------------
 	//モーションの遷移
 	//----------------------------------------------------------
-	if (m_bTransMotion == true) {
+	if (m_bTransMotion) {
 		//モーションカウンターの加算
 		m_nCntMotion++;
 
 		//現在のモデルのパーツごとの位置と角度の保存
-		if (m_bSetCurMotion == false) {
+		if (!m_bSetCurMotion) {
 			for (int nCntParts = 0; nCntParts < m_nNumParts; nCntParts++) {
 				m_pUpdateMotionInfoArray[nCntParts].curRot = m_ppModelArray[nCntParts]->GetRot();
 			}
@@ -540,7 +559,7 @@ void CSceneMotion::Update(void) {
 		m_nCntMotion++;
 
 		//現在のモデルのパーツごとの位置と角度の保存
-		if (m_bSetCurMotion == false) {
+		if (!m_bSetCurMotion) {
 			m_bSetCurMotion = true;
 
 			//現在（キー遷移時）の角度の設定
@@ -586,7 +605,7 @@ void CSceneMotion::Update(void) {
 			if (m_nKey == m_pMotionInfoArray[m_nTypeMotion].nNumKey - 1)
 			{
 				//ループモーションの場合
-				if (m_bLoopMotion == true) {
+				if (m_bLoopMotion) {
 					SetMotion(m_nTypeMotion);
 				}
 				//ループモーションでは無い場合
@@ -602,6 +621,8 @@ void CSceneMotion::Update(void) {
 // モーションオブジェクトの描画処理
 //=============================================================================
 void CSceneMotion::Draw(void) {
+	if (m_ppModelArray == nullptr) return;	//モデルの配列がnullの場合終了
+
 	LPDIRECT3DDEVICE9 pDevice = nullptr;	//デバイスへのポインタ
 	//マネージャーの取得
 	CManager* pManager = CManager::GetManager();	
@@ -633,7 +654,7 @@ void CSceneMotion::Draw(void) {
 	//モデルの描画
 	//-----------------------------------
 	for (int nCnt = 0; nCnt < m_nNumParts; nCnt++) {
-		if (m_ppModelArray[nCnt] != NULL) {
+		if (m_ppModelArray[nCnt] != nullptr) {
 			m_ppModelArray[nCnt]->Draw();
 		}
 	}
@@ -646,7 +667,7 @@ void CSceneMotion::SetMotion(int nType) {
 	//モーションタイプの設定
 	m_nTypeMotion = nType;
 	//ループするかどうかの設定
-	m_bLoopMotion = m_pMotionInfoArray[nType].bLoop;
+	if(m_pMotionInfoArray != nullptr) m_bLoopMotion = m_pMotionInfoArray[nType].bLoop;
 	//キーの初期化
 	m_nKey = 0;
 	//カウンターの初期化
@@ -665,7 +686,7 @@ void CSceneMotion::SetMotion(int nType) {
 void CSceneMotion::InitObjAttacked(void) {
 	for (int nCnt = 0; nCnt < MAX_ATTACK_OBJECT; nCnt++)
 	{
-		m_apObjAttacked[nCnt] = NULL;
+		m_apObjAttacked[nCnt] = nullptr;
 	}
 }
 
@@ -696,7 +717,7 @@ void CSceneMotion::Attack(OBJ_TYPE objtype, D3DXVECTOR3 posAttack, float fRadius
 			//すでにリストに入っていた場合
 			if (pScene == m_apObjAttacked[nCntAttacked]) {
 				//死亡フラグが立っていた場合
-				if (pScene->GetDeath() == true) {
+				if (pScene->GetDeath()) {
 					//攻撃済みリストから除外
 					m_apObjAttacked[nCntAttacked] = nullptr;
 					bOpenList = true;
@@ -708,14 +729,14 @@ void CSceneMotion::Attack(OBJ_TYPE objtype, D3DXVECTOR3 posAttack, float fRadius
 		}
 
 		//リストに空きがない場合攻撃終了
-		if (bOpenList == false) return;
+		if (!bOpenList) return;
 
 		//攻撃可能な範囲にいるかどうか　（遠くのものすべてと当たり判定を行うとかなり処理が重くなるため）
 		D3DXVECTOR3 vecObj = pScene->GetPos() - posAttack;	//攻撃位置とオブジェクトのベクトル
 		float fDistObj = D3DXVec3Length(&vecObj);	//攻撃位置とオブジェクトの距離
 
 		//次のループに飛ばす
-		if (bAttacked == true || pScene->GetDeath() == true || pScene->GetEnableCollision() == false || fDistObj > MAX_ATTACK_DISTANCE) {
+		if (bAttacked || pScene->GetDeath() || !pScene->GetEnableCollision() || fDistObj > MAX_ATTACK_DISTANCE) {
 			pScene = pSceneNext;	//リストの次のオブジェクトを代入
 			continue;	
 		}
@@ -761,18 +782,18 @@ void CSceneMotion::Attack(OBJ_TYPE objtype, D3DXVECTOR3 posAttack, float fRadius
 			}
 
 			//すでに当たっていたら当たり判定のループ終了
-			if (bCollision == true) break;
+			if (bCollision) break;
 		}
 
 		//---------------------------
 		//当たり判定時の処理
 		//---------------------------
-		if (bCollision == true) {
+		if (bCollision) {
 			bool bDead = false;	//攻撃されたオブジェクトが死亡したかどうか
 			//オブジェクトにダメージを与える
 			pScene->Damage(nDamage, &bDead);
 			//倒した数の加算
-			if (bDead == true && pNumKill != nullptr) (*pNumKill)++;
+			if (bDead && pNumKill != nullptr) (*pNumKill)++;
 
 			//攻撃のタイプ
 			if (typeDamage > DAMAGE_TYPE::NONE && typeDamage < DAMAGE_TYPE::ENUM_MAX) {
@@ -816,7 +837,7 @@ void CSceneMotion::Attack(OBJ_TYPE objtype, D3DXVECTOR3 posAttack, float fRadius
 				}
 			}
 			//オブジェクトが死亡していない場合攻撃済みリストに追加
-			if (pScene->GetDeath() == false) {
+			if (!pScene->GetDeath()) {
 				for (int nCntAttacked = 0; nCntAttacked < MAX_ATTACK_OBJECT; nCntAttacked++)
 				{
 					//リストの空きを確認
@@ -933,7 +954,7 @@ void CSceneMotion::UpdateMtxWorldAll(void) {
 	if (pDevice == nullptr) return;
 
 	//モデルの配列がNULLの場合終了
-	if (m_ppModelArray == NULL) return;
+	if (m_ppModelArray == nullptr) return;
 
 	//-----------------------------------
 	//モーションオブジェクトのワールドマトリックスの設定
@@ -954,7 +975,7 @@ void CSceneMotion::UpdateMtxWorldAll(void) {
 	//ワールドマトリックスを更新
 	for (int nCnt = 0; nCnt < m_nNumParts; nCnt++)
 	{
-		if (m_ppModelArray[nCnt] != NULL)m_ppModelArray[nCnt]->UpdateMtxWorld();
+		if (m_ppModelArray[nCnt] != nullptr)m_ppModelArray[nCnt]->UpdateMtxWorld();
 	}
 }
 
@@ -962,11 +983,11 @@ void CSceneMotion::UpdateMtxWorldAll(void) {
 // モーションオブジェクトの全モデルの輪郭の色の指定
 //=============================================================================
 void CSceneMotion::SetColorOutlineAll(D3DXCOLOR col) {
-	if (m_ppModelArray == NULL) return;
+	if (m_ppModelArray == nullptr) return;
 	//輪郭の色を変更
 	for (int nCnt = 0; nCnt < m_nNumParts; nCnt++)
 	{
-		if (m_ppModelArray[nCnt] != NULL)m_ppModelArray[nCnt]->SetColorOutline(col);
+		if (m_ppModelArray[nCnt] != nullptr)m_ppModelArray[nCnt]->SetColorOutline(col);
 	}
 }
 
@@ -981,10 +1002,10 @@ D3DXMATRIX* CSceneMotion::GetPtrMtxWorld(void) {
 // モデルのポインタを取得
 //=============================================================================
 CModel* CSceneMotion::GetPtrModel(int nIdxParts) {
-	if (nIdxParts >= 0 && nIdxParts < m_nNumParts && m_ppModelArray != NULL) {
+	if (nIdxParts >= 0 && nIdxParts < m_nNumParts && m_ppModelArray != nullptr) {
 		return m_ppModelArray[nIdxParts];
 	}
-	return NULL;
+	return nullptr;
 }
 
 //=============================================================================
@@ -1014,7 +1035,7 @@ int CSceneMotion::GetCurrentKey(void) {
 bool CSceneMotion::FadeModelAll(float fDestAlpha, float fSpeedFade) {
 	bool bEndFade = false;
 	for (int nCnt = 0; nCnt < m_nNumParts; nCnt++) {
-		if (m_ppModelArray[nCnt] != NULL) {
+		if (m_ppModelArray[nCnt] != nullptr) {
 			//透明度の取得
 			float fAlpha = m_ppModelArray[nCnt]->GetMaterialAlpha();
 			//透明度の加算
@@ -1045,7 +1066,7 @@ bool CSceneMotion::FadeModelAll(float fDestAlpha, float fSpeedFade) {
 //=============================================================================
 void CSceneMotion::SetDrawOutlineAll(bool bDraw) {
 	for (int nCnt = 0; nCnt < m_nNumParts; nCnt++) {
-		if (m_ppModelArray[nCnt] != NULL) {
+		if (m_ppModelArray[nCnt] != nullptr) {
 			m_ppModelArray[nCnt]->SetDrawOutline(bDraw);
 		}
 	}

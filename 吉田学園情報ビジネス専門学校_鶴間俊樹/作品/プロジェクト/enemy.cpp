@@ -71,12 +71,12 @@ CEnemy::CEnemy(const PARTS_INFO* pPartsInfoArray, int nNumParts, const MOTION_IN
 	m_pGaugeLifeFrame = CBillboard::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), CTexture::TEXTURE_TYPE::NONE, 75.0f, 15.0f);
 	m_pGaugeLife = CBillboard::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), CTexture::TEXTURE_TYPE::NONE, 70.0f, 10.0f);
 
-	if (m_pGaugeLifeFrame != NULL) {
+	if (m_pGaugeLifeFrame != nullptr) {
 		m_pGaugeLifeFrame->SetColor(D3DXCOLOR(0.3f, 0.3f, 0.3f, 1.0f)); //体力ゲージの色の設定
 		m_pGaugeLifeFrame->SetDraw(false);	//描画しないようにする
 		m_pGaugeLifeFrame->SetDrawPriority(DRAW_PRIORITY::UI);	//描画順の設定
 	}
-	if (m_pGaugeLife != NULL) {
+	if (m_pGaugeLife != nullptr) {
 		m_pGaugeLife->SetColor(D3DXCOLOR(1.0f, 0.2f, 0.0f, 1.0f)); //体力ゲージの色の設定
 		m_pGaugeLife->SetDraw(false);	//描画しないようにする
 		m_pGaugeLife->SetDrawPriority(DRAW_PRIORITY::UI);	//描画順の設定
@@ -160,14 +160,14 @@ HRESULT CEnemy::Init(void) {
 //=============================================================================
 void CEnemy::Uninit(void) {
 	//体力ゲージの破棄
-	if (m_pGaugeLife != NULL) {
+	if (m_pGaugeLife != nullptr) {
 		m_pGaugeLife->Uninit();
-		m_pGaugeLife = NULL;
+		m_pGaugeLife = nullptr;
 	}
 	//体力ゲージの枠の破棄
-	if (m_pGaugeLifeFrame != NULL) {
+	if (m_pGaugeLifeFrame != nullptr) {
 		m_pGaugeLifeFrame->Uninit();
-		m_pGaugeLifeFrame = NULL;
+		m_pGaugeLifeFrame = nullptr;
 	}
 	//終了処理
 	CSceneMotion::Uninit();
@@ -193,7 +193,7 @@ void CEnemy::Update(void) {
 	//----------------------------
 	//死亡時
 	//----------------------------
-	if (m_bDead == true) {
+	if (m_bDead) {
 		m_nCntDead++;
 
 		if (m_nCntDead < 60) {
@@ -229,8 +229,7 @@ void CEnemy::Update(void) {
 
 		if (m_nCntDead == FALLDOWN_TIME) {
 			//倒れる音
-			if (pSound != NULL)pSound->PlaySound(CSound::SOUND_LABEL::STUN);
-
+			if (pSound != nullptr)pSound->PlaySound(CSound::SOUND_LABEL::STUN);
 
 			//パーティクルエフェクトの生成
 			D3DXVECTOR3 posParticle;	//パーティクルの位置
@@ -247,7 +246,7 @@ void CEnemy::Update(void) {
 			bool bEndFade = false;
 			bEndFade = FadeModelAll(0.0f, -0.01f);
 			//フェード終了時
-			if (bEndFade == true) {
+			if (bEndFade) {
 				//終了処理
 				Uninit();
 				return;
@@ -263,7 +262,7 @@ void CEnemy::Update(void) {
 	//目標角度と移動量の設定
 	//----------------------------
 	//プレイヤーが発見されているとき
-	if (m_bDetectPlayer == true) {
+	if (m_bDetectPlayer) {
 		//自動追跡
 		D3DXVECTOR3 posPlayer;	//プレイヤーの位置
 		//プレイヤーの位置の取得
@@ -334,7 +333,7 @@ void CEnemy::Update(void) {
 	//回転
 	//----------------------------
 	//攻撃モーション中ではないとき
-	if (this->GetMotionCategory() != MOTION_CATEGORY::ATTACK || m_bRotateAttack == true) {
+	if (this->GetMotionCategory() != MOTION_CATEGORY::ATTACK || m_bRotateAttack) {
 		//目標角度と角度が不一致の場合
 		if (m_rotDestY != GetRot().y) {
 			//移動モーション中ではなかったら
@@ -411,7 +410,7 @@ void CEnemy::Update(void) {
 
 	bLand = CTerrain::Collision(&posColTerrain, vecStart, vecEnd);
 	//接地時
-	if (bLand == true) {
+	if (bLand) {
 		SetPos(posColTerrain);	//位置の移動
 	}
 
@@ -443,8 +442,8 @@ void CEnemy::Update(void) {
 	bool bAngleAttack = false;	//攻撃できる角度にいるかどうか
 
 	//プレイヤーを見失う距離だった場合
-	if (fDistPlayer > DISTANCE_LOSE_SIGHT || bStunPlayer == true || bGameClear == true) {
-		if (m_bDetectPlayer == true) {
+	if (fDistPlayer > DISTANCE_LOSE_SIGHT || bStunPlayer || bGameClear) {
+		if (m_bDetectPlayer) {
 			m_move = D3DXVECTOR3(0.0f, m_move.y, 0.0f);	//移動させなくする
 			m_rotDestY = GetRot().y;	//目標角度を現在の角度にする
 			SetMotion(0);	//ニュートラルモーションを設定
@@ -454,7 +453,7 @@ void CEnemy::Update(void) {
 	}
 
 	//視野の半径内にプレイヤーがいた場合
-	if (fDistPlayer < RADIUS_VISUAL_FIELD && bStunPlayer == false && bGameClear == false) {
+	if (fDistPlayer < RADIUS_VISUAL_FIELD && !bStunPlayer && !bGameClear) {
 		float rotY = GetRot().y;	//敵のY軸の角度
 
 		//敵の角度とモデルの前方の向きが逆なので修正する
@@ -483,18 +482,18 @@ void CEnemy::Update(void) {
 	}
 
 	//プレイヤー発見中で攻撃モーション中じゃない場合
-	if (m_bDetectPlayer == true && this->GetMotionCategory() != MOTION_CATEGORY::ATTACK) {
+	if (m_bDetectPlayer && this->GetMotionCategory() != MOTION_CATEGORY::ATTACK) {
 		//追跡モーションに変更
 		this->SetChaseMotion();
 	}
 
 	//攻撃
-	if (bAngleAttack == true && this->GetMotionCategory() != MOTION_CATEGORY::ATTACK && bLand == true && fDistPlayer < m_fDistAttack) {
+	if (bAngleAttack && this->GetMotionCategory() != MOTION_CATEGORY::ATTACK && bLand && fDistPlayer < m_fDistAttack) {
 		bool bSuccessAttackStart = false;	//攻撃開始が成功したかどうか
 		//攻撃開始
 		bSuccessAttackStart = this->AttackStart();	
 		//攻撃開始成功時
-		if (bSuccessAttackStart == true) {
+		if (bSuccessAttackStart) {
 			//攻撃済みリストの初期化
 			InitObjAttacked();
 			//移動量を重力のみにする
@@ -508,7 +507,7 @@ void CEnemy::Update(void) {
 	CSceneMotion::Update();
 
 	//モーション終了時
-	if (GetEndMotion() == true) {
+	if (GetEndMotion()) {
 		this->MotionEnd();
 	}
 
@@ -554,7 +553,7 @@ void CEnemy::Draw(void) {
 	D3DXVECTOR2 vecPlayer = D3DXVECTOR2(posPlayer.x - GetPos().x, posPlayer.z - GetPos().z);
 	float fDistPlayer = D3DXVec2Length(&vecPlayer);
 	//描画の設定
-	if (m_bDraw == true) {
+	if (m_bDraw) {
 		//描画外の位置にいたら描画しないようにする
 		if (fDistPlayer > MAX_DRAW_DISTANCE) {
 			m_bDraw = false;
@@ -568,7 +567,7 @@ void CEnemy::Draw(void) {
 	}
 
 	//描画
-	if (m_bDraw == true) {
+	if (m_bDraw) {
 		CSceneMotion::Draw();
 	}
 	else {
@@ -581,12 +580,12 @@ void CEnemy::Draw(void) {
 // エネミーのダメージ
 //=============================================================================
 void CEnemy::Damage(int nDamage, bool* pDead) {
-	if (m_bDead == true) return;
+	if (m_bDead) return;
 	
 	//ダメージ
 	m_nLife -= nDamage;
 	//奇襲成功時、追加ダメージ
-	if (m_bDetectPlayer == false) {
+	if (!m_bDetectPlayer) {
 		m_nLife--;
 	}
 

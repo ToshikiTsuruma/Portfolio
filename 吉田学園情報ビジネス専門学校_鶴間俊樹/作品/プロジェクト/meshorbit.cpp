@@ -28,8 +28,8 @@ CMeshorbit::CMeshorbit(int nNumVtx) : m_nNumVtx(nNumVtx)
 {
 	SetDrawPriority(DRAW_PRIORITY::CLEAR);	//描画順の設定
 
-	m_pMtxParent = NULL;
-	m_pVtxBuff = NULL;
+	m_pMtxParent = nullptr;
+	m_pVtxBuff = nullptr;
 	for (int nCnt = 0; nCnt < 2; nCnt++) {
 		m_aOffset[nCnt] = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		m_aCol[nCnt] = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);
@@ -54,7 +54,7 @@ CMeshorbit::~CMeshorbit()
 CMeshorbit* CMeshorbit::Create(D3DXMATRIX* pMtxParent, int nNumVtx, int nSpanUpdate, D3DXVECTOR3 offset0, D3DXVECTOR3 offset1, D3DXCOLOR col0, D3DXCOLOR col1) {
 	CMeshorbit* pMeshorbit;
 	pMeshorbit = new CMeshorbit(nNumVtx);
-	if (pMeshorbit != NULL) {
+	if (pMeshorbit != nullptr) {
 		pMeshorbit->m_pMtxParent = pMtxParent;
 		pMeshorbit->m_aOffset[0] = offset0;
 		pMeshorbit->m_aOffset[1] = offset1;
@@ -85,17 +85,17 @@ HRESULT CMeshorbit::Init(void) {
 	m_nCntUpdate = 0;
 
 	//頂点バッファの生成
-	if (m_pVtxBuff == NULL) {
+	if (m_pVtxBuff == nullptr) {
 		pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * m_nNumVtx,
 			D3DUSAGE_WRITEONLY,
 			FVF_VERTEX_3D,
 			D3DPOOL_MANAGED,
 			&m_pVtxBuff,
-			NULL);
+			nullptr);
 	}
 
 	//頂点バッファの設定
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		VERTEX_3D *pVtx;	//頂点バッファのポインタ
 		//頂点バッファをロック
 		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
@@ -126,9 +126,9 @@ HRESULT CMeshorbit::Init(void) {
 //=============================================================================
 void CMeshorbit::Uninit(void) {
 	//頂点バッファの破棄
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		m_pVtxBuff->Release();
-		m_pVtxBuff = NULL;
+		m_pVtxBuff = nullptr;
 	}
 	//オブジェクトの破棄
 	Release();
@@ -164,7 +164,7 @@ void CMeshorbit::Draw(void) {
 	if (pDevice == nullptr) return;
 
 	//不可視の場合終了
-	if (m_bVisible == false) return;
+	if (!m_bVisible) return;
 
 	bool bPause = false;	//ポーズ状態かどうか
 	if (pPause != nullptr) {
@@ -172,19 +172,19 @@ void CMeshorbit::Draw(void) {
 	}
 
 	//ポーズ中には軌跡の移動を行わない
-	if (bPause == false) {
+	if (!bPause) {
 		//頂点の更新
 		VERTEX_3D *pVtx;
 		D3DXMATRIX mtxWorldPoint[2];	//軌道の原点の頂点のワールドマトリックス
 		D3DXMATRIX mtxTrans;			//計算用マトリックス
 		D3DXVECTOR3 posPoint[2];		//軌道の原点の頂点の位置
 
-		if (m_pVtxBuff != NULL) {
+		if (m_pVtxBuff != nullptr) {
 			//頂点バッファをロックし、頂点データへのポインタを取得
 			m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 			//軌道の原点の頂点を更新
-			if (m_pMtxParent != NULL && m_bBindPos == false) {
+			if (m_pMtxParent != nullptr && !m_bBindPos) {
 				//軌道の原点の頂点の取得
 				for (int nCntVtx = 0; nCntVtx < 2; nCntVtx++) {
 					//ワールドマトリックスの初期化
@@ -210,12 +210,12 @@ void CMeshorbit::Draw(void) {
 				//ひとつ前の軌道の頂点をコピー
 				for (int nCntVtx = m_nNumVtx - 1; nCntVtx > 1; nCntVtx--) {
 					//一つ前の頂点を比較
-					if (pVtx[nCntVtx].pos != pVtx[nCntVtx - 2].pos && bEqualALL == true) bEqualALL = false;	//異なった場合
+					if (pVtx[nCntVtx].pos != pVtx[nCntVtx - 2].pos && bEqualALL) bEqualALL = false;	//異なった場合
 					//頂点のコピー
 					pVtx[nCntVtx].pos = pVtx[nCntVtx - 2].pos;
 				}
 				//バインド状態時に全頂点が同じ位置なら不可視状態にする
-				if (m_bBindPos == true && bEqualALL == true) SetVisible(false);
+				if (m_bBindPos && bEqualALL) SetVisible(false);
 
 				m_nCntUpdate = 0;
 			}
@@ -295,9 +295,9 @@ void CMeshorbit::SetVisible(bool bVisible) {
 	m_bBindPos = false;	//バインドを解除
 
 	//可視状態に設定した場合、すべての頂点を親のマトリックスの位置に移動
-	if (bVisible == true && m_pMtxParent != NULL) {
+	if (bVisible && m_pMtxParent != nullptr) {
 		//頂点バッファの設定
-		if (m_pVtxBuff != NULL) {
+		if (m_pVtxBuff != nullptr) {
 			D3DXMATRIX mtxWorldPoint[2];	//軌道の原点の頂点のワールドマトリックス
 			D3DXMATRIX mtxTrans;			//計算用マトリックス
 			D3DXVECTOR3 posPoint[2];		//軌道の原点の頂点の位置

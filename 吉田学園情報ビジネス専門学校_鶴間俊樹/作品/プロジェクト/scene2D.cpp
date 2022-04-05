@@ -17,7 +17,7 @@
 //=============================================================================
 CScene2D::CScene2D()
 {
-	m_pVtxBuff = NULL;
+	m_pVtxBuff = nullptr;
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_fWidth = 0.0f;
@@ -44,7 +44,7 @@ CScene2D::~CScene2D()
 CScene2D* CScene2D::Create(D3DXVECTOR3 pos, CTexture::TEXTURE_TYPE type, float fWidth, float fHeight) {
 	CScene2D* pScene2D;
 	pScene2D = new CScene2D;
-	if (pScene2D != NULL) {
+	if (pScene2D != nullptr) {
 		LPDIRECT3DDEVICE9 pDevice = nullptr;	//デバイスへのポインタ
 		//マネージャーの取得
 		CManager* pManager = CManager::GetManager();	
@@ -61,7 +61,7 @@ CScene2D* CScene2D::Create(D3DXVECTOR3 pos, CTexture::TEXTURE_TYPE type, float f
 				FVF_VERTEX_2D,
 				D3DPOOL_MANAGED,
 				&(pScene2D->m_pVtxBuff),
-				NULL);
+				nullptr);
 		}
 
 		pScene2D->m_pos = pos;
@@ -82,7 +82,7 @@ HRESULT CScene2D::Init(void) {
 
 	VERTEX_2D *pVtx;
 
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 		// 頂点情報を設定
 		pVtx[0].pos = D3DXVECTOR3(m_pos.x - m_fWidth / 2.0f, m_pos.y - m_fHeight / 2.0f, 0.0f);
@@ -116,9 +116,9 @@ HRESULT CScene2D::Init(void) {
 //=============================================================================
 void CScene2D::Uninit(void) {
 	//頂点バッファの破棄
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		m_pVtxBuff->Release();
-		m_pVtxBuff = NULL;
+		m_pVtxBuff = nullptr;
 	}
 	//オブジェクトの破棄
    	Release();
@@ -151,7 +151,7 @@ void CScene2D::Draw(void) {
 	//テクスチャの取得
 	LPDIRECT3DTEXTURE9 pTexture = CTexture::GetTexture(GetTexType());
 
-	if (m_pVtxBuff != NULL && pDevice != NULL) {
+	if (m_pVtxBuff != nullptr && pDevice != nullptr) {
 		pDevice->SetFVF(FVF_VERTEX_2D);		//頂点フォーマットの設定
 		pDevice->SetStreamSource(0, m_pVtxBuff, 0, sizeof(VERTEX_2D));	//頂点バッファをデバイスのデータストリームに設定		
 		pDevice->SetTexture(0, pTexture);	//テクスチャの設定
@@ -207,7 +207,7 @@ D3DXVECTOR3 CScene2D::GetSize(void) { return D3DXVECTOR3(m_fWidth, m_fHeight, 0.
 void CScene2D::SetRatioWidth(float fRatio) {
 	m_fRatioWidth = fRatio;
 
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		VERTEX_2D *pVtx;
 		//頂点バッファのロック
 		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
@@ -229,7 +229,7 @@ void CScene2D::SetRatioWidth(float fRatio) {
 void CScene2D::SetRatioHeight(float fRatio) {
 	m_fRatioHeight = fRatio;
 
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		VERTEX_2D *pVtx;
 		//頂点バッファのロック
 		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
@@ -263,7 +263,7 @@ float CScene2D::GetAngle(void) { return m_fAngle; }
 //各頂点の位置を更新
 //=============================================================================
 void CScene2D::SetVtxPos(void) {
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		float fRadius = sqrtf(powf(m_fWidth / 2.0f, 2.0f) + powf(m_fHeight / 2.0f, 2.0f));	//ポリゴンの対角線の半分
 		float fAngleDelta = atan2f(m_fWidth, m_fHeight);	//基準の角度からの差分（ラジアン）
 
@@ -287,7 +287,7 @@ void CScene2D::SetColor(D3DXCOLOR col) {
 	m_col = col;
 
 	//頂点バッファの更新
-	if (m_pVtxBuff != NULL) {
+	if (m_pVtxBuff != nullptr) {
 		VERTEX_2D *pVtx;
 		//頂点バッファのロック
 		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
