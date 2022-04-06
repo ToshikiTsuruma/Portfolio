@@ -15,10 +15,15 @@
 // マクロ定義
 //*****************************************************************************
 #define MAX_KEY_MOTION (12)	//モーションごとの最大キー数
-#define MAX_ATTACK_OBJECT (24)	//一度に攻撃できる最大のオブジェクト数
+//#define MAX_ATTACK_OBJECT (24)	//一度に攻撃できる最大のオブジェクト数
 #define DEAD_HEIGHT (-5000.0f)	//死亡する高さ
 #define POWER_GRAVITY (0.6f)			//重力
 #define POWER_GRAVITY_GROUND (15.0f)	//地上にいる時の重力
+
+//*****************************************************************************
+// 前方宣言
+//*****************************************************************************
+class CObjectList;
 
 //*****************************************************************************
 // モーションオブジェクトクラス
@@ -111,7 +116,7 @@ private:
 	D3DXVECTOR3 m_rot;		//角度
 	D3DXMATRIX m_mtxWorld;	//ワールドマトリックス
 	bool m_bEndMotion;		//モーションが終了している状態かどうか
-	CScene* m_apObjAttacked[MAX_ATTACK_OBJECT];	//攻撃したオブジェクトのポインタ配列
+	CObjectList* m_pListAttacked;	//攻撃済みのオブジェクトのリスト
 
 	int m_nTypeMotion;		//モーションのタイプ
 	bool m_bLoopMotion;		//ループするかどうか

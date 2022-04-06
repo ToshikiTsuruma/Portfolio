@@ -9,6 +9,7 @@
 #include "renderer.h"
 #include "manager.h"
 #include "sound.h"
+#include "objectList.h"
 #include "effect.h"
 
 //=============================================================================
@@ -93,10 +94,7 @@ CSceneMotion::CSceneMotion(const PARTS_INFO* pPartsInfoArray, int nNumParts, con
 	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXMatrixIdentity(&m_mtxWorld);
 	m_bEndMotion = false;
-	for (int nCnt = 0; nCnt < MAX_ATTACK_OBJECT; nCnt++)
-	{
-		m_apObjAttacked[nCnt] = nullptr;
-	}
+	m_pListAttacked = new CObjectList;
 
 	m_nTypeMotion = 0;
 	m_bLoopMotion = false;
@@ -148,6 +146,8 @@ CSceneMotion::~CSceneMotion()
 		delete[] m_pMotionInfoArray;
 		m_pMotionInfoArray = nullptr;
 	}
+
+	if (m_pListAttacked != nullptr) delete m_pListAttacked;
 }
 
 //=============================================================================
@@ -684,10 +684,7 @@ void CSceneMotion::SetMotion(int nType) {
 // 攻撃済みリストの初期化
 //=============================================================================
 void CSceneMotion::InitObjAttacked(void) {
-	for (int nCnt = 0; nCnt < MAX_ATTACK_OBJECT; nCnt++)
-	{
-		m_apObjAttacked[nCnt] = nullptr;
-	}
+	if (m_pListAttacked != nullptr) m_pListAttacked->Init();
 }
 
 //=============================================================================
@@ -700,36 +697,13 @@ void CSceneMotion::Attack(OBJ_TYPE objtype, D3DXVECTOR3 posAttack, float fRadius
 	while (pScene != nullptr) {
 		CScene* pSceneNext = GetSceneNextObjtype(pScene);	//リストの次のオブジェクトのポインタを取得
 
-		bool bOpenList = false;	//リストの空き
-		//リストの空きの確認
-		for (int nCntAttacked = 0; nCntAttacked < MAX_ATTACK_OBJECT; nCntAttacked++)
-		{
-			if (m_apObjAttacked[nCntAttacked] == nullptr) {
-				bOpenList = true;
-				break;
-			}
-		}
-
 		//すでに攻撃が当たっている場合
 		bool bAttacked = false;	//すでに攻撃されているかどうか
-		for (int nCntAttacked = 0; nCntAttacked < MAX_ATTACK_OBJECT; nCntAttacked++)
-		{
-			//すでにリストに入っていた場合
-			if (pScene == m_apObjAttacked[nCntAttacked]) {
-				//死亡フラグが立っていた場合
-				if (pScene->GetDeath()) {
-					//攻撃済みリストから除外
-					m_apObjAttacked[nCntAttacked] = nullptr;
-					bOpenList = true;
-				}
 
-				bAttacked = true;
-				break;
-			}
+		if (m_pListAttacked != nullptr) {
+			//リストにすでに追加されている場合
+			bAttacked = m_pListAttacked->MatchObject(pScene);
 		}
-
-		//リストに空きがない場合攻撃終了
-		if (!bOpenList) return;
 
 		//攻撃可能な範囲にいるかどうか　（遠くのものすべてと当たり判定を行うとかなり処理が重くなるため）
 		D3DXVECTOR3 vecObj = pScene->GetPos() - posAttack;	//攻撃位置とオブジェクトのベクトル
@@ -838,15 +812,7 @@ void CSceneMotion::Attack(OBJ_TYPE objtype, D3DXVECTOR3 posAttack, float fRadius
 			}
 			//オブジェクトが死亡していない場合攻撃済みリストに追加
 			if (!pScene->GetDeath()) {
-				for (int nCntAttacked = 0; nCntAttacked < MAX_ATTACK_OBJECT; nCntAttacked++)
-				{
-					//リストの空きを確認
-					if (m_apObjAttacked[nCntAttacked] == nullptr) {
-						//リストに追加
-						m_apObjAttacked[nCntAttacked] = pScene;
-						break;
-					}
-				}
+				if (m_pListAttacked != nullptr) m_pListAttacked->AppendNode(pScene);
 			}
 		}
 
