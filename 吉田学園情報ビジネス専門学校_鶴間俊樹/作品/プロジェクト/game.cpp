@@ -374,7 +374,7 @@ void CGame::SetFadeNextStage(void) {
 
 	if (pFade != nullptr) {
 		//フェードの設定
-		pFade->SetFade((CManager::MODE) - 1, 0.01f);
+		pFade->SetFade((CManager::MODE) -1, 0.01f);
 		m_bChangeStage = true;
 		//フェード音を再生
 		if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::CHANGE_STAGE);

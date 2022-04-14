@@ -116,6 +116,12 @@ bool CObjectList::DeleteNode(CScene* pScene) {
 
 	ListNode* pNode = m_pTopNode->pNextNode;	//æ“ª‚Ìƒm[ƒh‚ÌŽŸ‚Ìƒm[ƒh‚ðŽæ“¾
 
+
+	//¦‚±‚ê‚¾‚ÆpNode‚ªˆê’v‚µ‚Ä‚¢‚Ä‚à”jŠü‚³‚ê‚È‚¢
+
+	//æ“ª‚Ìƒm[ƒh‚ÌŽŸ‚Ìƒm[ƒh‚ªnull‚Ìê‡I—¹
+	if (pNode == nullptr) return bDeleteNode;
+	
 	//ŽŸ‚Ìƒm[ƒh‚ªnull‚Å‚Í‚È‚¢ê‡
 	while (pNode->pNextNode != nullptr)
 	{
@@ -129,9 +135,9 @@ bool CObjectList::DeleteNode(CScene* pScene) {
 			bDeleteNode = true;
 			//pNextNode‚ðŽŸ‚ÌŽŸ‚Ìƒm[ƒh‚É‚·‚é
 			pNode->pNextNode = pNextNodeNext;
-			//ƒm[ƒh‚ðŽŸ‚Éi‚ß‚é
-			pNode = pNode->pNextNode;
 		}
+		//ƒm[ƒh‚ðŽŸ‚Éi‚ß‚é
+		pNode = pNode->pNextNode;
 	}
 
 	return bDeleteNode;
