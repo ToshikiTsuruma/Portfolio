@@ -1,0 +1,38 @@
+//=============================================================================
+//
+// ロードするテクスチャのディレクトリ [load_texture.txt]
+// Author : 鶴間俊樹
+//
+//=============================================================================
+
+// enumと同じ順に
+
+data/TEXTURE/BG/bg_title.jpg
+data/TEXTURE/UI/text_titlename.png
+data/TEXTURE/UI/text_gamestart.png
+data/TEXTURE/UI/text_tutorial.png
+data/TEXTURE/UI/text_credit.png
+data/TEXTURE/UI/tutorial.jpg
+data/TEXTURE/UI/credit.jpg
+data/TEXTURE/UI/select_icon.png
+data/TEXTURE/BG/bg_black.png
+data/TEXTURE/UI/icon_none.png
+data/TEXTURE/UI/icon_apple.png
+data/TEXTURE/UI/icon_hp.png
+data/TEXTURE/UI/text_growup.png
+data/TEXTURE/UI/arrow_left.png
+data/TEXTURE/UI/arrow_right.png
+data/TEXTURE/UI/text_gameclear.png
+data/TEXTURE/UI/text_gameover.png
+data/TEXTURE/UI/text_quit.png
+data/TEXTURE/UI/text_retry.png
+
+data/TEXTURE/EFFECT/explosion.png
+data/TEXTURE/EFFECT/apple_heal.png
+data/TEXTURE/EFFECT/particle.jpg
+data/TEXTURE/EFFECT/shockwave.jpg
+
+data/TEXTURE/NUMBER/number_001.png
+data/TEXTURE/NUMBER/number_002.png
+data/TEXTURE/NUMBER/number_003.png
+data/TEXTURE/NUMBER/number_004.png

@@ -1,0 +1,77 @@
+//=============================================================================
+//
+// テクスチャ処理 [texture.h]
+// Author : 鶴間俊樹
+//
+//=============================================================================
+#ifndef _TEXTURE_H_
+#define _TEXTURE_H_
+
+#include "main.h"
+
+//*****************************************************************************
+// マクロ定義
+//*****************************************************************************
+#define MAX_TEXTURE_FILE_PATH (128)	//テクスチャのファイルのパスの長さの最大
+
+//*****************************************************************************
+// テクスチャクラス
+//*****************************************************************************
+class CTexture
+{
+public:
+	enum class TEXTURE_TYPE {
+		NONE = 0,
+
+		//UIのテクスチャ
+		BG_TITLE,
+		TEXT_TITLENAME,
+		TEXT_GAMESTART,
+		TEXT_TUTORIAL,
+		TEXT_CREDIT,
+		TUTORIAL,
+		CREDIT,
+		SELECT_ICON,
+		MENU_BG,
+		ICON_NONE,
+		ICON_APPLE,
+		ICON_HP,
+		TEXT_GROWUP,
+		ARROW_LEFT,
+		ARROW_RIGHT,
+		TEXT_GAMECLEAR,
+		TEXT_GAMEOVER,
+		TEXT_QUIT,
+		TEXT_RETRY,
+
+		//モデルのテクスチャ
+
+		//エフェクトのテクスチャ
+		EFFECT_EXPLOSION,		// 爆発エフェクト
+		EFFECT_HEAL_APPLE,		// 林檎による回復エフェクト
+		EFFECT_PARTICLE,		// パーティクル
+		EFFECT_SHOCKWAVE,		// 衝撃波
+
+		//ナンバーのテクスチャ
+		NUMBER_001,
+		NUMBER_002,
+		NUMBER_003,
+		NUMBER_004,
+
+		ENUM_MAX
+	};
+
+	CTexture();		//デフォルトコンストラクタ
+	~CTexture();	//デストラクタ
+
+	static HRESULT Load(void);	//テクスチャデータの読み込み
+	static void Unload(void);	//テクスチャデータの解放
+	static LPDIRECT3DTEXTURE9 GetTexture(TEXTURE_TYPE type);	//テクスチャの取得
+	static char* GetPathName(TEXTURE_TYPE type);				//テクスチャのパスの文字列の取得
+
+private:
+	static LPDIRECT3DTEXTURE9 m_apTexture[(int)TEXTURE_TYPE::ENUM_MAX];	//テクスチャへのポインタ
+	static char m_asFilePath[(int)TEXTURE_TYPE::ENUM_MAX][MAX_TEXTURE_FILE_PATH];	// ファイルのパス
+};
+
+#endif // !_TEXTURE_H_
