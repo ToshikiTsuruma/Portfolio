@@ -15,7 +15,7 @@
 //=============================================================================
 // デフォルトコンストラクタ
 //=============================================================================
-CGauge::CGauge() : m_nDrawLifeMax(0), m_nMaxValueDefault(0)
+CGauge::CGauge() : m_bVertical(false), m_nMaxValueDefault(0)
 {
 
 }
@@ -23,11 +23,13 @@ CGauge::CGauge() : m_nDrawLifeMax(0), m_nMaxValueDefault(0)
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CGauge::CGauge(int nMaxValue, int nValue, int nDrawLifeMax) : m_nDrawLifeMax(nDrawLifeMax), m_nMaxValueDefault(nMaxValue)
+CGauge::CGauge(int nMaxValue, bool bVertical) : m_bVertical(bVertical), m_nMaxValueDefault(nMaxValue)
 {
 	m_nMaxValue = nMaxValue;
-	m_nValue = nValue;
-	m_nDrawLife = 0;
+	m_nValue = 0;
+	m_nDrawLifeMax = 0;
+	m_nCntDrawLife = 0;
+	m_bExtend = false;
 
 	m_colGaugeDefault = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	m_colGaugeDanger = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
@@ -74,11 +76,11 @@ void CGauge::Uninit(void) {
 // ゲージの更新処理
 //=============================================================================
 void CGauge::Update(void) {
-	if (m_nDrawLife > 0) {
+	if (m_nCntDrawLife > 0) {
 		//描画する時間を減らす
-		m_nDrawLife--;
+		m_nCntDrawLife--;
 		//描画時間が終了した場合
-		if (m_nDrawLife == 0) {
+		if (m_nCntDrawLife == 0) {
 			//ゲージを非表示
 			SetGaugeDraw(false);
 		}
@@ -98,26 +100,46 @@ void CGauge::AddGaugeValue(int nAddValue) {
 void CGauge::SetGaugeValue(int nValue) {
 	m_nValue = nValue;
 
-	if (m_nValue <= m_nDangerValue) {
-		//危険時の色に変更
-		if (m_pGauge != nullptr) m_pGauge->SetColor(m_colGaugeDanger);
-	}
-	else {
-		//通常色へ変更
-		if (m_pGauge != nullptr) m_pGauge->SetColor(m_colGaugeDefault);
-	}
-
 	//上限・下限超過時の調整
 	if (m_nValue < 0) m_nValue = 0;
 	if (m_nValue > m_nMaxValue) m_nValue = m_nMaxValue;
 
-	m_nDrawLife = m_nDrawLifeMax;	//描画時間を最大値に設定
+	m_nCntDrawLife = m_nDrawLifeMax;	//描画時間を最大値に設定
 
 	//ゲージを表示
 	SetGaugeDraw(true);
 
-	//ゲージの割合を設定
-	if (m_pGauge != nullptr) m_pGauge->SetRatioWidth((float)m_nValue / (float)m_nMaxValueDefault);
+	if (m_pGauge == nullptr) return;
+
+	if (m_nValue <= m_nDangerValue) {
+		//危険時の色に変更
+		m_pGauge->SetColor(m_colGaugeDanger);
+	}
+	else {
+		//通常色へ変更
+		m_pGauge->SetColor(m_colGaugeDefault);
+	}
+
+	//ゲージを最大値に合わせて拡張する場合
+	if (m_bExtend) {
+		//ゲージの割合を設定
+		if (m_bVertical) {
+			m_pGauge->SetRatioHeight((float)m_nValue / (float)m_nMaxValueDefault);
+		}
+		else {
+			m_pGauge->SetRatioWidth((float)m_nValue / (float)m_nMaxValueDefault);
+		}
+	}
+	else {
+		//ゲージの割合を設定
+		if (m_bVertical) {
+			m_pGauge->SetRatioHeight((float)m_nValue / (float)m_nMaxValue);
+		}
+		else
+		{
+			m_pGauge->SetRatioWidth((float)m_nValue / (float)m_nMaxValue);
+		}
+	}
 }
 
 //=============================================================================
@@ -127,11 +149,27 @@ void CGauge::SetMaxValue(int nValue) {
 	//最大値を設定
 	m_nMaxValue = nValue;
 
-	//ゲージの割合を設定
-	if (m_pGauge != nullptr) m_pGauge->SetRatioWidth((float)m_nValue / (float)m_nMaxValueDefault);
+	if (m_pGauge == nullptr) return;
 
-	//ゲージの背景の割合を設定
-	if (m_pGaugeBG != nullptr) m_pGaugeBG->SetRatioWidth((float)m_nMaxValue / (float)m_nMaxValueDefault);
+	//ゲージを最大値に合わせて拡張する場合
+	if (m_bExtend) {
+		if (m_bVertical) {
+			//ゲージの割合を設定
+			m_pGauge->SetRatioHeight((float)m_nValue / (float)m_nMaxValueDefault);
+			//ゲージの背景の割合を設定
+			m_pGaugeBG->SetRatioHeight((float)m_nMaxValue / (float)m_nMaxValueDefault);
+			//ゲージの枠の割合を設定
+			m_pGaugeFrame->SetRatioHeight((float)m_nMaxValue / (float)m_nMaxValueDefault);
+		}
+		else {
+			//ゲージの割合を設定
+			m_pGauge->SetRatioWidth((float)m_nValue / (float)m_nMaxValueDefault);
+			//ゲージの背景の割合を設定
+			m_pGaugeBG->SetRatioWidth((float)m_nMaxValue / (float)m_nMaxValueDefault);
+			//ゲージの枠の割合を設定
+			m_pGaugeFrame->SetRatioWidth((float)m_nMaxValue / (float)m_nMaxValueDefault);
+		}
+	}
 }
 
 //=============================================================================
@@ -150,9 +188,9 @@ void CGauge::SetGaugeDraw(bool bDraw) {
 // ゲージのすべての位置の設定
 //=============================================================================
 void CGauge::SetAllGaugePos(D3DXVECTOR3 pos) {
-	if (m_pGauge != nullptr)		m_pGauge->SetPos(pos);
-	if (m_pGaugeBG != nullptr)		m_pGaugeBG->SetPos(pos);
-	if (m_pGaugeFrame != nullptr)	m_pGaugeFrame->SetPos(pos);
+	if (m_pGauge != nullptr) m_pGauge->SetPos(pos);
+	if (m_pGaugeBG != nullptr) m_pGaugeBG->SetPos(pos);
+	if (m_pGaugeFrame != nullptr) m_pGaugeFrame->SetPos(pos);
 }
 
 //=============================================================================
@@ -202,4 +240,40 @@ void CGauge::SetGaugeBGColor(D3DXCOLOR col) {
 void CGauge::SetGaugeFrameColor(D3DXCOLOR col) {
 	if (m_pGaugeFrame == nullptr) return;
 	m_pGaugeFrame->SetColor(col);
+}
+
+//=============================================================================
+//ゲージのポインタを設定
+//=============================================================================
+void CGauge::SetGaugePtr(CObject* pGauge) {
+	//すでに設定されている場合破棄
+	if (m_pGauge != nullptr) {
+		m_pGauge->Uninit();
+	}
+
+	m_pGauge = pGauge;
+}
+
+//=============================================================================
+//ゲージの背景のポインタを設定
+//=============================================================================
+void CGauge::SetGaugeBGPtr(CObject* pGaugeBG) {
+	//すでに設定されている場合破棄
+	if (m_pGaugeBG != nullptr) {
+		m_pGaugeBG->Uninit();
+	}
+
+	m_pGaugeBG = pGaugeBG;
+}
+
+//=============================================================================
+//ゲージの枠のポインタを設定
+//=============================================================================
+void CGauge::SetGaugeFramePtr(CObject* pGaugeFrame) {
+	//すでに設定されている場合破棄
+	if (m_pGaugeFrame != nullptr) {
+		m_pGaugeFrame->Uninit();
+	}
+
+	m_pGaugeFrame = pGaugeFrame;
 }

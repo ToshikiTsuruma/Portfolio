@@ -31,7 +31,8 @@ public:
 	void SetText(const char* pText);	//文字列の設定
 	void SetRect(RECT rect);	//rectの設定
 	RECT GetRect(void);			//rectの取得
-	void SetFlagAnchor(int nFlag);	//揃える位置のフラグの番号の設定
+	void SetColor(D3DXCOLOR col) { m_col = col; }	//フォントの色の設定
+	void SetFlagAnchor(int nFlag) { m_nFlagAnchor = nFlag; }	//揃える位置のフラグの番号の設定
 
 private:
 	LPD3DXFONT m_pFont;		//フォントへのポインタ

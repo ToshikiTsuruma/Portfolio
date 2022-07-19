@@ -99,10 +99,8 @@ void CShockwave::Update(void) {
 	//回転させる
 	Rotate();
 
-	//敵との当たり判定
-	AttackCollision(OBJ_TYPE::ENEMY);
-	//林檎の木への当たり判定
-	AttackCollision(OBJ_TYPE::APPLE_TREE);
+	//攻撃の当たり判定
+	AttackCollision(OBJTYPE_ENEMY);
 
 	CMeshcylinder::Update();
 
@@ -160,12 +158,15 @@ void CShockwave::Rotate(void) {
 //=============================================================================
 // 攻撃の当たり判定
 //=============================================================================
-void CShockwave::AttackCollision(CObject::OBJ_TYPE objType) {
-	CObject* pObject;	//オブジェクトへのポインタ
-	pObject = GetObjectTopObjtype(objType);	//攻撃対象のリストの先頭を取得
+void CShockwave::AttackCollision(int nObjtype) {
+	CObject* pObject = GetObjectTopAll();	//全オブジェクトのリストの先頭を取得
 
 	while (pObject != nullptr) {
-		CObject* pObjNext = GetObjectNextObjtype(pObject);	//リストの次のオブジェクトのポインタを取得
+		CObject* pObjNext = GetObjectNextAll(pObject);	//リストの次のオブジェクトのポインタを取得
+
+		//オブジェクトタイプの確認
+		bool bMatchType = false;
+		if (pObject->GetObjType() & nObjtype) bMatchType = true;
 
 		//すでに攻撃が当たっている場合
 		bool bAttacked = false;	//すでに攻撃されているかどうか
@@ -179,7 +180,7 @@ void CShockwave::AttackCollision(CObject::OBJ_TYPE objType) {
 		bool bEnableCollision = pObject->GetEnableCollision();
 
 		//次のループに飛ばす
-		if (bAttacked || bDeath || !bEnableCollision) {
+		if (!bMatchType || bAttacked || bDeath || !bEnableCollision) {
 			pObject = pObjNext;	//リストの次のオブジェクトを代入
 			continue;
 		}
@@ -201,7 +202,7 @@ void CShockwave::AttackCollision(CObject::OBJ_TYPE objType) {
 		//当たり判定時の処理
 		//---------------------------
 		//オブジェクトにダメージを与える
-		pObject->Damage(DAMAGE_SHOCKWAVE, nullptr);
+		pObject->Damage(DAMAGE_SHOCKWAVE, DAMAGE_TYPE::SHOCKWAVE, nullptr);
 
 		//マネージャーの取得
 		CManager* pManager = CManager::GetManager();

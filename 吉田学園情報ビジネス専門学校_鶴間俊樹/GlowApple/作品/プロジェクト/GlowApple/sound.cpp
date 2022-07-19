@@ -21,26 +21,37 @@ CSound::PARAM CSound::m_aParam[(int)SOUND_LABEL::ENUM_MAX] = {
 
 	{ "data/SOUND/SE/select_switch.wav", 0 },
 	{ "data/SOUND/SE/cansel.wav", 0 },
+	{ "data/SOUND/SE/footstep.wav", 0 },
 	{ "data/SOUND/SE/swish_punch.wav", 0 },
 	{ "data/SOUND/SE/damage_punch.wav", 0 },
-	{ "data/SOUND/SE/attack_shock.wav", 0 },
+	{ "data/SOUND/SE/shock_punch.wav", 0 },
+	{ "data/SOUND/SE/shock_stamp.wav", 0 },
+
 	{ "data/SOUND/SE/heal.wav", 0 },
+	{ "data/SOUND/SE/getEXP.wav", 0 },
+	{ "data/SOUND/SE/drain.wav", 0 },
+	{ "data/SOUND/SE/shoot_bullet.wav", 0 },
+	{ "data/SOUND/SE/damage_bullet.wav", 0 },
+	{ "data/SOUND/SE/damage_fire.wav", 0 },
 	{ "data/SOUND/SE/stun.wav", 0 },
 	{ "data/SOUND/SE/explosion.wav", 0 },
+	{ "data/SOUND/SE/thunderbolt.wav", 0 },
+	{ "data/SOUND/SE/damage_thunder.wav", 0 },
 	{ "data/SOUND/SE/spawn_enemy.wav", 0 },
+	{ "data/SOUND/SE/grow_up2.wav", 0 },
 	{ "data/SOUND/SE/create_apple.wav", 0 },
 	{ "data/SOUND/SE/dead_tree.wav", 0 },
+	{ "data/SOUND/SE/endgame.wav", 0 },
 	{ "data/SOUND/SE/gameover.wav", 0 },
 	{ "data/SOUND/SE/gameclear.wav", 0 }
 };
-
-CSound::SOUND_LABEL CSound::m_playBGM = CSound::SOUND_LABEL::NONE;
 
 //=============================================================================
 // サウンドのデフォルトコンストラクタ
 //=============================================================================
 CSound::CSound()
 {
+	m_playBGM = CSound::SOUND_LABEL::NONE;
 }
 
 //=============================================================================
@@ -208,6 +219,9 @@ void CSound::Uninit(void)
 //=============================================================================
 HRESULT CSound::PlaySound(SOUND_LABEL label)
 {
+	//同フレーム中にすでに再生されている場合終了（同時に複数の音声を大量に流すとエラーが起きるため）
+	if (m_abBeginPlay[(int)label]) return S_OK;
+
 	XAUDIO2_VOICE_STATE xa2state;
 	XAUDIO2_BUFFER       buffer;
 
@@ -234,6 +248,9 @@ HRESULT CSound::PlaySound(SOUND_LABEL label)
 
 	// 再生
 	m_apSourceVoice[(int)label]->Start(0);
+
+	//再生開始時のフラグを設定
+	m_abBeginPlay[(int)label] = true;
 
 	return S_OK;
 }
@@ -399,4 +416,14 @@ void CSound::SetBGM(SOUND_LABEL label) {
 //=============================================================================
 CSound::SOUND_LABEL CSound::GetBGM(void) {
 	return m_playBGM;
+}
+
+//=============================================================================
+// 再生開始時のフラグをすべてリセット
+//=============================================================================
+void CSound::ResetBeginPlay(void) {
+	for (int nCnt = 0; nCnt < (int)SOUND_LABEL::ENUM_MAX; nCnt++)
+	{
+		m_abBeginPlay[nCnt] = false;
+	}
 }

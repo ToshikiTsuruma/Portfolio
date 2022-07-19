@@ -166,6 +166,13 @@ void CAppleMenu::SetAppleText(int nSelect) {
 	CGlowApple::GetAppleText(&aTextApple[0], m_aTypeApple[nSelect]);
 	//テキストを設定
 	m_pFontAppleText->SetText(aTextApple);
+	/*/色の変更
+	if (m_aTypeApple[nSelect] == CGlowApple::APPLE_TYPE::BLACK) {
+		m_pFontAppleText->SetColor(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	}
+	else {
+		m_pFontAppleText->SetColor(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+	}*/
 }
 
 //=============================================================================

@@ -26,7 +26,7 @@ CGauge3D::CGauge3D()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CGauge3D::CGauge3D(int nMaxValue, int nValue, int nDrawLifeMax) : CGauge(nMaxValue, nValue, nDrawLifeMax)
+CGauge3D::CGauge3D(int nMaxValue, bool bVertical) : CGauge(nMaxValue, bVertical)
 {
 
 }
@@ -42,12 +42,15 @@ CGauge3D::~CGauge3D()
 //=============================================================================
 // 3Dゲージの生成処理
 //=============================================================================
-CGauge3D* CGauge3D::Create(int nMaxValue, int nValue, int nDrawLifeMax) {
+CGauge3D* CGauge3D::Create(int nMaxValue, bool bVertical, int nValue, int nDrawLifeMax, bool bExtend) {
 	CGauge3D* pGauge3D;
-	pGauge3D = new CGauge3D(nMaxValue, nValue, nDrawLifeMax);
+	pGauge3D = new CGauge3D(nMaxValue, bVertical);
 	if (pGauge3D == nullptr) return nullptr;
 
 	pGauge3D->Init();
+	pGauge3D->SetGaugeValue(nValue);
+	pGauge3D->SetMaxDrawLife(nDrawLifeMax);
+	pGauge3D->SetExtend(bExtend);
 
 	return pGauge3D;
 }
@@ -77,52 +80,31 @@ void CGauge3D::Update(void) {
 // 3Dゲージを生成
 //=============================================================================
 void CGauge3D::CreateGauge(CTexture::TEXTURE_TYPE typeTex, D3DXVECTOR3 pos, float fWidth, float fHeight) {
-	//ゲージのダブルポインタを取得
-	CObject** ppGauge = GetGaugePtr();
-
-	//ゲージを生成するポインタ変数のアドレスがnullの場合終了
-	if (ppGauge == nullptr) return;
-
-	//すでに生成されている場合終了
-	if (*ppGauge != nullptr) return;
-
 	//ゲージの生成
-	*ppGauge = CBillboard::Create(pos, typeTex, fWidth, fHeight);
-	if (*ppGauge != nullptr) (*ppGauge)->SetDrawPriority(CObject::DRAW_PRIORITY::BILLBOARD_UI);
+	CObject* pGauge = CBillboard::Create(pos, typeTex, fWidth, fHeight);
+	if (pGauge != nullptr) pGauge->SetDrawPriority(CObject::DRAW_PRIORITY::BILLBOARD_UI);
+	//ゲージのポインタを設定
+	SetGaugePtr(pGauge);
 }
 
 //=============================================================================
 // 3Dゲージの背景を生成
 //=============================================================================
 void CGauge3D::CreateGaugeBG(CTexture::TEXTURE_TYPE typeTex, D3DXVECTOR3 pos, float fWidth, float fHeight) {
-	//ゲージの背景のダブルポインタを取得
-	CObject** ppGaugeBG = GetGaugeBGPtr();
-
-	//ゲージの背景を生成するポインタ変数のアドレスがnullの場合終了
-	if (ppGaugeBG == nullptr) return;
-
-	//すでに生成されている場合終了
-	if (*ppGaugeBG != nullptr) return;
-
 	//背景の生成
-	*ppGaugeBG = CBillboard::Create(pos, typeTex, fWidth, fHeight);
-	if (*ppGaugeBG != nullptr) (*ppGaugeBG)->SetDrawPriority(CObject::DRAW_PRIORITY::BILLBOARD_UI);
+	CObject* pGaugeBG = CBillboard::Create(pos, typeTex, fWidth, fHeight);
+	if (pGaugeBG != nullptr) pGaugeBG->SetDrawPriority(CObject::DRAW_PRIORITY::BILLBOARD_UI);
+	//ゲージのポインタを設定
+	SetGaugeBGPtr(pGaugeBG);
 }
 
 //=============================================================================
 // 3Dゲージの枠を生成
 //=============================================================================
 void CGauge3D::CreateGaugeFrame(CTexture::TEXTURE_TYPE typeTex, D3DXVECTOR3 pos, float fWidth, float fHeight) {
-	//ゲージの背景のダブルポインタを取得
-	CObject** ppGaugeFrame = GetGaugeFramePtr();
-
-	//ゲージの背景を生成するポインタ変数のアドレスがnullの場合終了
-	if (ppGaugeFrame == nullptr) return;
-
-	//すでに生成されている場合終了
-	if (*ppGaugeFrame != nullptr) return;
-
 	//背景の生成
-	*ppGaugeFrame = CBillboard::Create(pos, typeTex, fWidth, fHeight);
-	if (*ppGaugeFrame != nullptr) (*ppGaugeFrame)->SetDrawPriority(CObject::DRAW_PRIORITY::BILLBOARD_UI);
+	CObject* pGaugeFrame = CBillboard::Create(pos, typeTex, fWidth, fHeight);
+	if (pGaugeFrame != nullptr) pGaugeFrame->SetDrawPriority(CObject::DRAW_PRIORITY::BILLBOARD_UI);
+	//ゲージのポインタを設定
+	SetGaugeFramePtr(pGaugeFrame);
 }

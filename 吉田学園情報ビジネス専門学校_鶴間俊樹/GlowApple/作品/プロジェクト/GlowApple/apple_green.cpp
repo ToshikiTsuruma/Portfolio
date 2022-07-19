@@ -11,8 +11,9 @@
 #include "effect.h"
 
 //=============================================================================
-// 静的メンバ変数宣言
+// マクロ定義
 //=============================================================================
+#define HEAL_VALUE (20)	//回復量
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -61,6 +62,9 @@ HRESULT CAppleGreen::Init(void) {
 		pModelApple->SetMaterialDiffuse(GetAppleColor(APPLE_TYPE::GREEN), 0);
 	}
 
+	//発光表現のためにパーティクルを生成
+	CreateGlowParticle(APPLE_TYPE::GREEN);
+
 	m_nCntHeal = 0;
 
 	CGlowApple::Init();
@@ -82,19 +86,19 @@ void CAppleGreen::Update(void) {
 		//林檎の木を回復する
 		CAppleTree* pAppleTree = GetAppleTree();
 		if (pAppleTree != nullptr) {
-			pAppleTree->HealLife(5);
+			pAppleTree->HealLife(HEAL_VALUE);
 		}
 		//林檎の位置から回復のエフェクトを出す
 		D3DXVECTOR3 posEffect = GetPos();
-		posEffect.y -= 10.0f;	//位置の調整
-		CEffect::Create(posEffect, CEffect::EFFECT_TYPE::HEAL_APPLE, 80.0f, 80.0f);
+		posEffect.y -= 15.0f;	//位置の調整
+		CEffect::Create(posEffect, CEffect::EFFECT_TYPE::HEAL_APPLE, 80.0f, 80.0f, false);
 
 		//マネージャーの取得
 		CManager* pManager = CManager::GetManager();
 		CSound* pSound = nullptr;	//サウンドへのポインタ
 		//サウンドの取得
 		if (pManager != nullptr) pSound = pManager->GetSound();
-		//選択変更音の再生
+		//回復量音の再生
 		if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::HEAL);
 
 		m_nCntHeal = 0;

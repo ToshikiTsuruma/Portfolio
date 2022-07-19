@@ -18,11 +18,11 @@
 // マクロ定義
 //=============================================================================
 #define MAX_DRAW_DISTANCE (5000.0f)		//描画可能な最大の距離
-#define DEFAULT_CAMERA_DISTANCE (2000.0f)	//視点と注視点の距離
+#define DEFAULT_CAMERA_DISTANCE (1500.0f)	//視点と注視点の距離
 #define CAMERA_ROTATE_SPEED_YAW (0.008f)	//カメラの回転速度(Y軸)
 #define CAMERA_ROTATE_SPEED_PITCH (0.006f)	//カメラの回転速度(X軸)
-#define MAX_ROTATE_PITCH (0.18f)	//カメラのX軸回転の最大
-#define MIN_ROTATE_PITCH (0.05f)	//カメラのX軸回転の最低
+#define MAX_ROTATE_PITCH (-0.05f)	//カメラのX軸回転の最大
+#define MIN_ROTATE_PITCH (-0.18f)	//カメラのX軸回転の最低
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -38,6 +38,8 @@ CCamera::CCamera()
 	D3DXMatrixIdentity(&m_mtxProjection);
 	D3DXMatrixIdentity(&m_mtxView);
 	ZeroMemory(&m_viewport, sizeof(D3DVIEWPORT9));
+
+	m_bLockControll = false;
 }
 
 //=============================================================================
@@ -128,7 +130,7 @@ void CCamera::Update(void) {
 	//Move();
 
 	//回転処理
-	Rotate();
+	if(!m_bLockControll) Rotate();
 }
 
 //=============================================================================
@@ -292,15 +294,15 @@ void CCamera::Rotate(void) {
 	if (pInput->GetPress(CInput::CODE::ROTATE_UP)) {
 		//視点を下げる
 		m_rot.x += CAMERA_ROTATE_SPEED_PITCH * D3DX_PI;
-		if (m_rot.x > -MIN_ROTATE_PITCH * D3DX_PI) {
-			m_rot.x = -MIN_ROTATE_PITCH * D3DX_PI;
+		if (m_rot.x > MAX_ROTATE_PITCH * D3DX_PI) {
+			m_rot.x = MAX_ROTATE_PITCH * D3DX_PI;
 		}
 	}
 	if (pInput->GetPress(CInput::CODE::ROTATE_DOWN)) {
 		//視点を上げる
 		m_rot.x -= CAMERA_ROTATE_SPEED_PITCH * D3DX_PI;
-		if (m_rot.x < -MAX_ROTATE_PITCH * D3DX_PI) {
-			m_rot.x = -MAX_ROTATE_PITCH * D3DX_PI;
+		if (m_rot.x < MIN_ROTATE_PITCH * D3DX_PI) {
+			m_rot.x = MIN_ROTATE_PITCH * D3DX_PI;
 		}
 	}
 

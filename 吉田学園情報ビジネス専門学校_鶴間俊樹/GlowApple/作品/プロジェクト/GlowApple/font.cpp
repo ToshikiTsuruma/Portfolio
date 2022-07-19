@@ -133,10 +133,3 @@ void CFont::SetRect(RECT rect) {
 RECT CFont::GetRect(void) {
 	return m_rect;
 }
-
-//=============================================================================
-// ‘µ‚¦‚éˆÊ’u‚Ìƒtƒ‰ƒO‚Ì”Ô†‚Ìİ’è
-//=============================================================================
-void CFont::SetFlagAnchor(int nFlag) {
-	m_nFlagAnchor = nFlag;
-}

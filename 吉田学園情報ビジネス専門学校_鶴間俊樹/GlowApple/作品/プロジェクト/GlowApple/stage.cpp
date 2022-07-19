@@ -13,6 +13,7 @@
 // マクロ定義
 //=============================================================================
 #define MAX_LOAD_TEXT (128)		//一度にファイルから読み込むテキストのバイト数
+#define GLOW_COLOR_STAGE_OBJECT (D3DXCOLOR(0.0f, 0.4f, 1.0f, 1.0f))
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -123,10 +124,7 @@ void CStage::CreateStage(char* strFileName) {
 			if (strcmp(pSplitText, "END_SET_TERRAIN") == 0) {
 				bSetTerrain = false;
 
-				//生成するモデルの種類が存在する場合
-				if ((int)createTerrainData.modelType < 0 || (int)createTerrainData.modelType >= (int)CModel::MODELTYPE::ENUM_MAX) continue;
-				//地形を生成する
-				m_pStageTerrain = CTerrain::Create(createTerrainData.modelType, createTerrainData.pos, createTerrainData.rot);
+				m_pStageTerrain = CreateLoadTerrain(createTerrainData);
 			}
 
 			//地形のデータを読み込む
@@ -341,6 +339,24 @@ void CStage::LoadObjData(const char* pLoadText, ObjectData& objData) {
 }
 
 //=============================================================================
+// ロードした地形を生成
+//=============================================================================
+CTerrain* CStage::CreateLoadTerrain(TerrainData& terrainData) {
+	//生成するモデルの種類が存在する場合
+	if ((int)terrainData.modelType < 0 || (int)terrainData.modelType >= (int)CModel::MODELTYPE::ENUM_MAX) return nullptr;
+	//地形を生成する
+	CTerrain* pTerrain = CTerrain::Create(terrainData.modelType, terrainData.pos, terrainData.rot);
+	if (pTerrain == nullptr) return nullptr;
+
+	CModel* pModel = pTerrain->GetPtrModel();
+	if (pModel != nullptr) {
+		pModel->SetColorGlow(GLOW_COLOR_STAGE_OBJECT);
+	}
+
+	return pTerrain;
+}
+
+//=============================================================================
 // ロードしたオブジェクトを生成
 //=============================================================================
 CObject* CStage::CreateLoadObject(ObjectData& objData) {
@@ -348,7 +364,15 @@ CObject* CStage::CreateLoadObject(ObjectData& objData) {
 	if ((int)objData.modelType < 0 || (int)objData.modelType >= (int)CModel::MODELTYPE::ENUM_MAX) return nullptr;
 
 	//モデルオブジェクトを生成する
-	return CObjectModel::Create(objData.modelType, objData.pos, objData.rot, false);
+	CObjectModel* pCreateObj = CObjectModel::Create(objData.modelType, objData.pos, objData.rot, false);
+	if (pCreateObj == nullptr) return nullptr;
+
+	CModel* pModel = pCreateObj->GetPtrModel();
+	if (pModel != nullptr) {
+		pModel->SetColorGlow(GLOW_COLOR_STAGE_OBJECT);
+	}
+
+	return pCreateObj;
 }
 
 //=============================================================================

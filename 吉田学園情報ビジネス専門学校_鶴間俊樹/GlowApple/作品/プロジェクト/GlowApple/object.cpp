@@ -16,8 +16,6 @@
 bool CObject::m_abStopUpdate[(int)UPDATE_PRIORITY::ENUM_MAX] = {};
 CObject* CObject::m_pTopAll = nullptr;
 CObject* CObject::m_pCurAll = nullptr;
-CObject* CObject::m_apTopObjType[(int)OBJ_TYPE::ENUM_MAX] = {};
-CObject* CObject::m_apCurObjType[(int)OBJ_TYPE::ENUM_MAX] = {};
 CObject* CObject::m_apTopUpdate[(int)UPDATE_PRIORITY::ENUM_MAX] = {};
 CObject* CObject::m_apCurUpdate[(int)UPDATE_PRIORITY::ENUM_MAX] = {};
 CObject* CObject::m_apTopDraw[(int)DRAW_PRIORITY::ENUM_MAX] = {};
@@ -29,7 +27,7 @@ CObject* CObject::m_apCurDraw[(int)DRAW_PRIORITY::ENUM_MAX] = {};
 CObject::CObject()
 {
 	m_bDeath = false;
-	m_objType = OBJ_TYPE::NONE;
+	m_objType = OBJTYPE_NONE;
 	m_updatePriority = UPDATE_PRIORITY::DEFAULT;
 	m_drawPriority = DRAW_PRIORITY::DEFAULT;
 	m_texType = CTexture::TEXTURE_TYPE::NONE;
@@ -41,13 +39,6 @@ CObject::CObject()
 	if (m_pTopAll == nullptr) m_pTopAll = this;				//topが存在しない場合、このオブジェクトをtopにする
 	if (m_pCurAll != nullptr) m_pCurAll->m_pNextAll = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
 	m_pCurAll = this;		//最後尾のポインタの設定
-
-	//オブジェクトタイプリストの初期設定
-	m_pPrevObjtype = m_apCurObjType[(int)m_objType];	//前のポインタの設定
-	m_pNextObjtype = nullptr;						//次のポインタの設定
-	if (m_apTopObjType[(int)m_objType] == nullptr) m_apTopObjType[(int)m_objType] = this;				//topが存在しない場合、このオブジェクトをtopにする
-	if (m_apCurObjType[(int)m_objType] != nullptr) m_apCurObjType[(int)m_objType]->m_pNextObjtype = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
-	m_apCurObjType[(int)m_objType] = this;		//最後尾のポインタの設定
 
 	//更新順のリストの初期設定
 	m_pPrevUpdate = m_apCurUpdate[(int)m_updatePriority];	//前のポインタの設定
@@ -75,12 +66,6 @@ CObject::~CObject()
 	if (m_pCurAll == this) m_pCurAll = m_pPrevAll;	//このオブジェクトがcurだった場合、前のオブジェクトをcurにする
 	if (m_pPrevAll != nullptr) m_pPrevAll->m_pNextAll = m_pNextAll;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
 	if (m_pNextAll != nullptr) m_pNextAll->m_pPrevAll = m_pPrevAll;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
-
-	//オブジェクトタイプリスト
-	if (m_apTopObjType[(int)m_objType] == this) m_apTopObjType[(int)m_objType] = m_pNextObjtype;	//このオブジェクトがtopだった場合、次のオブジェクトをtopにする
-	if (m_apCurObjType[(int)m_objType] == this) m_apCurObjType[(int)m_objType] = m_pPrevObjtype;	//このオブジェクトがcurだった場合、前のオブジェクトをcurにする
-	if (m_pPrevObjtype != nullptr) m_pPrevObjtype->m_pNextObjtype = m_pNextObjtype;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
-	if (m_pNextObjtype != nullptr) m_pNextObjtype->m_pPrevObjtype = m_pPrevObjtype;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
 
 	//更新順リスト
 	if (m_apTopUpdate[(int)m_updatePriority] == this) m_apTopUpdate[(int)m_updatePriority] = m_pNextUpdate;	//このオブジェクトがtopだった場合、次のオブジェクトをtopにする
@@ -113,23 +98,6 @@ CObject* CObject::GetObjectNextAll(CObject* pObject) {
 }
 
 //=============================================================================
-// オブジェクトタイプのリストのTopを取得
-//=============================================================================
-CObject* CObject::GetObjectTopObjtype(OBJ_TYPE objType) {
-	return m_apTopObjType[(int)objType];
-}
-
-//=============================================================================
-// オブジェクトタイプのリストのNextを取得
-//=============================================================================
-CObject* CObject::GetObjectNextObjtype(CObject* pObject) {
-	if (pObject != nullptr) {
-		return pObject->m_pNextObjtype;
-	}
-	return nullptr;
-}
-
-//=============================================================================
 // 全オブジェクトの解放処理
 //=============================================================================
 //※破棄したオブジェクトを別のクラスでポインタを保持していた場合エラーが起きるため注意
@@ -149,15 +117,25 @@ void CObject::ReleaseAll(void) {
 // 指定したタイプのオブジェクトの解放処理
 //=============================================================================
 //※破棄したオブジェクトを別のクラスでポインタを保持していた場合エラーが起きるため注意
-void CObject::ReleaseObjtype(OBJ_TYPE objtype) {
-	CObject* pObjectObjtype = m_apTopObjType[(int)objtype];	//指定したタイプのオブジェクトのポインタを先頭から順に代入
-	while (pObjectObjtype != nullptr)
+void CObject::ReleaseObjtype(OBJTYPE objtype) {
+	CObject* pObject = m_pTopAll;	//全オブジェクトのポインタを先頭から順に代入
+	while (pObject != nullptr)
 	{
-		CObject* pObjectNext = pObjectObjtype->m_pNextObjtype;
+		//次のオブジェクトを取得
+		CObject* pObjectNext = pObject->m_pNextAll;
+
+		//オブジェクトタイプが一致しない場合
+		if (!(pObject->m_objType & objtype)) {
+			//次のオブジェクトを代入
+			pObject = pObjectNext;
+			//ループを飛ばす
+			continue;
+		}
+
 		//終了処理を行う
-		pObjectObjtype->Uninit();
+		pObject->Uninit();
 		//次のオブジェクトを代入
-		pObjectObjtype = pObjectNext;
+		pObject = pObjectNext;
 	}
 }
 
@@ -224,15 +202,24 @@ void CObject::DrawAll(void) {
 //=============================================================================
 // 指定したタイプの死亡処理
 //=============================================================================
-void CObject::DeadObjtype(OBJ_TYPE objtype) {
-	CObject* pObjectObjtype = m_apTopObjType[(int)objtype];	//指定したタイプのオブジェクトのポインタを先頭から順に代入
-	while (pObjectObjtype != nullptr)
+void CObject::DeadObjtype(OBJTYPE objtype) {
+	CObject* pObject = m_pTopAll;	//全オブジェクトのポインタを先頭から順に代入
+	while (pObject != nullptr)
 	{
-		CObject* pObjectNext = pObjectObjtype->m_pNextObjtype;
+		CObject* pObjectNext = pObject->m_pNextAll;
+
+		//オブジェクトタイプが一致しない場合
+		if (!(pObject->m_objType & objtype)) {
+			//次のオブジェクトを代入
+			pObject = pObjectNext;
+			//ループを飛ばす
+			continue;
+		}
+
 		//死亡処理を行う
-		if (!pObjectObjtype->m_bDeath) pObjectObjtype->Dead();
+		if (!pObject->m_bDeath) pObject->Dead();
 		//次のオブジェクトを代入
-		pObjectObjtype = pObjectNext;
+		pObject = pObjectNext;
 	}
 }
 
@@ -244,6 +231,75 @@ void CObject::SetStopUpdateAll(bool bFlag) {
 	{
 		m_abStopUpdate[nCnt] = bFlag;
 	}
+}
+
+//=============================================================================
+// ある位置からオブジェクトへの最も近い距離を求める
+//=============================================================================
+bool CObject::GetNearObject(const D3DXVECTOR3 pos, const OBJTYPE type, D3DXVECTOR3* pPosNearObj, float* pfDistNearObj, D3DXVECTOR3* pVecNearObj) {
+	bool bSuccessGetPos = false;	//最も近いオブジェクトが求められたかどうか
+
+	//最も近いオブジェクトの情報
+	D3DXVECTOR3 posNearObj;	//最も近いオブジェクトの位置
+	float fDistNearObj;		//最も近いオブジェクトへの距離
+	D3DXVECTOR3 vecNearObj;	//最も近いオブジェクトへの正規化ベクトル
+
+	CObject* pObject = GetObjectTopAll();	//全オブジェクトのリストの先頭を取得
+
+	while (pObject != nullptr) {
+		CObject* pObjNext = GetObjectNextAll(pObject);	//リストの次のオブジェクトのポインタを取得
+
+		//オブジェクトタイプの確認
+		bool bMatchType = false;
+		if (pObject->GetObjType() & type) bMatchType = true;
+
+		bool bDeath = pObject->GetDeath();
+		bool bEnableCollision = pObject->GetEnableCollision();
+
+		//次のループに飛ばす
+		if (!bMatchType || bDeath || !bEnableCollision) {
+			pObject = pObjNext;	//リストの次のオブジェクトを代入
+			continue;
+		}
+
+		//---------------------------
+		//位置取得していないとき、タイプの最初のオブジェクトを最も近いオブジェクトとして情報を設定
+		//---------------------------
+		if (!bSuccessGetPos) {
+			bSuccessGetPos = true;	//取得成功
+			//情報の設定
+			posNearObj = pObject->GetPos();	//位置
+			fDistNearObj = D3DXVec3Length(&D3DXVECTOR3(posNearObj - pos));	//距離
+			D3DXVec3Normalize(&vecNearObj, &D3DXVECTOR3(posNearObj - pos));	//正規化ベクトル
+		}
+
+		//---------------------------
+		//位置の取得
+		//---------------------------
+		D3DXVECTOR3 posObject = pObject->GetPos();	//敵の位置
+
+		D3DXVECTOR3 vecObject = D3DXVECTOR3(posObject - pos);	//ある位置からオブジェクトへのベクトル
+		float fDistObj = D3DXVec3Length(&vecObject);	//ある位置とオブジェクトの距離
+		//距離の更新
+		if (fDistNearObj > fDistObj) {
+			//最も近いオブジェクトの情報
+			posNearObj = posObject;		//位置
+			fDistNearObj = fDistObj;	//距離
+			D3DXVec3Normalize(&vecNearObj, &vecObject);	//正規化ベクトル
+		}
+
+		pObject = pObjNext;	//リストの次のオブジェクトを代入
+	}
+
+	//取得失敗時
+	if (!bSuccessGetPos) return false;
+
+	//取得成功時、情報の設定
+	if (pPosNearObj != nullptr) *pPosNearObj = posNearObj;
+	if (pfDistNearObj != nullptr) *pfDistNearObj = fDistNearObj;
+	if (pVecNearObj != nullptr) *pVecNearObj = vecNearObj;
+
+	return true;
 }
 
 //=============================================================================
@@ -263,26 +319,15 @@ bool CObject::GetDeath(void) {
 //=============================================================================
 // オブジェクトの種類の設定
 //=============================================================================
-void CObject::SetObjType(OBJ_TYPE objType) {
-	//変更前のオブジェクトタイプリストの設定
-	if (m_apTopObjType[(int)m_objType] == this) m_apTopObjType[(int)m_objType] = m_pNextObjtype;	//このオブジェクトがtopだった場合、次のオブジェクトをtopにする
-	if (m_apCurObjType[(int)m_objType] == this) m_apCurObjType[(int)m_objType] = m_pPrevObjtype;	//このオブジェクトがcurだった場合、前のオブジェクトをcurにする
-	if (m_pPrevObjtype != nullptr) m_pPrevObjtype->m_pNextObjtype = m_pNextObjtype;	//前のオブジェクトのpNextに、このオブジェクトのpNextを代入
-	if (m_pNextObjtype != nullptr) m_pNextObjtype->m_pPrevObjtype = m_pPrevObjtype;	//次のオブジェクトのpPrevに、このオブジェクトのpPrevを代入
-
+void CObject::SetObjType(OBJTYPE objType) {
 	//オブジェクトタイプのリストを変更
 	m_objType = objType;
-	m_pPrevObjtype = m_apCurObjType[(int)m_objType];	//前のポインタの設定
-	m_pNextObjtype = nullptr;						//次のポインタの設定
-	if (m_apTopObjType[(int)m_objType] == nullptr) m_apTopObjType[(int)m_objType] = this;				//topが存在しない場合、このオブジェクトをtopにする
-	if (m_apCurObjType[(int)m_objType] != nullptr) m_apCurObjType[(int)m_objType]->m_pNextObjtype = this;	//curが存在する場合、curのpNextをこのオブジェクトのポインタにする
-	m_apCurObjType[(int)m_objType] = this;			//最後尾のポインタの設定
 }
 
 //=============================================================================
 // オブジェクトの種類の取得
 //=============================================================================
-CObject::OBJ_TYPE CObject::GetObjType(void) {
+CObject::OBJTYPE CObject::GetObjType(void) {
 	return m_objType;
 }
 
@@ -371,5 +416,5 @@ int CObject::GetNumCollisionParts(void) { return 1; }	//当たり判定があるパーツの
 void CObject::GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECTOR3** const ppPosCol, float* const pRadiusCol) {}	//当たり判定の情報の取得
 void CObject::UpdateMtxWorldAll(void) {}			//オブジェクトの全モデルのワールドマトリックスの更新
 
-void CObject::Damage(int nDamage, bool* pDead) {}	//ダメージ
+void CObject::Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead) {}	//ダメージ
 bool CObject::GetItem(int nTypeItem) { return false; }	//アイテム取得時の処理

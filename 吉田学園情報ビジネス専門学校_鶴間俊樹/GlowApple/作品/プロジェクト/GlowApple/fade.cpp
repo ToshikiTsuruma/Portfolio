@@ -11,7 +11,7 @@
 //=============================================================================
 // マクロ定義
 //=============================================================================
-#define COLOR_FADE_DEFAULT (D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f))
+#define COLOR_FADE_DEFAULT (D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -108,6 +108,7 @@ void CFade::Update(void) {
 
 	//フェードアウト
 	if (!m_bFadein && m_colA > 0.0f) {
+		//フェードアウト
 		m_colA -= m_fFadeSpeed;
 		if (m_colA < 0.0f) {
 			m_colA = 0.0f;
@@ -120,11 +121,19 @@ void CFade::Update(void) {
 		//フェード完了時
 		if (m_colA >= 1.0f) {
 			m_colA = 1.0f;
-			m_bFadein = false;
-			//シーン遷移
-			if (pManager != nullptr) {
-				m_bChangeFade = true;	//フェード切り替え時
-				pManager->ChangeScene((int)m_nextScene);
+			//停止状態の判別
+			if (m_nCntStop < m_nStopTime) {
+				//停止カウントを進める
+				m_nCntStop++;
+			}
+			else {
+				m_bFadein = false;
+				//シーン遷移
+				if (pManager != nullptr) {
+					m_bChangeFade = true;	//フェード切り替え時
+					//シーンのタイプが存在している場合のみシーン遷移
+					if (m_nextScene >= (CScene::SCENE_TYPE)0 && m_nextScene < CScene::SCENE_TYPE::ENUM_MAX) pManager->ChangeScene((int)m_nextScene);
+				}
 			}
 		}
 	}
@@ -185,13 +194,15 @@ void CFade::Draw(void) {
 //=============================================================================
 //フェードの設定
 //=============================================================================
-void CFade::SetFade(CScene::SCENE_TYPE typeScene, float fFadeSpeed) {
+void CFade::SetFade(CScene::SCENE_TYPE typeScene, float fFadeSpeed, int nStopTime) {
 	//フェード中の場合終了
 	if (m_bFadein || m_colA > 0.0f) return;
 
 	m_bFadein = true;
 	m_nextScene = typeScene;
 	m_fFadeSpeed = fFadeSpeed;
+	m_nStopTime = nStopTime;
+	m_nCntStop = 0;
 }
 
 //=============================================================================

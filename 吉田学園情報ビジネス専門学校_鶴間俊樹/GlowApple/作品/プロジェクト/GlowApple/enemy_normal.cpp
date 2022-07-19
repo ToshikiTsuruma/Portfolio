@@ -10,12 +10,14 @@
 // マクロ定義
 //=============================================================================
 #define TEXT_FILE_NAME_LOAD_MOTION "data/MOTION/motion_enemyNormal.txt"
-#define MOVE_SPEED (1.0f)			//移動速度
+#define MOVE_SPEED (0.8f)			//移動速度
+#define ROTATE_SPEED (0.05f * D3DX_PI)		//回転速度
 #define NUM_COLLISION (1)			//当たり判定の数
 #define COLLISION_RADIUS (25.0f)	//当たり判定の半径
-#define MAX_LIFE (5)				//体力の最大値
+#define MAX_LIFE (9)				//体力の最大値
 #define DISTANCE_ATTACK (50.0f)		//攻撃する距離
-#define ATTACK_DAMAGE (3)	//攻撃力
+#define ATTACK_DAMAGE (10)	//攻撃力
+#define LIFE_GAUGE_HEIGHT (80.0f)	//敵の位置からの体力ゲージの高さ
 
 //=============================================================================
 // 静的メンバ変数宣言
@@ -27,7 +29,7 @@ CObjectMotion::MOTION_INFO CEnemyNormal::m_aMotionInfo[(int)CEnemyNormal::MOTION
 //=============================================================================
 // デフォルトコンストラクタ
 //=============================================================================
-CEnemyNormal::CEnemyNormal() : CEnemy(m_pPartsInfoArray, m_nNumParts, &m_aMotionInfo[0], (int)MOTION_TYPE::ENUM_MAX, MOVE_SPEED, MAX_LIFE, DISTANCE_ATTACK)
+CEnemyNormal::CEnemyNormal() : CEnemy(m_pPartsInfoArray, m_nNumParts, &m_aMotionInfo[0], (int)MOTION_TYPE::ENUM_MAX, MOVE_SPEED, ROTATE_SPEED, MAX_LIFE, DISTANCE_ATTACK, LIFE_GAUGE_HEIGHT)
 {
 
 }
@@ -184,15 +186,6 @@ void CEnemyNormal::SetMoveMotion(void) {
 }
 
 //=============================================================================
-// 追跡時のモーションを設定
-//=============================================================================
-void CEnemyNormal::SetChaseMotion(void) {
-	if (GetMotionType() != (int)MOTION_TYPE::MOVE) {
-		SetMotion((int)MOTION_TYPE::MOVE);
-	}
-}
-
-//=============================================================================
 // 死亡時のモーションを設定
 //=============================================================================
 void CEnemyNormal::SetDeadMotion(void) {
@@ -247,7 +240,7 @@ void CEnemyNormal::MotionAct(void) {
 			for (int nCntAttack = 0; nCntAttack < nNumCollision; nCntAttack++)
 			{
 				//攻撃
-				CObjectMotion::Attack(OBJ_TYPE::APPLE_TREE, aPosCol[nCntAttack], 10.0f, ATTACK_DAMAGE, DAMAGE_TYPE::ENEMY, nullptr);
+				CObjectMotion::Attack(OBJTYPE_APPLE_TREE, aPosCol[nCntAttack], 10.0f, ATTACK_DAMAGE, DAMAGE_TYPE::ENEMY_PUNCH, nullptr);
 			}
 		}
 		break;	//_攻撃

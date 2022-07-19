@@ -26,6 +26,8 @@ float4 g_matEmissive;	//マテリアルのエミッシブ色
 float4 g_matSpecular;	//マテリアルのスペキュラー色　
 float g_matPower;		//マテリアルの反射の強度
 
+float4 g_colGlow;	//輪郭の発光色
+
 //フォグ
 bool g_bEnableFog;	//フォグが有効かどうか	//if文は良くないらしいので後に方法を調べる
 float3 g_fogColor;	//フォグの色
@@ -127,7 +129,7 @@ VS_OUTPUT RenderSceneVSLight(
 
 	//WVP変換
 	Out.Pos = mul(vPos, g_mWorld);
-	float3 v = normalize(g_posEye.xyz - Out.Pos.xyz);	//視線ベクトル
+	float3 vecView = normalize(g_posEye.xyz - Out.Pos.xyz);	//視線ベクトル
 
 	Out.Pos = mul(Out.Pos, g_mView);
 	Out.Pos = mul(Out.Pos, g_mProj);
@@ -144,11 +146,14 @@ VS_OUTPUT RenderSceneVSLight(
 
 	//スペキュラーの計算
 	float3 r = normalize(2.0 * nor * dot(nor, light) - light);	//正反射ベクトル
-	float i = saturate(dot(r, v));	//反射の明るさ？
+	float i = saturate(dot(r, vecView));	//反射の明るさ？
 
 	//色と掛け合わせる
 	Out.Diffuse.xyz = g_matDiffuse.xyz * col + pow(g_matSpecular.xyz * i, g_matPower);	//ディフューズ + スペキュラー
 	Out.Diffuse.w = g_matDiffuse.w;
+
+	//輪郭を光らせる
+	Out.Diffuse.xyz += pow(1.0 - saturate(dot(vecView, nor)), 2) * g_colGlow.xyz;
 
 	//フォグを計算
 	Out.Fog = 1.0 - saturate(g_fogRange.x + g_fogRange.y * Out.Pos.w);
@@ -283,7 +288,6 @@ PS_OUTPUT RenderScenePS3D(VS_OUTPUT In)
 	if (ZValue > SM_Z + 0.001f && SM_Z < 1.0) {	//シャドウマップが1.0だったらかげができないようにする
 		Out.RGB.xyz = Out.RGB.xyz * 0.5f;
 	}
-
 
 	//エミッシブを加算
 	Out.RGB.xyz += g_matEmissive.xyz;

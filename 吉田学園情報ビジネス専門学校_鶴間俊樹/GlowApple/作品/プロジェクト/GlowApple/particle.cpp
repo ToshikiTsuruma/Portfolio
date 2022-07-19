@@ -84,8 +84,8 @@ void CParticle::Uninit(void) {
 // パーティクルの更新処理
 //=============================================================================
 void CParticle::Update(void) {
-	//ライフが０以下
-	if (m_nLife <= 0) {
+	//ライフが0
+	if (m_nLife == 0) {
 		//パーティクル破棄
 		Uninit();
 		return;

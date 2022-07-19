@@ -29,6 +29,7 @@ public:
 		//オブジェクト
 		OBJ_APPLE,
 		OBJ_APPLE_TREE,
+		OBJ_APPLE_BULLET,
 		OBJ_MENUAPPLE,
 		OBJ_TREE,
 		OBJ_FOUNTAIN,
@@ -40,6 +41,7 @@ public:
 		//敵
 		eNo_0, eNo_1, eNo_2, eNo_3, eNo_4,	//通常敵
 		eHu_0, eHu_1, eHu_2, eHu_3, eHu_4, eHu_5, eHu_6, eHu_7, eHu_8, eHu_9,	//通常敵
+		eSo_0, eSo_1, eSo_2, eSo_3, eSo_4,	//魔術師敵
 
 		ENUM_MAX	//最大数
 	};
@@ -77,6 +79,7 @@ public:
 	float GetMaterialDiffuseAlpha(int nIdx);				//マテリアルのアルファ値を取得
 	void SetMaterialSpecular(D3DXCOLOR col, int nIdx);	//マテリアルのスペキュラー色の設定
 	void SetMaterialEmissive(D3DXCOLOR col, int nIdx);	//マテリアルの発光色の設定
+	void SetColorGlow(D3DXCOLOR col);	//輪郭の発光色の設定
 
 	void CreateCloneMesh(void);		//複製メッシュの生成
 	void ExpansionCloneMesh(void);	//複製メッシュを膨張させる
@@ -96,6 +99,7 @@ private:
 	CModel* m_pParent;		//親のモデルへのポインタ
 	int m_nIdxParent;		//親のインデックス
 	D3DXMATERIAL m_aMat[MAX_MATERIAL];	//モデルのマテリアル
+	D3DXCOLOR m_colGlow;	//輪郭の発光色の色
 
 	bool m_bOutline;			//輪郭があるかどうか
 	LPD3DXMESH m_pCloneMesh;	//複製したメッシュのポインタ

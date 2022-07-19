@@ -26,7 +26,7 @@ public:
 	void Uninit(void);	//終了処理
 	void Update(void);	//更新処理
 	void Draw(void);	//描画処理
-	void SetFade(CScene::SCENE_TYPE typeScene, float fFadeSpeed);	//フェードの設定
+	void SetFade(CScene::SCENE_TYPE typeScene, float fFadeSpeed, int nStopTime);	//フェードの設定
 	void SkipFade(void);	//フェードアウトをスキップさせる
 	bool GetFade(void);		//フェード中かどうかを取得
 	bool GetChangeFade(void);	//フェードインからフェードアウトに切り替わったタイミングかどうか
@@ -36,6 +36,8 @@ private:
 	float m_fFadeSpeed;	//フェードする速度
 	bool m_bFadein;		//フェード中かどうか
 	float m_colA;		//カラーのアルファ値
+	int m_nStopTime;	//フェード切り替わり時の停止時間
+	int m_nCntStop;		//停止時間のカウンター
 	CScene::SCENE_TYPE m_nextScene;	//次のシーン
 	bool m_bChangeFade;	//フェードの切り替わり時
 

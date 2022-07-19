@@ -25,9 +25,9 @@ class CGauge2D : public CGauge
 public:
 
 	CGauge2D();		//デフォルトコンストラクタ
-	CGauge2D(int nMaxValue, int nValue, int nDrawLifeMax);	//オーバーロードされたコンストラクタ
+	CGauge2D(int nMaxValue, bool bVertical);	//オーバーロードされたコンストラクタ
 	virtual ~CGauge2D();		//デストラクタ
-	static CGauge2D* Create(int nMaxValue, int nValue, int nDrawLifeMax);	//生成処理
+	static CGauge2D* Create(int nMaxValue, bool bVertical, int nValue, int nDrawLifeMax, bool bExtend);	//生成処理
 	virtual void Init(void);	//初期化処理
 	virtual void Uninit(void);	//終了処理
 	virtual void Update(void);	//更新処理

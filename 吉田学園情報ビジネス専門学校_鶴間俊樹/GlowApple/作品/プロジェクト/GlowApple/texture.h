@@ -29,6 +29,7 @@ public:
 		TEXT_GAMESTART,
 		TEXT_TUTORIAL,
 		TEXT_CREDIT,
+		QUIT_GAME,
 		TUTORIAL,
 		CREDIT,
 		SELECT_ICON,
@@ -36,6 +37,10 @@ public:
 		ICON_NONE,
 		ICON_APPLE,
 		ICON_HP,
+		GAUGE_HORIZONTAL,
+		GAUGE_VERTICAL,
+		HP_GAUGE_FRAME,
+		GROW_GAUGE_FRAME,
 		TEXT_GROWUP,
 		ARROW_LEFT,
 		ARROW_RIGHT,
@@ -48,7 +53,17 @@ public:
 
 		//エフェクトのテクスチャ
 		EFFECT_EXPLOSION,		// 爆発エフェクト
+		EFFECT_DAMAGE_PLAYER,	// プレイヤー攻撃のダメージ
+		EFFECT_DAMAGE_ENEMY,	// 敵の攻撃のダメージ
+		EFFECT_DAMAGE_BULLET,	// 弾のダメージエフェクト
+		EFFECT_DEATH,			// 死亡エフェクト
 		EFFECT_HEAL_APPLE,		// 林檎による回復エフェクト
+		EFFECT_DRAIN_APPLE,		// 林檎によるHP吸収エフェクト
+		EFFECT_FIRE_BOLL,		// 火の玉
+		EFFECT_FIRE,			// 火
+		EFFECT_THUNDERBOLT,		// 落雷
+		EFFECT_THUNDER,			// 雷
+		EFFECT_WIND,			// 風の渦
 		EFFECT_PARTICLE,		// パーティクル
 		EFFECT_SHOCKWAVE,		// 衝撃波
 

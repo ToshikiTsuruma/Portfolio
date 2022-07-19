@@ -34,6 +34,7 @@ CModel::CModel()
 	D3DXMatrixIdentity(&m_mtxWorld);
 	m_pParent = nullptr;
 	m_nIdxParent = -1;
+	m_colGlow = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);
 	m_bOutline = false;
 	m_pCloneMesh = nullptr;
 }
@@ -340,7 +341,10 @@ void CModel::Draw(void) {
 			pRenderer->SetEffectMaterialEmissive(m_aMat[nCntMat].MatD3D.Emissive);
 			pRenderer->SetEffectMaterialSpecular(m_aMat[nCntMat].MatD3D.Specular);
 			pRenderer->SetEffectMaterialPower(m_aMat[nCntMat].MatD3D.Power);
+			//輪郭の発光色の設定
+			pRenderer->SetEffectColorGlow(m_colGlow);
 
+			//パスの開始
 			pRenderer->BeginPassEffect(PASS_3D | PASS_LIGHT);
 
 			//モデル（パーツ）の描画	
@@ -530,6 +534,13 @@ void CModel::SetMaterialEmissive(D3DXCOLOR col, int nIdx) {
 	m_aMat[nIdx].MatD3D.Emissive.g = col.g;
 	m_aMat[nIdx].MatD3D.Emissive.b = col.b;
 	m_aMat[nIdx].MatD3D.Emissive.a = col.a;
+}
+
+//=============================================================================
+// 輪郭の発光色の設定
+//=============================================================================
+void CModel::SetColorGlow(D3DXCOLOR col) {
+	m_colGlow = col;
 }
 
 //=============================================================================

@@ -204,6 +204,11 @@ void CManager::Uninit(void) {
 // 更新処理
 //=============================================================================
 void CManager::Update(void) {
+	//サウンドの再生開始時フラグをリセット
+	if (m_pSound != nullptr) {
+		m_pSound->ResetBeginPlay();
+	}
+
 	//キーボードの更新処理
 	if (m_pInputKeyboard != nullptr) {
 		m_pInputKeyboard->Update();

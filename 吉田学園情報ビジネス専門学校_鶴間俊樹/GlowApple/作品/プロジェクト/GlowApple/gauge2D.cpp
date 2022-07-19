@@ -26,7 +26,7 @@ CGauge2D::CGauge2D()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CGauge2D::CGauge2D(int nMaxValue, int nValue, int nDrawLifeMax) : CGauge(nMaxValue, nValue, nDrawLifeMax)
+CGauge2D::CGauge2D(int nMaxValue, bool bVertical) : CGauge(nMaxValue, bVertical)
 {
 
 }
@@ -42,12 +42,15 @@ CGauge2D::~CGauge2D()
 //=============================================================================
 // 2Dゲージの生成処理
 //=============================================================================
-CGauge2D* CGauge2D::Create(int nMaxValue, int nValue, int nDrawLifeMax) {
+CGauge2D* CGauge2D::Create(int nMaxValue, bool bVertical, int nValue, int nDrawLifeMax, bool bExtend) {
 	CGauge2D* pGauge2D;
-	pGauge2D = new CGauge2D(nMaxValue, nValue, nDrawLifeMax);
+	pGauge2D = new CGauge2D(nMaxValue, bVertical);
 	if (pGauge2D == nullptr) return nullptr;
 
 	pGauge2D->Init();
+	pGauge2D->SetGaugeValue(nValue);
+	pGauge2D->SetMaxDrawLife(nDrawLifeMax);
+	pGauge2D->SetExtend(bExtend);
 
 	return pGauge2D;
 }
@@ -77,52 +80,28 @@ void CGauge2D::Update(void) {
 // 2Dゲージを生成
 //=============================================================================
 void CGauge2D::CreateGauge(CTexture::TEXTURE_TYPE typeTex, D3DXVECTOR3 pos, float fWidth, float fHeight) {
-	//ゲージのダブルポインタを取得
-	CObject** ppGauge = GetGaugePtr();
-
-	//ゲージを生成するポインタ変数のアドレスがnullの場合終了
-	if (ppGauge == nullptr) return;
-
-	//すでに生成されている場合終了
-	if (*ppGauge != nullptr) return;
-
 	//ゲージの生成
-	*ppGauge = CObject2D::Create(pos, typeTex, fWidth, fHeight);
+	CObject* pGauge = CObject2D::Create(pos, typeTex, fWidth, fHeight);
+	//ゲージのポインタを設定
+	SetGaugePtr(pGauge);
 }
 
 //=============================================================================
 // 2Dゲージの背景を生成
 //=============================================================================
 void CGauge2D::CreateGaugeBG(CTexture::TEXTURE_TYPE typeTex, D3DXVECTOR3 pos, float fWidth, float fHeight) {
-	//ゲージの背景のダブルポインタを取得
-	CObject** ppGaugeBG = GetGaugeBGPtr();
-
-	//ゲージの背景を生成するポインタ変数のアドレスがnullの場合終了
-	if (ppGaugeBG == nullptr) return;
-
-	//すでに生成されている場合終了
-	if (*ppGaugeBG != nullptr) return;
-
 	//背景の生成
-	*ppGaugeBG = CObject2D::Create(pos, typeTex, fWidth, fHeight);
+	CObject* pGaugeBG = CObject2D::Create(pos, typeTex, fWidth, fHeight);
+	//ゲージのポインタを設定
+	SetGaugeBGPtr(pGaugeBG);
 }
 
 //=============================================================================
 // 2Dゲージの枠を生成
 //=============================================================================
 void CGauge2D::CreateGaugeFrame(CTexture::TEXTURE_TYPE typeTex, D3DXVECTOR3 pos, float fWidth, float fHeight) {
-	//ゲージの背景のダブルポインタを取得
-	CObject** ppGaugeFrame = GetGaugeFramePtr();
-
-	//ゲージの背景を生成するポインタ変数のアドレスがnullの場合終了
-	if (ppGaugeFrame == nullptr) return;
-
-	//すでに生成されている場合終了
-	if (*ppGaugeFrame != nullptr) return;
-
 	//背景の生成
-	*ppGaugeFrame = CObject2D::Create(pos, typeTex, fWidth, fHeight);
-
-	//生成されていない場合終了
-	if (*ppGaugeFrame == nullptr) return;
+	CObject* pGaugeFrame = CObject2D::Create(pos, typeTex, fWidth, fHeight);
+	//ゲージのポインタを設定
+	SetGaugeFramePtr(pGaugeFrame);
 }

@@ -10,26 +10,32 @@
 #include "gameScene.h"
 #include "player.h"
 #include "terrain.h"
-#include "enemy_normal.h"
-#include "enemy_human.h"
 #include "effect.h"
 #include "billboard.h"
 #include "particleEffect.h"
 #include "gauge3D.h"
 #include "appleTree.h"
+#include "apple_black.h"
 
 //=============================================================================
 // マクロ定義
 //=============================================================================
-#define ROTATE_SPEED (0.05f * D3DX_PI)	//回転速度
 #define FALLDOWN_TIME (35)	//死亡時の倒れる時間
 #define DEAD_TIME (120)	//死亡後消えるまでの時間
-#define LIFE_GAUGE_HEIGHT (100.0f)	//敵の位置からの体力ゲージの高さ
+
+#define GOLD_RATE (7)	//金の敵になる確率
+#define DEFAULT_GROW_VALUE (1)	//デフォルトの敵死亡時の林檎の木成長量
+#define GOLD_GROW_VALUE (10)		//金の敵死亡時の林檎の木成長量
+
+//=============================================================================
+// 静的メンバ変数宣言
+//=============================================================================
+bool CEnemy::m_bGoldRush = false;
 
 //=============================================================================
 // デフォルトコンストラクタ
 //=============================================================================
-CEnemy::CEnemy() : m_fMoveSpeed(0.0f), m_nMaxLife(0), m_fDistAttack(0.0f)
+CEnemy::CEnemy() : m_fMoveSpeed(0.0f), m_fRotateSpeed(0.0f), m_nMaxLife(0), m_fDistAttack(0.0f), m_fHeightLifeGauge(0.0f)
 {
 
 }
@@ -37,14 +43,15 @@ CEnemy::CEnemy() : m_fMoveSpeed(0.0f), m_nMaxLife(0), m_fDistAttack(0.0f)
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CEnemy::CEnemy(const PARTS_INFO* pPartsInfoArray, int nNumParts, const MOTION_INFO* pMotionInfoArray, int nNumTypeMotion, float fMoveSpeed, int nLife, float fDistAttack)
-	: CObjectMotion(pPartsInfoArray, nNumParts, pMotionInfoArray, nNumTypeMotion, false), m_fMoveSpeed(fMoveSpeed), m_nMaxLife(nLife), m_fDistAttack(fDistAttack)
+CEnemy::CEnemy(const PARTS_INFO* pPartsInfoArray, int nNumParts, const MOTION_INFO* pMotionInfoArray, int nNumTypeMotion, float fMoveSpeed, float fRotSpeed, int nLife, float fDistAttack, float fHeightLifeGauge)
+	: CObjectMotion(pPartsInfoArray, nNumParts, pMotionInfoArray, nNumTypeMotion, false), m_fMoveSpeed(fMoveSpeed), m_fRotateSpeed(fRotSpeed), m_nMaxLife(nLife), m_fDistAttack(fDistAttack), m_fHeightLifeGauge(fHeightLifeGauge)
 {
 	SetUpdatePriority(UPDATE_PRIORITY::ENEMY);	//更新順の設定
 	SetDrawPriority(DRAW_PRIORITY::CHARA);	//描画順の設定
-	SetObjType(OBJ_TYPE::ENEMY);	//オブジェクトタイプの設定
+	SetObjType(OBJTYPE_ENEMY);	//オブジェクトタイプの設定
 
 	SetColorOutlineAll(D3DXCOLOR(0.8f, 0.0f, 0.0f, 1.0f));	//輪郭の色の設定
+	SetColorGlowAll(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));	//輪郭の発光色の設定
 
 	m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_rotDestY = 0.0f;
@@ -55,12 +62,12 @@ CEnemy::CEnemy(const PARTS_INFO* pPartsInfoArray, int nNumParts, const MOTION_IN
 	m_bGoldEnemy = false;
 
 	//体力ゲージの生成
-	m_pGaugeLife = CGauge3D::Create(m_nMaxLife, m_nLife, 180);
+	m_pGaugeLife = CGauge3D::Create(m_nMaxLife, false, m_nLife, 600, false);
 	//ゲージの背景の設定
-	m_pGaugeLife->CreateGaugeBG(CTexture::TEXTURE_TYPE::NONE, D3DXVECTOR3(0.0f, 0.0f, 0.0f), 75.0f, 15.0f);
+	m_pGaugeLife->CreateGaugeBG(CTexture::TEXTURE_TYPE::NONE, D3DXVECTOR3(0.0f, 0.0f, 0.0f), 55.0f, 7.0f);
 	m_pGaugeLife->SetGaugeBGColor(D3DXCOLOR(0.3f, 0.3f, 0.3f, 1.0f));
 	//ゲージの設定
-	m_pGaugeLife->CreateGauge(CTexture::TEXTURE_TYPE::NONE, D3DXVECTOR3(0.0f, 0.0f, 0.0f), 70.0f, 10.0f);
+	m_pGaugeLife->CreateGauge(CTexture::TEXTURE_TYPE::NONE, D3DXVECTOR3(0.0f, 0.0f, 0.0f), 50.0f, 4.0f);
 	m_pGaugeLife->SetGaugeColor(D3DXCOLOR(1.0f, 0.2f, 0.0f, 1.0f));
 	//ゲージを非表示
 	m_pGaugeLife->SetGaugeDraw(false);
@@ -75,49 +82,6 @@ CEnemy::~CEnemy()
 }
 
 //=============================================================================
-// 同心円状にランダムに角度ずらして敵を配置する
-//=============================================================================
-//引数：中心の位置　円の数　円ごとの距離（半径）　（同じ円の一つ前の敵との）最短距離、最長距離
-void CEnemy::SetEnemyCircle(D3DXVECTOR3 posCenter, int nNumCircle, float fDistCircle, int nMinDist, int nMaxDist) {
-	int nCntCircle = 0;	//作成した木の円の数
-	float fRotCreate = 0.0f;	//配置する角度
-	float fRandStartRot = (rand() % 314) * 0.01f;	//配置の開始角度の位置をランダム 前方が過疎気味になるため
-
-	while (nCntCircle < nNumCircle)
-	{
-		int nRandDist = rand() % (nMaxDist + 1 - nMinDist) + nMinDist;	//一つ前の木との距離
-		fRotCreate += nRandDist / ((nCntCircle + 1) * fDistCircle * D3DX_PI) * D3DX_PI;	//ランダムな距離 / 円周の長さの半分 * pi でラジアンを求める
-
-		//一周配置した場合
-		if (fRotCreate >= D3DX_PI * 2.0f) {
-			nCntCircle++;	//カウントの加算
-			fRotCreate = 0.0f;	//配置する角度のリセット
-			fRandStartRot = (rand() % 314) * 0.01f;	//配置する角度のランダム値を再設定
-		}
-		else {
-			//敵を生成する位置の設定
-			D3DXVECTOR3 posCreate = posCenter;	//配置する位置
-			posCreate.x += sinf(fRotCreate + fRandStartRot) * fDistCircle * (nCntCircle + 1);
-			posCreate.z += cosf(fRotCreate + fRandStartRot) * fDistCircle * (nCntCircle + 1);
-			//敵の種類をランダムで決める
-			int nRandType = rand() % 2;
-			//敵の生成
-			switch (nRandType)
-			{
-				//通常敵
-			case 0:
-				CEnemyNormal::Create(posCreate);
-				break;
-				//人形敵
-			case 1:
-				CEnemyHuman::Create(posCreate);
-				break;
-			}
-		}
-	}
-}
-
-//=============================================================================
 // エネミーの初期化処理
 //=============================================================================
 HRESULT CEnemy::Init(void) {
@@ -125,11 +89,11 @@ HRESULT CEnemy::Init(void) {
 	SetEnableCollision(true);
 
 	//ランダムで金色の敵
-	int nRandGold = rand() % 3;
-	if (nRandGold == 0) {
+	int nRandGold = rand() % GOLD_RATE;
+	if (nRandGold == 0 || m_bGoldRush) {
 		m_bGoldEnemy = true;
-		SetDiffuseModelAll(D3DXCOLOR(0.7f, 0.5f, 0.0f, 1.0f));
-		SetSpecularModelAll(D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f));
+		SetDiffuseModelAll(D3DXCOLOR(0.7f, 0.5f, 0.0f, 1.0f), 0);
+		SetSpecularModelAll(D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), 0);
 	}
 
 	//モーションオブジェクトの初期化処理
@@ -218,17 +182,17 @@ void CEnemy::Update(void) {
 		//目標角度がマイナス、角度がプラスのときに、減算した結果が-πを超えた場合
 		if (m_rotDestY - rotY < -D3DX_PI) {
 			//加算
-			rot.y += ROTATE_SPEED;
+			rot.y += m_fRotateSpeed;
 		}
 		//目標角度がプラス、角度がマイナスのときに、減算した結果がπを超えた場合
 		else if (m_rotDestY - rotY > D3DX_PI) {
 			//減算
-			rot.y -= ROTATE_SPEED;
+			rot.y -= m_fRotateSpeed;
 		}
 		//個々の正負は関係ない場合
 		else if (m_rotDestY - rotY > 0) {
 			//加算
-			rot.y += ROTATE_SPEED;
+			rot.y += m_fRotateSpeed;
 			//目標角度超過時の調整
 			if (rot.y > m_rotDestY) {
 				rot.y = m_rotDestY;
@@ -236,7 +200,7 @@ void CEnemy::Update(void) {
 		}
 		else if (m_rotDestY - rotY < 0) {
 			//減算
-			rot.y -= ROTATE_SPEED;
+			rot.y -= m_fRotateSpeed;
 			//目標角度超過時の調整
 			if (rot.y < m_rotDestY) {
 				rot.y = m_rotDestY;
@@ -323,7 +287,7 @@ void CEnemy::Update(void) {
 		//体力ゲージの更新
 		m_pGaugeLife->Update();
 		//体力ゲージの位置を更新
-		m_pGaugeLife->SetAllGaugePos(D3DXVECTOR3(GetPos().x, GetPos().y + LIFE_GAUGE_HEIGHT, GetPos().z));
+		m_pGaugeLife->SetAllGaugePos(D3DXVECTOR3(GetPos().x, GetPos().y + m_fHeightLifeGauge, GetPos().z));
 	}
 }
 
@@ -337,12 +301,37 @@ void CEnemy::Draw(void) {
 //=============================================================================
 // エネミーのダメージ
 //=============================================================================
-void CEnemy::Damage(int nDamage, bool* pDead) {
+void CEnemy::Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead) {
 	if (m_bDead) return;
-	
+
 	//ダメージ
 	m_nLife -= nDamage;
 
+	//マネージャーの取得
+	CManager* pManager = CManager::GetManager();
+	//サウンドの取得
+	CSound *pSound = nullptr;
+	if (pManager != nullptr) pSound = pManager->GetSound();
+
+	//攻撃のタイプごとの処理
+	switch (typeDamage)
+	{
+	case DAMAGE_TYPE::PLAYER_PUNCH:
+	case DAMAGE_TYPE::SHOCKWAVE:
+		//攻撃エフェクトの生成
+		CEffect::Create(GetPos() + D3DXVECTOR3(0.0f, 50.0f, 0.0f), CEffect::EFFECT_TYPE::DAMAGE_PLAYER, 40.0f, 40.0f, false);
+		//ダメージ音の再生
+		if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::DAMAGE_PUNCH);
+		break;
+	case DAMAGE_TYPE::THUNDERBOLT:
+		//ダメージエフェクトの生成
+		CEffect::Create(GetPos() + D3DXVECTOR3(0.0f, 50.0f, 0.0f), CEffect::EFFECT_TYPE::THUNDER, 50.0f, 50.0f, false);
+		//ダメージ音の再生
+		if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::DAMAGE_THUNDER);
+		break;
+	}
+
+	//死亡判定
 	if (m_nLife <= 0) {
 		//死亡
 		if (pDead != nullptr) *pDead = true;
@@ -390,12 +379,15 @@ void CEnemy::Dead(void) {
 	if (pGame != nullptr) pAppleTree = pGame->GetAppleTree();
 	//林檎の木を成長させる
 	if (pAppleTree != nullptr) {
-		int nGrowValue = 1; //成長量
+		int nGrowValue = DEFAULT_GROW_VALUE; //成長量
 		//金の敵の場合多く成長
-		if (m_bGoldEnemy) nGrowValue = 3;
+		if (m_bGoldEnemy) nGrowValue = GOLD_GROW_VALUE;
 		//木を成長
 		pAppleTree->AddGrow(nGrowValue);
 	}
+
+	//黒林檎のHP吸収
+	CAppleBlack::DrainAllApple();
 
 	//サウンドの取得
 	CSound* pSound = nullptr;

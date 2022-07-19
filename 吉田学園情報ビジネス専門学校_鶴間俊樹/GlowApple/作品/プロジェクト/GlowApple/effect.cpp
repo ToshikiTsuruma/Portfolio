@@ -15,8 +15,17 @@
 //=============================================================================
 // デフォルトコンストラクタ
 //=============================================================================
-CEffect::CEffect()
+CEffect::CEffect() : m_bLoop(false)
 {
+
+}
+
+//=============================================================================
+// オーバーロードされたコンストラクタ
+//=============================================================================
+CEffect::CEffect(EFFECT_TYPE type, bool bLoop) : m_bLoop(bLoop)
+{
+	m_type = type;
 	m_nCntAnim = 0;
 	m_nSpanAnim = 0;
 	m_nPatternAnim = 0;
@@ -39,31 +48,14 @@ CEffect::~CEffect()
 //=============================================================================
 // 生成処理
 //=============================================================================
-CEffect* CEffect::Create(D3DXVECTOR3 pos, EFFECT_TYPE type, float fWidth, float fHeight) {
+CEffect* CEffect::Create(D3DXVECTOR3 pos, EFFECT_TYPE type, float fWidth, float fHeight, bool bLoop) {
 	CEffect* pEffect;
-	pEffect = new CEffect;
+	pEffect = new CEffect(type, bLoop);
 	if (pEffect == nullptr) return nullptr;
 
-	pEffect->m_type = type;
 	pEffect->SetPos(pos);
 	pEffect->SetSize(D3DXVECTOR3(fWidth, fHeight, 0.0f));
 
-	switch ((EFFECT_TYPE)type)
-	{
-	case EFFECT_TYPE::EXPLOSION:
-		pEffect->SetTexType(CTexture::TEXTURE_TYPE::EFFECT_EXPLOSION);
-		pEffect->m_nSpanAnim = 2;
-		pEffect->m_nPatternU = 7;
-		pEffect->m_nPatternV = 1;
-		break;
-	case EFFECT_TYPE::HEAL_APPLE:
-		pEffect->SetTexType(CTexture::TEXTURE_TYPE::EFFECT_HEAL_APPLE);
-		pEffect->m_nSpanAnim = 1;
-		pEffect->m_nPatternU = 9;
-		pEffect->m_nPatternV = 1;
-		pEffect->m_bDestBlendOne = true;
-		break;
-	}
 	pEffect->Init();
 
 	return pEffect;
@@ -73,6 +65,88 @@ CEffect* CEffect::Create(D3DXVECTOR3 pos, EFFECT_TYPE type, float fWidth, float 
 // エフェクトの初期化処理
 //=============================================================================
 HRESULT CEffect::Init(void) {
+	switch (m_type)
+	{
+	case EFFECT_TYPE::EXPLOSION:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_EXPLOSION);
+		m_nSpanAnim = 2;
+		m_nPatternU = 7;
+		m_nPatternV = 1;
+		break;
+	case EFFECT_TYPE::DAMAGE_PLAYER:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_DAMAGE_PLAYER);
+		m_nSpanAnim = 1;
+		m_nPatternU = 1;
+		m_nPatternV = 15;
+		break;
+	case EFFECT_TYPE::DAMAGE_ENEMY:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_DAMAGE_ENEMY);
+		m_nSpanAnim = 1;
+		m_nPatternU = 13;
+		m_nPatternV = 1;
+		break;
+	case EFFECT_TYPE::DAMAGE_BULLET:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_DAMAGE_BULLET);
+		m_nSpanAnim = 1;
+		m_nPatternU = 12;
+		m_nPatternV = 1;
+		break;
+	case EFFECT_TYPE::DEATH:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_DEATH);
+		m_nSpanAnim = 2;
+		m_nPatternU = 8;
+		m_nPatternV = 1;
+		break;
+	case EFFECT_TYPE::HEAL_APPLE:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_HEAL_APPLE);
+		m_nSpanAnim = 1;
+		m_nPatternU = 9;
+		m_nPatternV = 1;
+		m_bDestBlendOne = true;	//加算合成
+		break;
+	case EFFECT_TYPE::DRAIN:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_DRAIN_APPLE);
+		m_nSpanAnim = 1;
+		m_nPatternU = 10;
+		m_nPatternV = 1;
+		m_bDestBlendOne = true;	//加算合成
+		break;
+	case EFFECT_TYPE::FIRE:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_FIRE);
+		m_nSpanAnim = 2;
+		m_nPatternU = 8;
+		m_nPatternV = 1;
+		break;
+	case EFFECT_TYPE::FIRE_BOLL:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_FIRE_BOLL);
+		m_nSpanAnim = 2;
+		m_nPatternU = 5;
+		m_nPatternV = 2;
+		SetZtestAlways(false);	//他のオブジェクトに遮られる
+		SetRotateYOnly(false);
+		break;
+	case EFFECT_TYPE::THUNDERBOLT:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_THUNDERBOLT);
+		m_nSpanAnim = 1;
+		m_nPatternU = 8;
+		m_nPatternV = 1;
+		SetZtestAlways(false);	//他のオブジェクトに遮られる
+		SetRotateYOnly(true);	//Y回転のみ
+		break;
+	case EFFECT_TYPE::THUNDER:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_THUNDER);
+		m_nSpanAnim = 3;
+		m_nPatternU = 8;
+		m_nPatternV = 1;
+		break;
+	case EFFECT_TYPE::WIND:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_WIND);
+		m_nSpanAnim = 3;
+		m_nPatternU = 12;
+		m_nPatternV = 1;
+		break;
+	}
+
 	//メンバ変数の初期化
 	m_nCntAnim = 0;
 	m_nPatternAnim = 0;
@@ -104,8 +178,16 @@ void CEffect::Update(void) {
 
 		//アニメーションを終了した場合
 		if (m_nPatternAnim >= m_nPatternU * m_nPatternV) {
-			Uninit();
-			return;
+			if (m_bLoop) {
+				//ループさせる
+				m_nPatternAnim = 0;
+			}
+			else
+			{
+				//破棄して終了
+				Uninit();
+				return;
+			}
 		}
 
 		//テクスチャ座標の設定

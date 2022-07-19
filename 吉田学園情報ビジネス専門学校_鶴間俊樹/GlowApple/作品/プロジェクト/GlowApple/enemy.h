@@ -35,16 +35,17 @@ public:
 	};	//モーションの区分
 
 	CEnemy();	//デフォルトコンストラクタ
-	CEnemy(const PARTS_INFO* pPartsInfoArray, int nNumParts, const MOTION_INFO* pMotionInfoArray, int nNumTypeMotion, float fMoveSpeed, int nLife, float fDistAttack);	//オーバーロードされたコンストラクタ
+	CEnemy(const PARTS_INFO* pPartsInfoArray, int nNumParts, const MOTION_INFO* pMotionInfoArray, int nNumTypeMotion, float fMoveSpeed, float fRotSpeed, int nLife, float fDistAttack, float fHeightLifeGauge);	//オーバーロードされたコンストラクタ
 	~CEnemy();	//デストラクタ
 
-	static void SetEnemyCircle(D3DXVECTOR3 posCenter, int nNumCircle, float fRadiusCircle, int nMinDist, int nMaxDist);	//同心円状にランダムに角度ずらして敵を配置する
 	virtual HRESULT Init(void);		//初期化処理
 	virtual void Uninit(void);		//終了処理
 	virtual void Update(void);		//更新処理
 	virtual void Draw(void);		//描画処理
-	void Damage(int nDamage, bool* pDead);		//ダメージ
+	void Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead);		//ダメージ
 	void Dead(void);		//死亡時処理
+
+	static void SetGoldRush(bool bRush) { m_bGoldRush = bRush; }	//ゴールドラッシュの設定
 
 	virtual MOTION_CATEGORY GetMotionCategory(void) = 0;	//モーションの区分の取得
 	virtual void SetMoveMotion(void) = 0;	//移動時のモーションを設定
@@ -59,6 +60,7 @@ private:
 	void Attack(void);	//攻撃の処理
 
 	const float m_fMoveSpeed;	//移動速度
+	const float m_fRotateSpeed;	//回転速度
 	const float m_fDistAttack;	//攻撃する距離
 	const int m_nMaxLife;	//最大の体力
 
@@ -68,9 +70,12 @@ private:
 	int m_nLife;			//体力
 	bool m_bDead;			//死亡
 	int m_nCntDead;			//死亡後のカウント
+
+	static bool m_bGoldRush;	//すべての敵が金になるかどうか
 	bool m_bGoldEnemy;		//金色の敵かどうか
 
 	CGauge3D* m_pGaugeLife;	//体力ゲージ
+	const float m_fHeightLifeGauge;	//体力ゲージの高さの差分
 };
 
 #endif // !_ENEMY_H_

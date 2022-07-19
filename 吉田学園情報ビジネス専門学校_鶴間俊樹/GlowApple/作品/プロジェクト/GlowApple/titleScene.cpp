@@ -56,6 +56,7 @@ void CTitleScene::Init(void) {
 	CObject2D* pTitleBG = CObject2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f), CTexture::TEXTURE_TYPE::BG_TITLE , SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (pTitleBG != nullptr) pTitleBG->SetDrawPriority(CObject::DRAW_PRIORITY::UI_BG);
 
+	CObject2D::Create(D3DXVECTOR3(180.0f, 60.0f, 0.0f), CTexture::TEXTURE_TYPE::QUIT_GAME, 300.0f, 80.0f);
 	CObject2D* pTitleName = CObject2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f - 100.0f, 0.0f), CTexture::TEXTURE_TYPE::TEXT_TITLENAME, 800.0f, 200.0f);
 
 	//マネージャーの取得
@@ -145,7 +146,7 @@ void CTitleScene::Update(void) {
 			case 0:
 				//シーン遷移開始
 				m_bBeginFade = true;
-				if (pFade != nullptr) pFade->SetFade(CScene::SCENE_TYPE::GAME, 0.02f);
+				if (pFade != nullptr) pFade->SetFade(CScene::SCENE_TYPE::GAME, 0.02f, 60);
 				//決定音の再生
 				if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::TITLE_START);
 				//メニューの選択をロック

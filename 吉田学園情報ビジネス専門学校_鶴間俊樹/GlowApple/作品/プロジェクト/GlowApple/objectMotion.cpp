@@ -690,30 +690,35 @@ void CObjectMotion::InitObjAttacked(void) {
 //=============================================================================
 // 攻撃
 //=============================================================================
-void CObjectMotion::Attack(OBJ_TYPE objtype, D3DXVECTOR3 posAttack, float fRadiusAttack, int nDamage, CObjectMotion::DAMAGE_TYPE typeDamage, int* pNumKill) {
-	CObject* pObject;	//オブジェクトへのポインタ
-	pObject = GetObjectTopObjtype(objtype);	//当たり判定を行うオブジェクトタイプのリストの先頭を取得
+void CObjectMotion::Attack(int nObjtype, D3DXVECTOR3 posAttack, float fRadiusAttack, int nDamage, CObject::DAMAGE_TYPE typeDamage, int* pNumKill) {
+	CObject* pObject = GetObjectTopAll();	//全オブジェクトのリストの先頭を取得
 
 	while (pObject != nullptr) {
-		CObject* pObjNext = GetObjectNextObjtype(pObject);	//リストの次のオブジェクトのポインタを取得
+		CObject* pObjNext = GetObjectNextAll(pObject);	//リストの次のオブジェクトのポインタを取得
+
+		//オブジェクトタイプの確認
+		bool bMatchType = false;
+		if (pObject->GetObjType() & nObjtype) bMatchType = true;
 
 		//すでに攻撃が当たっている場合
 		bool bAttacked = false;	//すでに攻撃されているかどうか
-
 		if (m_pListAttacked != nullptr) {
 			//リストにすでに追加されている場合
 			bAttacked = m_pListAttacked->MatchObject(pObject);
 		}
 
+		//死亡状態の取得
 		bool bDeath = pObject->GetDeath();
+
+		//当たり判定可能状態の取得
 		bool bEnableCollision = pObject->GetEnableCollision();
 
-		//攻撃可能な範囲にいるかどうか　（遠くのものすべてと当たり判定を行うとかなり処理が重くなるため）
+		//攻撃可能な範囲にいるかどうか
 		D3DXVECTOR2 vecObj = D3DXVECTOR2(pObject->GetPos().x - posAttack.x, pObject->GetPos().z - posAttack.z);	//攻撃位置とオブジェクトのベクトル
 		float fDistObj = D3DXVec2Length(&vecObj);	//攻撃位置とオブジェクトの距離
 
 		//次のループに飛ばす
-		if (bAttacked || bDeath || !bEnableCollision || fDistObj > MAX_ATTACK_DISTANCE) {
+		if (!bMatchType || bAttacked || bDeath || !bEnableCollision || fDistObj > MAX_ATTACK_DISTANCE) {
 			pObject = pObjNext;	//リストの次のオブジェクトを代入
 			continue;	
 		}
@@ -769,35 +774,10 @@ void CObjectMotion::Attack(OBJ_TYPE objtype, D3DXVECTOR3 posAttack, float fRadiu
 		if (bCollision) {
 			bool bDead = false;	//攻撃されたオブジェクトが死亡したかどうか
 			//オブジェクトにダメージを与える
-			pObject->Damage(nDamage, &bDead);
+			pObject->Damage(nDamage, typeDamage, &bDead);
 			//倒した数の加算
 			if (bDead && pNumKill != nullptr) (*pNumKill)++;
 
-			//攻撃のタイプ
-			if (typeDamage > DAMAGE_TYPE::NONE && typeDamage < DAMAGE_TYPE::ENUM_MAX) {
-				//マネージャーの取得
-				CManager* pManager = CManager::GetManager();
-				//サウンドの取得
-				CSound *pSound = nullptr;
-				if (pManager != nullptr) pSound = pManager->GetSound();
-
-				switch ((DAMAGE_TYPE)typeDamage)
-				{
-				case DAMAGE_TYPE::PUNCH:
-					//攻撃エフェクトの生成
-					//CEffect::Create(posHit, CEffect::EFFECT_TYPE::PUNCH_DAMAGE, 30.0f, 30.0f);
-					//ダメージ音の再生
-					if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::DAMAGE_PUNCH);
-					break;
-
-				case DAMAGE_TYPE::ENEMY:
-					//攻撃エフェクトの生成
-					//CEffect::Create(posHit, CEffect::EFFECT_TYPE::ENEMY_DAMAGE, 40.0f, 40.0f);
-					//ダメージ音の再生
-					if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::DAMAGE_PUNCH);
-					break;
-				}
-			}
 			//オブジェクトが死亡していない場合攻撃済みリストに追加
 			if (!pObject->GetDeath()) {
 				if (m_pListAttacked != nullptr) m_pListAttacked->AppendNode(pObject);
@@ -993,28 +973,42 @@ int CObjectMotion::GetCurMotionCnt(void) {
 //=============================================================================
 // モデルのディフューズ色を設定する
 //=============================================================================
-void CObjectMotion::SetDiffuseModelAll(D3DXCOLOR col) {
+void CObjectMotion::SetDiffuseModelAll(D3DXCOLOR col, int nIdx) {
 	for (int nCnt = 0; nCnt < m_nNumParts; nCnt++) {
 		//モデルがnullの場合ループを飛ばす
 		if (m_ppModelArray[nCnt] == nullptr) {
 			continue;
 		}
 		//色の設定
-		m_ppModelArray[nCnt]->SetMaterialDiffuse(col, 0);
+		m_ppModelArray[nCnt]->SetMaterialDiffuse(col, nIdx);
 	}
 }
 
 //=============================================================================
 // モデルのスペキュラー色を設定する
 //=============================================================================
-void CObjectMotion::SetSpecularModelAll(D3DXCOLOR col) {
+void CObjectMotion::SetSpecularModelAll(D3DXCOLOR col, int nIdx) {
 	for (int nCnt = 0; nCnt < m_nNumParts; nCnt++) {
 		//モデルがnullの場合ループを飛ばす
 		if (m_ppModelArray[nCnt] == nullptr) {
 			continue;
 		}
 		//色の設定
-		m_ppModelArray[nCnt]->SetMaterialSpecular(col, 0);
+		m_ppModelArray[nCnt]->SetMaterialSpecular(col, nIdx);
+	}
+}
+
+//=============================================================================
+// モデルの輪郭の発光色を設定する
+//=============================================================================
+void CObjectMotion::SetColorGlowAll(D3DXCOLOR col) {
+	for (int nCnt = 0; nCnt < m_nNumParts; nCnt++) {
+		//モデルがnullの場合ループを飛ばす
+		if (m_ppModelArray[nCnt] == nullptr) {
+			continue;
+		}
+		//色の設定
+		m_ppModelArray[nCnt]->SetColorGlow(col);
 	}
 }
 

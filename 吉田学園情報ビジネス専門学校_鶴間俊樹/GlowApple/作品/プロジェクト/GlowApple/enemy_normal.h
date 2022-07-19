@@ -48,7 +48,6 @@ public:
 
 	MOTION_CATEGORY GetMotionCategory(void);	//モーションの区分の取得
 	void SetMoveMotion(void);	//移動時のモーションを設定
-	void SetChaseMotion(void);	//追跡時のモーションを設定
 	void SetDeadMotion(void);	//死亡時のモーションを設定
 	void AttackStart(void);	//攻撃開始時
 	void MotionEnd(void);	//モーション終了時

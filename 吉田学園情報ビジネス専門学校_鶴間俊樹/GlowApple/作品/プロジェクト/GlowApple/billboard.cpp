@@ -7,8 +7,8 @@
 #include "billboard.h"
 #include "manager.h"
 #include "renderer.h"
-//#include "game.h"
-//#include "player.h"
+
+#include "camera.h"
 
 //=============================================================================
 // 静的メンバ変数宣言
@@ -44,11 +44,15 @@ CBillboard::CBillboard()
 	SetDrawPriority(DRAW_PRIORITY::EFFECT);	//描画順の設定
 
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXMatrixIdentity(&m_mtxWorld);
 	m_fWidth = 0.0f;
 	m_fRatioWidth = 1.0f;
 	m_fHeight = 0.0f;
+	m_fRatioHeight = 1.0f;
 	m_offsetPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_bRotateYOnly = false;
+
 	m_bEnableFog = false;
 	m_bZtestAlways = true;
 	m_bZwriteEnable = false;
@@ -138,7 +142,7 @@ void CBillboard::Uninit(void) {
 // ビルボードの更新処理
 //=============================================================================
 void CBillboard::Update(void) {
-
+	m_pos += m_move;
 }
 
 //=============================================================================
@@ -154,7 +158,8 @@ void CBillboard::Draw(void) {
 	//デバイスの取得
 	LPDIRECT3DDEVICE9 pDevice = pRenderer->GetDevice();
 	if (pDevice == nullptr) return;		//nullの場合終了
-
+	//カメラの取得
+	CCamera* pCamera = pManager->GetCamera();
 
 	//ビルボードはZテクスチャに書き込まない
 	if (pRenderer->GetDrawZTex()) return;
@@ -177,22 +182,35 @@ void CBillboard::Draw(void) {
 		if (fDistPlayer > m_fDistDrawMax) return;
 	}*/
 
-	D3DXMATRIX mtxTrans;	//計算用マトリックス
-	D3DXMATRIX mtxView;		//ビューマトリックス取得用
-	LPDIRECT3DTEXTURE9 pTexture;	//テクスチャへのポインタ
-
-	//ビューマトリックスを取得
-	pDevice->GetTransform(D3DTS_VIEW, &mtxView);
-	//テクスチャの取得
-	pTexture = CTexture::GetTexture(GetTexType());
+	D3DXMATRIX mtxRot, mtxTrans;	//計算用マトリックス
+	D3DXVECTOR3 rotCamera = pCamera->GetRot();
 
 	//ワールドマトリックスの初期化
 	D3DXMatrixIdentity(&m_mtxWorld);
+
+	//Y回転のみ反映させる場合
+	if (m_bRotateYOnly && pCamera != nullptr) {
+		//向きを反映
+		D3DXMatrixRotationYawPitchRoll(&mtxRot, rotCamera.y, 0.0f, 0.0f);
+		D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);
+	}
+	//すべての軸の回転を反映させる場合
+	else {
+		//向きを反映
+		D3DXMatrixRotationYawPitchRoll(&mtxRot, rotCamera.y, -rotCamera.x, 0.0f);
+		D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);
+	}
+
+	/*
+	D3DXMATRIX mtxView;		//ビューマトリックス取得用
+	//ビューマトリックスを取得
+	pDevice->GetTransform(D3DTS_VIEW, &mtxView);
 	//ポリゴンをカメラに対して正面に向ける
 	D3DXMatrixInverse(&m_mtxWorld, nullptr, &mtxView);//逆行列を求める
 	m_mtxWorld._41 = 0.0f;
 	m_mtxWorld._42 = 0.0f;
 	m_mtxWorld._43 = 0.0f;
+	*/
 
 	//位置を反映
 	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
@@ -205,8 +223,10 @@ void CBillboard::Draw(void) {
 
 	//頂点定義を設定
 	pRenderer->SetVtxDecl3D();	
+
+	//テクスチャの取得
+	LPDIRECT3DTEXTURE9 pTexture = CTexture::GetTexture(GetTexType());
 	//テクスチャの設定
-	//pDevice->SetTexture(0, pTexture); //テクスチャの設定
 	pRenderer->SetEffectTexture(pTexture);
 
 	//頂点バッファをデータストリームに設定
@@ -273,6 +293,16 @@ D3DXVECTOR3 CBillboard::GetPos(void) {
 }
 
 //=============================================================================
+// 移動量の設定
+//=============================================================================
+void CBillboard::SetMove(D3DXVECTOR3 move) { m_move = move; }
+
+//=============================================================================
+// 移動量の取得
+//=============================================================================
+D3DXVECTOR3 CBillboard::GetMove(void) { return m_move; }
+
+//=============================================================================
 // サイズの設定
 //=============================================================================
 void CBillboard::SetSize(D3DXVECTOR3 size) {
@@ -284,8 +314,8 @@ void CBillboard::SetSize(D3DXVECTOR3 size) {
 	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 	//頂点座標の設定
-	pVtx[0].pos = D3DXVECTOR3(-m_fWidth / 2.0f, m_fHeight / 2.0f, 0.0f) + m_offsetPos;
-	pVtx[1].pos = D3DXVECTOR3(-m_fWidth / 2.0f + (m_fWidth * m_fRatioWidth), m_fHeight / 2.0f, 0.0f) + m_offsetPos;
+	pVtx[0].pos = D3DXVECTOR3(-m_fWidth / 2.0f, -m_fHeight / 2.0f + (m_fHeight * m_fRatioHeight), 0.0f) + m_offsetPos;
+	pVtx[1].pos = D3DXVECTOR3(-m_fWidth / 2.0f + (m_fWidth * m_fRatioWidth), -m_fHeight / 2.0f + (m_fHeight * m_fRatioHeight), 0.0f) + m_offsetPos;
 	pVtx[2].pos = D3DXVECTOR3(-m_fWidth / 2.0f, -m_fHeight / 2.0f, 0.0f) + m_offsetPos;
 	pVtx[3].pos = D3DXVECTOR3(-m_fWidth / 2.0f + (m_fWidth * m_fRatioWidth), -m_fHeight / 2.0f, 0.0f) + m_offsetPos;
 
@@ -311,13 +341,35 @@ void CBillboard::SetRatioWidth(float fRatio) {
 	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 	//頂点座標の設定
-	pVtx[0].pos = D3DXVECTOR3(-m_fWidth / 2.0f, m_fHeight / 2.0f, 0.0f) + m_offsetPos;
-	pVtx[1].pos = D3DXVECTOR3(-m_fWidth / 2.0f + (m_fWidth * m_fRatioWidth), m_fHeight / 2.0f, 0.0f) + m_offsetPos;
+	pVtx[0].pos = D3DXVECTOR3(-m_fWidth / 2.0f, -m_fHeight / 2.0f + (m_fHeight * m_fRatioHeight), 0.0f) + m_offsetPos;
+	pVtx[1].pos = D3DXVECTOR3(-m_fWidth / 2.0f + (m_fWidth * m_fRatioWidth), -m_fHeight / 2.0f + (m_fHeight * m_fRatioHeight), 0.0f) + m_offsetPos;
 	pVtx[2].pos = D3DXVECTOR3(-m_fWidth / 2.0f, -m_fHeight / 2.0f, 0.0f) + m_offsetPos;
 	pVtx[3].pos = D3DXVECTOR3(-m_fWidth / 2.0f + (m_fWidth * m_fRatioWidth), -m_fHeight / 2.0f, 0.0f) + m_offsetPos;
 
 	//頂点バッファをアンロックする
 	m_pVtxBuff->Unlock();
+}
+
+//=============================================================================
+// 幅の割合の設定
+//=============================================================================
+void CBillboard::SetRatioHeight(float fRatio) {
+	m_fRatioHeight = fRatio;
+
+	if (m_pVtxBuff != nullptr) {
+		VERTEX_2D *pVtx;
+		//頂点バッファのロック
+		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+		//頂点座標の設定
+		pVtx[0].pos = D3DXVECTOR3(-m_fWidth / 2.0f, -m_fHeight / 2.0f + (m_fHeight * m_fRatioHeight), 0.0f) + m_offsetPos;
+		pVtx[1].pos = D3DXVECTOR3(-m_fWidth / 2.0f + (m_fWidth * m_fRatioWidth), -m_fHeight / 2.0f + (m_fHeight * m_fRatioHeight), 0.0f) + m_offsetPos;
+		pVtx[2].pos = D3DXVECTOR3(-m_fWidth / 2.0f, -m_fHeight / 2.0f, 0.0f) + m_offsetPos;
+		pVtx[3].pos = D3DXVECTOR3(-m_fWidth / 2.0f + (m_fWidth * m_fRatioWidth), -m_fHeight / 2.0f, 0.0f) + m_offsetPos;
+
+		//頂点バッファをアンロックする
+		m_pVtxBuff->Unlock();
+	}
 }
 
 //=============================================================================

@@ -12,6 +12,7 @@ data/TEXTURE/UI/text_titlename.png
 data/TEXTURE/UI/text_gamestart.png
 data/TEXTURE/UI/text_tutorial.png
 data/TEXTURE/UI/text_credit.png
+data/TEXTURE/UI/quit_game.png
 data/TEXTURE/UI/tutorial.jpg
 data/TEXTURE/UI/credit.jpg
 data/TEXTURE/UI/select_icon.png
@@ -19,6 +20,10 @@ data/TEXTURE/BG/bg_black.png
 data/TEXTURE/UI/icon_none.png
 data/TEXTURE/UI/icon_apple.png
 data/TEXTURE/UI/icon_hp.png
+data/TEXTURE/UI/gauge_horizontal.png
+data/TEXTURE/UI/gauge_vertical.png
+data/TEXTURE/UI/hp_gauge_frame.png
+data/TEXTURE/UI/grow_gauge_frame.png
 data/TEXTURE/UI/text_growup.png
 data/TEXTURE/UI/arrow_left.png
 data/TEXTURE/UI/arrow_right.png
@@ -28,7 +33,17 @@ data/TEXTURE/UI/text_quit.png
 data/TEXTURE/UI/text_retry.png
 
 data/TEXTURE/EFFECT/explosion.png
+data/TEXTURE/EFFECT/damage_player.png
+data/TEXTURE/EFFECT/damage_enemy.png
+data/TEXTURE/EFFECT/damage_bullet.png
+data/TEXTURE/EFFECT/death.png
 data/TEXTURE/EFFECT/apple_heal.png
+data/TEXTURE/EFFECT/apple_drain.png
+data/TEXTURE/EFFECT/fire_boll.png
+data/TEXTURE/EFFECT/fire.png
+data/TEXTURE/EFFECT/thunderbolt.png
+data/TEXTURE/EFFECT/thunder.png
+data/TEXTURE/EFFECT/wind.png
 data/TEXTURE/EFFECT/particle.jpg
 data/TEXTURE/EFFECT/shockwave.jpg
 

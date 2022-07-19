@@ -32,6 +32,9 @@ public:
 	void Update(void);	//XVˆ—
 	void Draw(void);	//•`‰æˆ—
 
+	static void DrainAllApple(void);	//‚·‚×‚Ä‚Ì•—ÑŒç‚ÌHP‹zû
+	void Drain(void);	//‘Ì—Í‚Ì‹zû
+
 private:
 
 };

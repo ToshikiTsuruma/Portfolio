@@ -36,7 +36,7 @@ public:
 
 private:
 	void Rotate(void);	//回転する
-	void AttackCollision(CObject::OBJ_TYPE objType);	//攻撃の当たり判定
+	void AttackCollision(int nObjtype);	//攻撃の当たり判定
 
 	int m_nLife;	//消滅するまでのカウンター
 	float m_fAddRadius;		//追加する半径

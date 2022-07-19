@@ -15,12 +15,12 @@
 //=============================================================================
 #define DEFAULT_EFFECT_FILE_NAME "effect/DefaultEffect.fx"	//読み込むエフェクトファイルの名前
 #define DEFAULT_EFFECT_TECHNIQUE_NAME "RenderScene"	//エフェクトファイルのTechniqueの名前
-#define FOG_COLOR (D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f))	//フォグの色
+//#define FOG_COLOR (D3DXCOLOR(0.0f, 0.7f, 1.0f, 1.0f))	//フォグの色
+#define FOG_COLOR (D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	//フォグの色
 
 //=============================================================================
 // 静的メンバ変数宣言
 //=============================================================================
-
 
 //=============================================================================
 // サーフェイスの幅高取得関数
@@ -522,13 +522,17 @@ void CRenderer::SetEffectMaterialEmissive(D3DXCOLOR matEmissive) {
 
 //シェーダのマテリアルのスペキュラーを設定
 void CRenderer::SetEffectMaterialSpecular(D3DXCOLOR matSpecular) {
-	D3DXVECTOR4 vecSpecular = D3DXVECTOR4(matSpecular.r, matSpecular.g, matSpecular.b, matSpecular.a);
-	m_pEffect->SetVector("g_matSpecular", &vecSpecular);
+	m_pEffect->SetVector("g_matSpecular", &D3DXVECTOR4(matSpecular.r, matSpecular.g, matSpecular.b, matSpecular.a));
 }
 
 //シェーダのマテリアルの反射の強さを設定
 void CRenderer::SetEffectMaterialPower(float matPower) {
 	m_pEffect->SetFloat("g_matPower", matPower);
+}
+
+//シェーダの輪郭の発光色を設定
+void CRenderer::SetEffectColorGlow(D3DXCOLOR colGlow) {
+	m_pEffect->SetVector("g_colGlow", &D3DXVECTOR4(colGlow.r, colGlow.g, colGlow.b, colGlow.a));
 }
 
 

@@ -43,6 +43,8 @@ public:
 	CEnemySpawner* GetEnemySpawner(void) { return m_pEnemySpawner; }	//敵のスポナーを取得
 
 private:
+	void UpdateGameClear(void);		//ゲームクリア時の更新
+	void UpdateGameOver(void);		//ゲームオーバー時の更新
 	void CreateMenuEndGame(void);	//ゲーム終了時の選択メニューの生成
 
 	bool m_bGameClear;	//ゲームオーバー
@@ -53,6 +55,8 @@ private:
 	CTimer* m_pTimer;	//ゲームのタイマー
 	CSelectMenu2D* m_pMenuGameEnd;	//ゲーム終了時の選択メニュー
 	CEnemySpawner* m_pEnemySpawner;	//敵のスポナー
+
+	int m_nCntGameClear;	//ゲームクリア後のカウント
 };
 
 #endif // !_GAME_SCENE_H_

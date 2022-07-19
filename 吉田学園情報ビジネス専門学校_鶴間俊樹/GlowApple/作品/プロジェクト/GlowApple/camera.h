@@ -38,6 +38,7 @@ public:
 	D3DXVECTOR3 GetRot(void);		//角度の取得
 	void SetDistance(float fDistance);	//距離の設定
 	float GetDistance(void);			//距離の取得
+	void SetLockControll(bool bLock) { m_bLockControll = bLock; }	//操作の制限を設定
 
 private:
 	void Move(void);	//移動
@@ -52,6 +53,8 @@ private:
 	D3DXMATRIX m_mtxProjection;	//プロジェクションマトリックス
 	D3DXMATRIX m_mtxView;		//ビューマトリックス
 	D3DVIEWPORT9 m_viewport;	//ビューポート
+
+	bool m_bLockControll;	//操作の制限
 };
 
 #endif // !_CAMERA_H_

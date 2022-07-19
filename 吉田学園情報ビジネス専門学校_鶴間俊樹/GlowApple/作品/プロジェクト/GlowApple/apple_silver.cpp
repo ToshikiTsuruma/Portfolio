@@ -9,9 +9,10 @@
 #include "manager.h"
 #include "gameScene.h"
 #include "player.h"
+#include "effect.h"
 
 //=============================================================================
-// 静的メンバ変数宣言
+// マクロ定義
 //=============================================================================
 
 //=============================================================================
@@ -55,10 +56,13 @@ CAppleSilver* CAppleSilver::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 	//プレイヤーの取得
 	if (pGame != nullptr) pPlayer = pGame->GetPlayer();
 
-	//プレイヤーの衝撃波数を増やす
+	//プレイヤーの落雷数を増やす
 	if (pPlayer != nullptr) {
-		pPlayer->AddNumShockwave(1);
+		pPlayer->AddNumThunder(2);
 	}
+
+	//雷のエフェクトを生成
+	pAppleSilver->m_pEffectThunder = CEffect::Create(pos + D3DXVECTOR3(0.0f, -15.0f, 0.0f), CEffect::EFFECT_TYPE::THUNDER, 50.0f, 50.0f, true);
 
 	pAppleSilver->Init();
 
@@ -75,6 +79,9 @@ HRESULT CAppleSilver::Init(void) {
 		pModelApple->SetMaterialDiffuse(GetAppleColor(APPLE_TYPE::SILVER), 0);
 	}
 
+	//発光表現のためにパーティクルを生成
+	CreateGlowParticle(APPLE_TYPE::SILVER);
+
 	CGlowApple::Init();
 	return S_OK;
 }
@@ -83,6 +90,12 @@ HRESULT CAppleSilver::Init(void) {
 // 銀林檎の終了処理
 //=============================================================================
 void CAppleSilver::Uninit(void) {
+	//雷のエフェクトの破棄
+	if (m_pEffectThunder != nullptr) {
+		m_pEffectThunder->Uninit();
+		m_pEffectThunder = nullptr;
+	}
+
 	CGlowApple::Uninit();
 }
 

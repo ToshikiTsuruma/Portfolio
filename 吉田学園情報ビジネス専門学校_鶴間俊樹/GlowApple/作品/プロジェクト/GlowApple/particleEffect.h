@@ -9,6 +9,7 @@
 
 #include "main.h"
 #include "object.h"
+#include "particle.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -43,7 +44,7 @@ public:
 	HRESULT Init(void);	//初期化処理
 	void Uninit(void);	//終了処理
 	void Update(void);	//更新処理
-	void Draw(void);	//描画処理
+	void Draw(void) {}	//描画処理
 
 private:
 	PARTICLE_INFO m_particleInfo;	//生成するパーティクルの情報

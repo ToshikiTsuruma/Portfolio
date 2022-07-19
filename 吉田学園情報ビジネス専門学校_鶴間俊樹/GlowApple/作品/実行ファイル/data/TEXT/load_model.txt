@@ -11,8 +11,9 @@ data/MODEL/TERRAIN/apple_terrain.x
 
 data/MODEL/OBJECT/apple.x
 data/MODEL/OBJECT/tree_apple.x	
+data/MODEL/OBJECT/bullet_apple.x	
 data/MODEL/OBJECT/menu_apple.x	
-data/MODEL/OBJECT/tree.x	
+data/MODEL/OBJECT/many_tree.x	
 data/MODEL/OBJECT/fountain.x	
 data/MODEL/OBJECT/rock.x	
 
@@ -42,3 +43,8 @@ data/MODEL/ENEMY/human/06_legR.x
 data/MODEL/ENEMY/human/07_footR.x	
 data/MODEL/ENEMY/human/08_legL.x	
 data/MODEL/ENEMY/human/09_footL.x	
+
+data/MODEL/ENEMY/sorcerer/00_body.x
+data/MODEL/ENEMY/sorcerer/01_head.x
+data/MODEL/ENEMY/sorcerer/02_ribR.x
+data/MODEL/ENEMY/sorcerer/03_ribL.x

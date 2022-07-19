@@ -26,15 +26,27 @@ public:
 
 		SELECT_SWITCH,	//タイトル画面の選択切替時
 		CANSEL,			//キャンセル音
+		FOOTSTEP,		//足音
 		SWISH_PUNCH,	//拳を振る音
 		DAMAGE_PUNCH,	//拳によるダメージ音
-		ATTACK_SHOCK,	//攻撃時の衝撃音
+		SHOCK_PUNCH,	//パンチの衝撃音
+		SHOCK_STAMP,	//踏みつけ音
+
 		HEAL,			//回復音
+		GETEXP,			//経験値取得音
+		DRAIN,			//体力吸収音
+		SHOOT_BULLET,	//弾の発射音
+		DAMAGE_BULLET,	//弾のダメージ音
+		DAMAGE_FIRE,	//炎のダメージ音
 		STUN,			//気絶音
 		EXPLOSION,		//爆発音
+		THUNDERBOLT,	//落雷音
+		DAMAGE_THUNDER,	//雷ダメージ音
 		SPAWN_ENEMY,	//敵のスポーン
+		GROW_UP,		//成長
 		CREATE_APPLE,	//林檎の生成音
 		DEAD_TREE,		//木の死亡音
+		ENDGAME,		//ゲームクリア時の衝撃波が起こるときの音
 		GAMEOVER,		//ゲームオーバー
 		GAMECLEAR,		//ゲームクリア
 
@@ -51,8 +63,9 @@ public:
 	void PauseSound(SOUND_LABEL label);		//音の一時停止
 	void StartSound(SOUND_LABEL label);		//音の再開
 
-	static void SetBGM(SOUND_LABEL label);			//再生中BGMの設定
-	static SOUND_LABEL GetBGM(void);				//再生中BGMの取得
+	void SetBGM(SOUND_LABEL label);			//再生中BGMの設定
+	SOUND_LABEL GetBGM(void);				//再生中BGMの取得
+	void ResetBeginPlay(void);	//再生開始時のフラグをすべてリセット
 
 private:
 	// パラメータ構造体定義
@@ -74,7 +87,8 @@ private:
 	DWORD m_aSizeAudio[(int)SOUND_LABEL::ENUM_MAX] = {};					// オーディオデータサイズ
 	static PARAM m_aParam[(int)SOUND_LABEL::ENUM_MAX];						//ファイル名とループ
 
-	static SOUND_LABEL m_playBGM;	//再生中のBGM
+	SOUND_LABEL m_playBGM;	//再生中のBGM
+	bool m_abBeginPlay[(int)SOUND_LABEL::ENUM_MAX];	//１フレームごとの再生開始時かどうかの判定
 };
 
 #endif // !_SOUND_H_

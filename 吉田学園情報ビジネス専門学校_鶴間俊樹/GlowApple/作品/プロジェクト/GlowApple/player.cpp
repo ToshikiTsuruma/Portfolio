@@ -14,15 +14,14 @@
 
 #include "wallCylinder.h"
 #include "terrain.h"
-//#include "item.h"
 #include "effect.h"
 #include "particle.h"
 #include "particleEffect.h"
 #include "object2D.h"
 #include "billboard.h"
 
-//#include "shockWave.h"
 #include "shockWaveEmitter.h"
+#include "thunderEmitter.h"
 
 //=============================================================================
 // マクロ定義
@@ -52,8 +51,8 @@
 //--------------------------------
 //攻撃
 //--------------------------------
-#define ATTACK_DAMAGE_PUNCH (5)
-#define ATTACK_DAMAGE_STANP (10)
+#define ATTACK_DAMAGE_PUNCH (20)
+#define ATTACK_DAMAGE_STANP (30)
 
 //--------------------------------
 //その他
@@ -72,12 +71,13 @@ CObjectMotion::MOTION_INFO CPlayer::m_aMotionInfo[(int)CPlayer::MOTION_TYPE::ENU
 //=============================================================================
 CPlayer::CPlayer() : CObjectMotion(m_pPartsInfoArray, m_nNumParts, &m_aMotionInfo[0], (int)MOTION_TYPE::ENUM_MAX, false)
 {
-	SetObjType(OBJ_TYPE::PLAYER);	//オブジェクトタイプの設定
+	SetObjType(OBJTYPE_PLAYER);	//オブジェクトタイプの設定
 	SetUpdatePriority(UPDATE_PRIORITY::PLAYER);	//更新順の設定
 	SetDrawPriority(DRAW_PRIORITY::CHARA);	//描画順の設定
 
 	SetColorOutlineAll(COLOR_OUTLINE);	//輪郭の色の設定
-	SetDiffuseModelAll(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+	SetDiffuseModelAll(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 0);	//モデルの色の設定
+	SetColorGlowAll(D3DXCOLOR(1.0f, 0.8f, 0.4f, 1.0f));	//輪郭の発光色の設定
 
 	m_lastPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_destRot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -88,7 +88,10 @@ CPlayer::CPlayer() : CObjectMotion(m_pPartsInfoArray, m_nNumParts, &m_aMotionInf
 	m_bValidAttack = false;
 	m_nNumKillEnemy = 0;
 	m_bLockAct = false;
-	m_nShockWave = 0;
+	m_nNumShockWave = 0;
+	m_nNumThunder = 0;
+
+	m_bEndFadeColor = false;
 }
 
 //=============================================================================
@@ -211,8 +214,26 @@ void CPlayer::Update(void) {
 	//ゲームオーバー時
 	//----------------------------
 	if (pGame != nullptr) {
+		//ゲームクリア時
+		if (pGame->GetGameClear()) {
+			//モーションのアップデート
+			CObjectMotion::Update();
+			return;
+		}
 		//ゲームオーバー時
 		if (pGame->GetGameOver()) {
+			//すでにフェード完了している場合終了
+			if (m_bEndFadeColor) return;
+			
+			//パーティクルエフェクトの生成
+			CParticleEffect::PARTICLE_INFO particleInfo;	//パーティクル情報
+			particleInfo.addMove = D3DXVECTOR3(0.0f, 0.08f, 0.0f); particleInfo.colEnd = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); particleInfo.colStart = D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f);
+			particleInfo.fAddSize = -1.0f; particleInfo.fSizeStart = 60.0f; particleInfo.fSpeedMove = 3.5f; particleInfo.nLife = 60;
+			//１回分のエフェクトを同時に重ねて表示
+			CParticleEffect::Create(particleInfo, GetPos(), 1, 1, 0.45f * D3DX_PI, true);
+
+			//フェードアウト
+			m_bEndFadeColor = FadeModelAll(0.0f, -0.01f);
 			return;
 		}
 	}
@@ -314,6 +335,8 @@ void CPlayer::Update(void) {
 // プレイヤーの描画処理
 //=============================================================================
 void CPlayer::Draw(void) {
+	if (m_bEndFadeColor) return;	//フェード完了時は描画しない
+
 	CObjectMotion::Draw();
 }
 
@@ -438,12 +461,12 @@ void CPlayer::Move(CInput* pInput, float fRotCameraY) {
 	//------------------------
 	float fMaxSpeed;	//移動速度の最大
 	//地上
-	if (pInput->GetPress(CInput::CODE::DASH)) {
-		fMaxSpeed = MAX_MOVE_SPEED_DASH;
-	}
-	else {
+	//if (pInput->GetPress(CInput::CODE::DASH)) {
+	//	fMaxSpeed = MAX_MOVE_SPEED_DASH;
+	//}
+	//else {
 		fMaxSpeed = MAX_MOVE_SPEED_WALK;
-	}
+	//}
 	//空中
 	if (!m_bLand) {
 		fMaxSpeed = MAX_MOVE_SPEED_AIR;
@@ -770,7 +793,7 @@ void CPlayer::MotionAction(void) {
 		//足が地面に触れたタイミングだった場合
 		if ((GetCurKey() == 0 && GetCurMotionCnt() == 14 && !GetTransMotion()) || (GetCurKey() == 2 && GetCurMotionCnt() == 14)) {
 			//歩行時の音
-			if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::STUN);
+			if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::FOOTSTEP);
 
 			//生成時にエフェクトを生成
 			CParticleEffect::PARTICLE_INFO particleInfo;	//パーティクル情報
@@ -787,12 +810,15 @@ void CPlayer::MotionAction(void) {
 				nIdxModel = 8;	//左足
 			}
 			//足の位置の取得
-			GetPosCollision(&posFoot, D3DXVECTOR3(0.0f, -80.0f, 5.0f), nIdxModel);
+			GetPosCollision(&posFoot, D3DXVECTOR3(0.0f, -85.0f, 5.0f), nIdxModel);
 			//１回分のエフェクトを同時に重ねて表示
 			for (int nCnt = 0; nCnt < 6; nCnt++)
 			{
-				CParticleEffect::Create(particleInfo, posFoot, 1, 1, 0.08f * D3DX_PI, true);
+				CParticleEffect::Create(particleInfo, posFoot, 2, 1, 0.08f * D3DX_PI, true);
 			}
+
+			//衝撃波生成
+			//CShockWaveEmitter::Create(m_nNumShockWave, 4, posFoot, 30.0f, 2.0f, 4.0f, 40.0f, -1.0f, 15, D3DX_PI * 0.02f);
 		
 		}
 		break;
@@ -816,10 +842,13 @@ void CPlayer::MotionAction(void) {
 		//攻撃が地面に当たったタイミングだった場合
 		if (GetCurKey() == 1 && GetCurMotionCnt() == 5) {
 			//衝撃音
-			if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::ATTACK_SHOCK);
+			if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::SHOCK_PUNCH);
 			//衝撃波生成
-			D3DXVECTOR3 posWave = GetPos() + D3DXVECTOR3(sinf(GetRot().y + D3DX_PI) * 200.0f, 0.0f, cosf(GetRot().y + D3DX_PI) * 200.0f);	//プレイヤーの前方
-			CShockWaveEmitter::Create(m_nShockWave, 4, posWave, 40.0f, 10.0f, 15.0f, 60.0f, -1.0f, 18, D3DX_PI * 0.02f);
+			D3DXVECTOR3 posWave = GetPos() + D3DXVECTOR3(sinf(GetRot().y + D3DX_PI), 0.0f, cosf(GetRot().y + D3DX_PI)) * 200.0f;	//プレイヤーの前方
+			CShockWaveEmitter::Create(m_nNumShockWave + 1, 4, posWave, 40.0f, 10.0f, 15.0f, 60.0f, -1.0f, 18, D3DX_PI * 0.02f);
+
+			//雷の生成
+			CThunderEmitter::CreateStraight(m_nNumThunder, 5, posWave, posWave - GetPos(), 100.0f);
 		}
 		break;
 
@@ -839,11 +868,12 @@ void CPlayer::MotionAction(void) {
 		//攻撃が地面に当たったタイミングだった場合
 		if (GetCurKey() == 1 && GetCurMotionCnt() == 3) {
 			//衝撃音
-			if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::ATTACK_SHOCK);
+			if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::SHOCK_STAMP);
 			//衝撃波生成
 			D3DXVECTOR3 posWave = GetPos();
-			//個数＋１
-			CShockWaveEmitter::Create(m_nShockWave + 1, 4, posWave, 40.0f, 10.0f, 15.0f, 80.0f, -1.0f, 22, D3DX_PI * 0.02f);
+			CShockWaveEmitter::Create(m_nNumShockWave + 2, 4, posWave, 40.0f, 10.0f, 15.0f, 80.0f, -1.0f, 22, D3DX_PI * 0.02f);
+			//雷の生成
+			if(m_nNumThunder > 0) CThunderEmitter::CreateRound(m_nNumThunder + 1, 3, posWave, GetRot().y + D3DX_PI, 300.0f);
 		}
 		break;
 
@@ -878,8 +908,7 @@ void CPlayer::AttackCollision(int nIdxModel, const int nNumCol, float fRadiusCol
 	for (int nCntCol = 0; nCntCol < nNumCol; nCntCol++)
 	{
 		//攻撃
-		CObjectMotion::Attack(OBJ_TYPE::ENEMY, pPosColArray[nCntCol], fRadiusCol, nDamage, DAMAGE_TYPE::PUNCH, &nNumKillEnemy);	//敵
-		CObjectMotion::Attack(OBJ_TYPE::APPLE_TREE, pPosColArray[nCntCol], fRadiusCol, nDamage, DAMAGE_TYPE::PUNCH, &nNumKillEnemy);	//敵
+		CObjectMotion::Attack(OBJTYPE_ENEMY | OBJTYPE_APPLE_TREE, pPosColArray[nCntCol], fRadiusCol, nDamage, DAMAGE_TYPE::PLAYER_PUNCH, &nNumKillEnemy);	//敵
 	}
 
 	//攻撃の先端にパーティクルの生成

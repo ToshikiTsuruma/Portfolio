@@ -9,10 +9,12 @@
 
 #include "main.h"
 #include "objectModel.h"
+#include "glowApple.h"
 
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
+#define MAX_NUM_CREATE_APPLE (6)	//生成可能な林檎の最大数
 
 //*****************************************************************************
 // 前方宣言
@@ -35,23 +37,25 @@ public:
 	void Uninit(void);	//終了処理
 	void Update(void);	//更新処理
 	void Draw(void);	//描画処理
-	void Damage(int nDamage, bool* pDead);		//ダメージ
+	void Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead);		//ダメージ
 	void Dead(void);		//死亡時処理
 
-	void GrowUp(void);	//成長
-	D3DXVECTOR3 GetPosApple(void);	//林檎生成位置の取得
+	static D3DXVECTOR3 GetOffsetPosApple(int nIdxApple);	//林檎生成位置の取得
 	void SetMaxLife(int nMaxLife);	//体力の最大値の設定
 	void AddMaxLife(int nAddLife);	//体力の最大値の増加
 	void HealLife(int nHeal);		//体力を回復する
 	void AddGrow(int nAddValue);	//成長度を増やす
-	bool GetDead(void) { return m_bDead; }	//死亡状態の取得
+	CGlowApple::APPLE_TYPE GetCreateAppleType(int nIdx);	//リンゴの種類の取得
 
 	void GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECTOR3** const ppPosColArray, float* const pRadiusCol);	//当たり判定の情報の取得
 
 private:
+	void GrowUp(void);	//成長
 	void CreateApple(void);	//林檎の生成
 
 	int m_nNumApple;	//生成した林檎の数
+	CGlowApple* m_apCreateApple[MAX_NUM_CREATE_APPLE];	//生成したリンゴのポインタ
+	CGlowApple::APPLE_TYPE m_aTypeCreateApple[MAX_NUM_CREATE_APPLE];	//生成したリンゴの種類
 
 	//体力
 	int m_nMaxLife;			//体力の最大値
@@ -59,7 +63,8 @@ private:
 	CGauge2D* m_pGaugeLife;	//体力ゲージ
 	CObject2D* m_pIconHP;	//HPのアイコン
 	//成長
-	int m_nGrowValue;	//成長度
+	int m_nGrowValue;		//成長度
+	int m_nGrowValueMax;	//成長度の最大（成長の必要量）
 	CGauge2D* m_pGaugeGrow;	//成長ゲージ
 
 	bool m_bDead;			//死亡

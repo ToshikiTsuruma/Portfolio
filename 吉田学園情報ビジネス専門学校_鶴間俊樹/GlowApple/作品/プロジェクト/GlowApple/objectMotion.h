@@ -57,14 +57,6 @@ public:
 		KEY_INFO aKeyInfo[MAX_KEY_MOTION];	//キー情報
 	} MOTION_INFO;
 
-	//ダメージの種類
-	enum class DAMAGE_TYPE {
-		NONE = 0,
-		PUNCH,		//プレイヤーのパンチ
-		ENEMY,		//敵の攻撃
-		ENUM_MAX
-	};
-
 	CObjectMotion();		//デフォルトコンストラクタ
 	CObjectMotion(const PARTS_INFO* pPartsInfoArray, int nNumParts, const MOTION_INFO* pMotionInfoArray, int nNumTypeMotion, bool bOutline);		//オーバーロードされたコンストラクタ
 	virtual ~CObjectMotion();	//デストラクタ
@@ -84,7 +76,7 @@ public:
 	void SetColorOutlineAll(D3DXCOLOR col);	//オブジェクトの全モデルの輪郭の色の指定
 
 	void InitObjAttacked(void);	//攻撃済みリストの初期化
-	void Attack(OBJ_TYPE objtype, D3DXVECTOR3 pos, float fRadius, int nDamage, CObjectMotion::DAMAGE_TYPE typeDamage, int* pNumKill);	//攻撃
+	void Attack(int nObjtype, D3DXVECTOR3 pos, float fRadius, int nDamage, CObject::DAMAGE_TYPE typeDamage, int* pNumKill);	//攻撃
 	void GetPosCollision(D3DXVECTOR3* const pPosCollision, D3DXVECTOR3 posOffset, int nIdxParts);	//当たり判定の位置を取得
 	D3DXMATRIX* GetPtrMtxWorld(void);	//ワールドマトリックスのポインタを取得
 	CModel* GetPtrModel(int nIdxParts);	//モデルのポインタを取得
@@ -92,8 +84,9 @@ public:
 	bool GetEndMotion(void);	//モーションの終了判定
 	int GetCurKey(void);		//現在のモーションのキーの取得
 	int GetCurMotionCnt(void);	//現在のモーションのカウントの取得
-	void SetDiffuseModelAll(D3DXCOLOR col);	//モデルのディフューズ色を設定する
-	void SetSpecularModelAll(D3DXCOLOR col);	//モデルのスペキュラー色を設定する
+	void SetDiffuseModelAll(D3DXCOLOR col, int nIdx);	//モデルのディフューズ色を設定する
+	void SetSpecularModelAll(D3DXCOLOR col, int nIdx);	//モデルのスペキュラー色を設定する
+	void SetColorGlowAll(D3DXCOLOR col);	//モデルの輪郭の発光色を設定する
 	bool FadeModelAll(float fDestAlpha, float fSpeedFade);	//モデルの色をフェードさせる
 	void SetDrawOutlineAll(bool bDraw);	//モデルの輪郭の表示設定
 

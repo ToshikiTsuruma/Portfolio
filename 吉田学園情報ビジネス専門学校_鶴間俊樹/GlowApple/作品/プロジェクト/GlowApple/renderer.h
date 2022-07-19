@@ -16,7 +16,7 @@
 #define PASS_2D 0x001		//2Dオブジェクト
 #define PASS_3D 0x002		//3Dオブジェクト
 #define PASS_TEXTURE 0x004	//テクスチャあり
-#define PASS_LIGHT 0x08		//ライトあり
+#define PASS_LIGHT 0x008	//ライトあり
 
 //*****************************************************************************
 // レンダリングクラス
@@ -72,6 +72,8 @@ public:
 	void SetEffectMaterialEmissive(D3DXCOLOR matEmissive);	//シェーダのマテリアルのエミッシブ色を設定
 	void SetEffectMaterialSpecular(D3DXCOLOR matSpecular);	//シェーダのマテリアルのスペキュラー色を設定
 	void SetEffectMaterialPower(float matPower);			//シェーダのマテリアルの反射の強さを設定
+
+	void SetEffectColorGlow(D3DXCOLOR colGlow);			//シェーダの輪郭の発光色を設定
 
 private:
 	void CreateVtxDecl2D(void);		//2Dポリゴンの頂点定義を生成

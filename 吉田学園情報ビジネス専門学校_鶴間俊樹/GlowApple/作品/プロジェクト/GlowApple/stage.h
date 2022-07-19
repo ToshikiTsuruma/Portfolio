@@ -54,6 +54,7 @@ private:
 
 	void LoadTerrainData(const char* pLoadText, TerrainData& terrainData);	//地形のデータをロード
 	void LoadObjData(const char* pLoadText, ObjectData& objData);			//オブジェクトのデータをロード
+	CTerrain* CreateLoadTerrain(TerrainData& terrainData);	//ロードした地形を生成
 	CObject* CreateLoadObject(ObjectData& objData);	//ロードしたオブジェクトを生成
 
 	//ツールのみ

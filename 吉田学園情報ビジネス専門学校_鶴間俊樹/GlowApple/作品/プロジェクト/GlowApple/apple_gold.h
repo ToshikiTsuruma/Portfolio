@@ -33,7 +33,9 @@ public:
 	void Draw(void);	//描画処理
 
 private:
+	void ShootBullet(void);	//弾の発射
 
+	int m_nCntBullet;	//弾生成カウンター
 };
 
 #endif // !_APPLE_GOLD_H_

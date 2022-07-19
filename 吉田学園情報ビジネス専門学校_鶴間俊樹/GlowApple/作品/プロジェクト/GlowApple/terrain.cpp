@@ -20,7 +20,7 @@
 //=============================================================================
 CTerrain::CTerrain(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 rot) : CObjectModel(typeModel, pos, rot, false)
 {
-	SetObjType(OBJ_TYPE::TERRAIN);	//オブジェクトタイプの設定
+	SetObjType(OBJTYPE_TERRAIN);	//オブジェクトタイプの設定
 	SetDrawPriority(DRAW_PRIORITY::BG);
 }
 
@@ -80,19 +80,26 @@ void CTerrain::Draw(void) {
 //=============================================================================
 bool CTerrain::Collision(D3DXVECTOR3* pPosCollision, D3DXVECTOR3 vecStart, D3DXVECTOR3 vecEnd) {
 	CObject* pObject;	//オブジェクトへのポインタ
-	pObject = GetObjectTopObjtype(OBJ_TYPE::TERRAIN);	//地形のオブジェクトタイプのリストの先頭を取得
+	pObject = GetObjectTopAll();	//全オブジェクトのリストの先頭を取得
 
 	while (pObject != nullptr) {
-		CObject* pObjectNext = GetObjectNextObjtype(pObject);	//リストの次のオブジェクトのポインタを取得
+		CObject* pObjNext = GetObjectNextAll(pObject);	//リストの次のオブジェクトのポインタを取得
+	
+		//オブジェクトタイプが異なる場合
+		if (!(pObject->GetObjType() & OBJTYPE_TERRAIN)) {
+			pObject = pObjNext;	//リストの次のオブジェクトを代入
+			continue;
+		}
+
 		CTerrain* pTerrain = dynamic_cast<CTerrain*>(pObject);	//地形クラスにキャスト
 		//キャスト失敗時
 		if (pTerrain == nullptr) {
-			pObject = pObjectNext;	//リストの次のオブジェクトを代入
+			pObject = pObjNext;	//リストの次のオブジェクトを代入
 			continue;	//ループを飛ばす
 		}
 		//死亡フラグが立っている場合
 		if (pTerrain->GetDeath()) {
-			pObject = pObjectNext;	//リストの次のオブジェクトを代入
+			pObject = pObjNext;	//リストの次のオブジェクトを代入
 			continue;	//ループを飛ばす
 		}
 
@@ -102,7 +109,7 @@ bool CTerrain::Collision(D3DXVECTOR3* pPosCollision, D3DXVECTOR3 vecStart, D3DXV
 		LPD3DXMESH pMesh = modelData.pMesh;	//メッシュデータの取得
 		//メッシュがnullの場合
 		if (pMesh == nullptr) {
-			pObject = pObjectNext;	//リストの次のオブジェクトを代入
+			pObject = pObjNext;	//リストの次のオブジェクトを代入
 			continue;	//ループを飛ばす
 		}
 
@@ -138,7 +145,7 @@ bool CTerrain::Collision(D3DXVECTOR3* pPosCollision, D3DXVECTOR3 vecStart, D3DXV
 
 		//レイが衝突していない場合
 		if (bHit == FALSE) {
-			pObject = pObjectNext;	//リストの次のオブジェクトを代入
+			pObject = pObjNext;	//リストの次のオブジェクトを代入
 			continue;	//ループを飛ばす
 		}
 
@@ -189,7 +196,7 @@ bool CTerrain::Collision(D3DXVECTOR3* pPosCollision, D3DXVECTOR3 vecStart, D3DXV
 		*pPosCollision = posCol;
 		return true;
 	
-		pObject = pObjectNext;	//リストの次のオブジェクトを代入
+		pObject = pObjNext;	//リストの次のオブジェクトを代入
 	}
 
 	return false;

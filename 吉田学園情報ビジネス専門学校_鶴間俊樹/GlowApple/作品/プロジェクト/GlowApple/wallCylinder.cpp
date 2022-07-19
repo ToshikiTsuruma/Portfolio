@@ -36,7 +36,7 @@ CWallCylinder::CWallCylinder() : CMeshcylinder()
 //=============================================================================
 CWallCylinder::CWallCylinder(D3DXVECTOR3 pos, float fRadius, float fHeight, CTexture::TEXTURE_TYPE typeTex, bool bClear) : CMeshcylinder(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), NUM_POLYGON_XZ, fRadius, fRadius, 1, fHeight, false)
 {
-	SetObjType(OBJ_TYPE::WALL);	//オブジェクトタイプの設定
+	SetObjType(OBJTYPE_WALL);	//オブジェクトタイプの設定
 
 	//描画順の設定
 	if (bClear) {
@@ -139,11 +139,17 @@ void CWallCylinder::Draw(void) {
 bool CWallCylinder::Collision(D3DXVECTOR3* pPos, D3DXVECTOR3 lastPos, float fRadius) {
 	if (pPos == nullptr) return false;
 
-	CObject* pObject;	//オブジェクトへのポインタ
-	pObject = GetObjectTopObjtype(OBJ_TYPE::WALL);	//壁のオブジェクトタイプのリストの先頭を取得
+	CObject* pObject = GetObjectTopAll();	//全オブジェクトのリストの先頭を取得
 
 	while (pObject != nullptr) {
-		CObject* pObjNext = GetObjectNextObjtype(pObject);	//リストの次のオブジェクトのポインタを取得
+		CObject* pObjNext = GetObjectNextAll(pObject);	//リストの次のオブジェクトのポインタを取得
+	
+		//オブジェクトタイプが異なる場合
+		if (!(pObject->GetObjType() & OBJTYPE_WALL)) {
+			pObject = pObjNext;	//リストの次のオブジェクトを代入
+			continue;
+		}
+
 		CWallCylinder* pWallCylinder = dynamic_cast<CWallCylinder*>(pObject);	//円柱の壁クラスにキャスト
 		//キャスト失敗時
 		if (pWallCylinder == nullptr) {
@@ -185,11 +191,17 @@ bool CWallCylinder::Collision(D3DXVECTOR3* pPos, D3DXVECTOR3 lastPos, float fRad
 void CWallCylinder::CrossPoint(D3DXVECTOR2* pPosCross, const D3DXVECTOR3* pPosStart, const D3DXVECTOR3* pPosEnd, float fDelta) {
 	if (pPosStart == nullptr || pPosEnd == nullptr) return;
 
-	CObject* pObject;	//オブジェクトへのポインタ
-	pObject = GetObjectTopObjtype(OBJ_TYPE::WALL);	//壁のオブジェクトタイプのリストの先頭を取得
+	CObject* pObject = GetObjectTopAll();	//全オブジェクトのリストの先頭を取得
 
 	while (pObject != nullptr) {
-		CObject* pObjNext = GetObjectNextObjtype(pObject);	//リストの次のオブジェクトのポインタを取得
+		CObject* pObjNext = GetObjectNextAll(pObject);	//リストの次のオブジェクトのポインタを取得
+	
+		//オブジェクトタイプが異なる場合
+		if (!(pObject->GetObjType() & OBJTYPE_WALL)) {
+			pObject = pObjNext;	//リストの次のオブジェクトを代入
+			continue;
+		}
+
 		CWallCylinder* pWallCylinder = dynamic_cast<CWallCylinder*>(pObject);	//円柱の壁クラスにキャスト
 		//キャスト失敗時
 		if (pWallCylinder == nullptr) {

@@ -8,8 +8,9 @@
 #include "appleTree.h"
 
 //=============================================================================
-// 静的メンバ変数宣言
+// マクロ定義
 //=============================================================================
+#define ADD_TREE_LIFE (400)
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -48,7 +49,8 @@ CAppleRed* CAppleRed::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 	//林檎の木の体力の上限値を上げる
 	CAppleTree* pAppleTree = pAppleRed->GetAppleTree();
 	if (pAppleTree != nullptr) {
-		pAppleTree->AddMaxLife(100);
+		pAppleTree->AddMaxLife(ADD_TREE_LIFE);
+		pAppleTree->HealLife(9999);
 	}
 
 	return pAppleRed;
@@ -63,6 +65,9 @@ HRESULT CAppleRed::Init(void) {
 	if (pModelApple != nullptr) {
 		pModelApple->SetMaterialDiffuse(GetAppleColor(APPLE_TYPE::RED), 0);
 	}
+
+	//発光表現のためにパーティクルを生成
+	CreateGlowParticle(APPLE_TYPE::RED);
 
 	CGlowApple::Init();
 	return S_OK;
