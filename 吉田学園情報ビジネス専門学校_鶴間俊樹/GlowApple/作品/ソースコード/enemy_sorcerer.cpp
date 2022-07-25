@@ -68,7 +68,7 @@ void CEnemySorcerer::LoadMotionInfo(void) {
 	//ロードする前に動的確保したメモリをdeleteする
 	UnloadMotionInfo();
 
-	LoadMotionText(TEXT_FILE_NAME_LOAD_MOTION, &m_pPartsInfoArray, &m_nNumParts, &m_aMotionInfo[0], (int)MOTION_TYPE::ENUM_MAX, nullptr);
+	LoadMotionText(TEXT_FILE_NAME_LOAD_MOTION, m_pPartsInfoArray, m_nNumParts, &m_aMotionInfo[0], (int)MOTION_TYPE::ENUM_MAX);
 }
 
 //=============================================================================

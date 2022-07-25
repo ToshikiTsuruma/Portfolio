@@ -52,6 +52,7 @@ CBillboard::CBillboard()
 	m_fRatioHeight = 1.0f;
 	m_offsetPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_bRotateYOnly = false;
+	m_col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 	m_bEnableFog = false;
 	m_bZtestAlways = true;
@@ -108,11 +109,6 @@ HRESULT CBillboard::Init(void) {
 		pVtx[2].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
 		pVtx[3].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
 
-		pVtx[0].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-		pVtx[1].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-		pVtx[2].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-		pVtx[3].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-
 		pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
 		pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
 		pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
@@ -164,24 +160,6 @@ void CBillboard::Draw(void) {
 	//ビルボードはZテクスチャに書き込まない
 	if (pRenderer->GetDrawZTex()) return;
 
-	/*/距離によっては描画せずに終了
-	if (!m_bDrawAllDist) {
-		//ゲームの取得
-		CGame* pGame = nullptr;
-		if (pManager != nullptr) pGame = pManager->GetGame();
-		//プレイヤーの取得
-		CPlayer* pPlayer = nullptr;
-		if (pGame != nullptr) pPlayer = pGame->GetPlayer();
-		//プレイヤーの位置を取得
-		D3DXVECTOR3 posPlayer;
-		if (pPlayer != nullptr) posPlayer = pPlayer->GetPos();
-		//プレイヤーとの距離を求める
-		D3DXVECTOR2 vecPlayer = D3DXVECTOR2(posPlayer.x - GetPos().x, posPlayer.z - GetPos().z);
-		float fDistPlayer = D3DXVec2Length(&vecPlayer);
-		//プレイヤーから一定以上離れていた場合終了
-		if (fDistPlayer > m_fDistDrawMax) return;
-	}*/
-
 	D3DXMATRIX mtxRot, mtxTrans;	//計算用マトリックス
 	D3DXVECTOR3 rotCamera = pCamera->GetRot();
 
@@ -200,17 +178,6 @@ void CBillboard::Draw(void) {
 		D3DXMatrixRotationYawPitchRoll(&mtxRot, rotCamera.y, -rotCamera.x, 0.0f);
 		D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);
 	}
-
-	/*
-	D3DXMATRIX mtxView;		//ビューマトリックス取得用
-	//ビューマトリックスを取得
-	pDevice->GetTransform(D3DTS_VIEW, &mtxView);
-	//ポリゴンをカメラに対して正面に向ける
-	D3DXMatrixInverse(&m_mtxWorld, nullptr, &mtxView);//逆行列を求める
-	m_mtxWorld._41 = 0.0f;
-	m_mtxWorld._42 = 0.0f;
-	m_mtxWorld._43 = 0.0f;
-	*/
 
 	//位置を反映
 	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
@@ -232,9 +199,6 @@ void CBillboard::Draw(void) {
 	//頂点バッファをデータストリームに設定
 	pDevice->SetStreamSource(0, m_pVtxBuff, 0, sizeof(VERTEX_3D));
 
-	//ライトを無効
-	//pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
-
 	if (m_bZtestAlways) {
 		//Zテスト
 		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
@@ -243,10 +207,12 @@ void CBillboard::Draw(void) {
 		//Zバッファの更新
 		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 	}
-	if (!m_bEnableFog) {
-		//フォグを無効
-		//pDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
-	}
+
+	//マテリアルの設定
+	pRenderer->SetEffectMaterialDiffuse(m_col);
+	pRenderer->SetEffectMaterialEmissive(D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f));
+	pRenderer->SetEffectMaterialSpecular(D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f));
+	pRenderer->SetEffectMaterialPower(0.0f);
 
 	DWORD dwPassFlag = PASS_3D;	//開始するパスのフラグ
 	//テクスチャがある場合フラグを追加
@@ -270,12 +236,6 @@ void CBillboard::Draw(void) {
 		//Zバッファの更新
 		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	}
-	if (!m_bEnableFog) {
-		//フォグを有効
-		//pDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
-	}
-	//ライトを有効
-	//pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
 }
 
 //=============================================================================
@@ -413,17 +373,7 @@ void CBillboard::SetTexPos(float startU, float startV, float endU, float endV) {
 // 色の設定
 //=============================================================================
 void CBillboard::SetColor(D3DXCOLOR col) {
-	VERTEX_3D *pVtx;
-	//頂点バッファのロック
-	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
-	// 頂点情報を設定
-	pVtx[0].col = col;
-	pVtx[1].col = col;
-	pVtx[2].col = col;
-	pVtx[3].col = col;
-
-	//頂点バッファをアンロックする
-	m_pVtxBuff->Unlock();
+	m_col = col;
 }
 
 //=============================================================================

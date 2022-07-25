@@ -60,7 +60,7 @@ public:
 	CObjectMotion();		//デフォルトコンストラクタ
 	CObjectMotion(const PARTS_INFO* pPartsInfoArray, int nNumParts, const MOTION_INFO* pMotionInfoArray, int nNumTypeMotion, bool bOutline);		//オーバーロードされたコンストラクタ
 	virtual ~CObjectMotion();	//デストラクタ
-	static void LoadMotionText(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int* pNumParts, MOTION_INFO* pMotionInfoArray, int nNumMotionType, int* pIdxWeapon);	//モーション情報をロード
+	static void LoadMotionText(char* pLoadDirectory, PARTS_INFO*& pPartsInfoArray, int& nNumParts, MOTION_INFO* pMotionInfoArray, int nNumMotionType);	//モーション情報をロード
 	virtual HRESULT Init(void);	//初期化処理
 	virtual void Uninit(void);	//終了処理
 	virtual void Update(void);	//更新処理

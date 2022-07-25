@@ -34,6 +34,7 @@ CModel::CModel()
 	D3DXMatrixIdentity(&m_mtxWorld);
 	m_pParent = nullptr;
 	m_nIdxParent = -1;
+	m_colOutline = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	m_colGlow = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);
 	m_bOutline = false;
 	m_pCloneMesh = nullptr;
@@ -299,19 +300,22 @@ void CModel::Draw(void) {
 	if (m_bOutline && m_pCloneMesh != nullptr && !pRenderer->GetDrawZTex()) {
 		//裏面
 		pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
-		//ライトを無効
-		//pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 		//Zテスト
 		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 		//Zバッファの更新
 		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
 		D3DMATERIAL9 matOutline;	//輪郭用マテリアル
+		memset(&matOutline, 0, sizeof(D3DMATERIAL9));
 		//マテリアル情報の設定
-		matOutline.Diffuse = D3DXCOLOR(1.0f, 0.0f, 1.0f, 1.0f);
+		matOutline.Diffuse = m_colOutline;
 
 		for (int nCntMat = 0; nCntMat < (int)m_aModelData[(int)m_modelType].nNumMat; nCntMat++) {
+			//マテリアルの設定
 			pRenderer->SetEffectMaterialDiffuse(matOutline.Diffuse);
+			pRenderer->SetEffectMaterialEmissive(matOutline.Emissive);
+			pRenderer->SetEffectMaterialSpecular(matOutline.Specular);
+			pRenderer->SetEffectMaterialPower(matOutline.Power);
 
 			pRenderer->BeginPassEffect(PASS_3D);
 			//輪郭の描画	
@@ -320,11 +324,8 @@ void CModel::Draw(void) {
 			pRenderer->EndPassEffect();
 		}
 
-
 		// 表面
 		pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);	
-		//ライトを有効
-		//pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
 		//Zテスト
 		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 		//Zバッファの更新
@@ -334,8 +335,10 @@ void CModel::Draw(void) {
 	//モデルの描画
 	if (m_aModelData[(int)m_modelType].pMesh != nullptr) {
 		for (int nCntMat = 0; nCntMat < (int)m_aModelData[(int)m_modelType].nNumMat; nCntMat++) {
+			//テクスチャの取得
+			LPDIRECT3DTEXTURE9 pTexture = CTexture::GetTexture(m_aTexType[(int)m_modelType][nCntMat]);
 			//テクスチャの設定
-			//pRenderer->SetEffectTexture(CTexture::GetTexture(m_aTexType[(int)m_modelType][nCntMat]));	//モデルでテクスチャを使うパスは今はない
+			pRenderer->SetEffectTexture(pTexture);
 			//マテリアルの設定
 			pRenderer->SetEffectMaterialDiffuse(m_aMat[nCntMat].MatD3D.Diffuse);
 			pRenderer->SetEffectMaterialEmissive(m_aMat[nCntMat].MatD3D.Emissive);
@@ -344,8 +347,12 @@ void CModel::Draw(void) {
 			//輪郭の発光色の設定
 			pRenderer->SetEffectColorGlow(m_colGlow);
 
+			DWORD dwPassFlag = PASS_3D | PASS_LIGHT;
+			//テクスチャがある場合フラグを追加
+			if (pTexture != nullptr) dwPassFlag |= PASS_TEXTURE;
+
 			//パスの開始
-			pRenderer->BeginPassEffect(PASS_3D | PASS_LIGHT);
+			pRenderer->BeginPassEffect(dwPassFlag);
 
 			//モデル（パーツ）の描画	
 			m_aModelData[(int)m_modelType].pMesh->DrawSubset(nCntMat);
@@ -537,6 +544,15 @@ void CModel::SetMaterialEmissive(D3DXCOLOR col, int nIdx) {
 }
 
 //=============================================================================
+//マテリアルの反射の質感の設定
+//=============================================================================
+void CModel::SetMaterialPower(float fPower, int nIdx) {
+	if (nIdx < 0 || nIdx >= MAX_MATERIAL) return;
+
+	m_aMat[nIdx].MatD3D.Power = fPower;
+}
+
+//=============================================================================
 // 輪郭の発光色の設定
 //=============================================================================
 void CModel::SetColorGlow(D3DXCOLOR col) {
@@ -588,9 +604,6 @@ void CModel::ExpansionCloneMesh(void) {
 		pVtx[nCnt].pos = D3DXVECTOR3(pVtx[nCnt].pos.x + pVtx[nCnt].nor.x * OUTLINE_SIZE,
 			pVtx[nCnt].pos.y + pVtx[nCnt].nor.y * OUTLINE_SIZE,
 			pVtx[nCnt].pos.z + pVtx[nCnt].nor.z * OUTLINE_SIZE);
-
-		//複製の仕方のせいかマテリアルが反映されないのでここで色を指定
-		pVtx[nCnt].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	//頂点バッファのアンロック
@@ -601,22 +614,7 @@ void CModel::ExpansionCloneMesh(void) {
 // 輪郭の色の設定
 //=============================================================================
 void CModel::SetColorOutline(D3DXCOLOR col) {
-	if (m_pCloneMesh == nullptr) return;
-	//頂点数の取得
-	int nNumVtx = 0;
-	nNumVtx = m_pCloneMesh->GetNumVertices();
-
-	VERTEX_3D *pVtx;	//FVFを変更して複製したのでそれに合わせた構造体の頂点バッファのポインタ
-
-	//頂点バッファのロック
-	m_pCloneMesh->LockVertexBuffer(0, (void**)&pVtx);
-
-	for (int nCnt = 0; nCnt < nNumVtx; nCnt++) {
-		pVtx[nCnt].col = col;
-	}
-
-	//頂点バッファのアンロック
-	m_pCloneMesh->UnlockVertexBuffer();
+	m_colOutline = col;
 }
 
 //=============================================================================

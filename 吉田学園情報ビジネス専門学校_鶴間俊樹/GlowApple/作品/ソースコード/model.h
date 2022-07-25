@@ -79,6 +79,7 @@ public:
 	float GetMaterialDiffuseAlpha(int nIdx);				//マテリアルのアルファ値を取得
 	void SetMaterialSpecular(D3DXCOLOR col, int nIdx);	//マテリアルのスペキュラー色の設定
 	void SetMaterialEmissive(D3DXCOLOR col, int nIdx);	//マテリアルの発光色の設定
+	void SetMaterialPower(float fPower, int nIdx);		//マテリアルの反射の質感の設定
 	void SetColorGlow(D3DXCOLOR col);	//輪郭の発光色の設定
 
 	void CreateCloneMesh(void);		//複製メッシュの生成
@@ -99,6 +100,7 @@ private:
 	CModel* m_pParent;		//親のモデルへのポインタ
 	int m_nIdxParent;		//親のインデックス
 	D3DXMATERIAL m_aMat[MAX_MATERIAL];	//モデルのマテリアル
+	D3DXCOLOR m_colOutline;	//輪郭の色
 	D3DXCOLOR m_colGlow;	//輪郭の発光色の色
 
 	bool m_bOutline;			//輪郭があるかどうか

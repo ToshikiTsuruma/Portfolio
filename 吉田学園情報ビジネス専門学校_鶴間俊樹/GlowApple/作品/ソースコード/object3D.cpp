@@ -227,17 +227,4 @@ int CObject3D::GetNumIdx(void) {
 //=============================================================================
 void CObject3D::SetColor(D3DXCOLOR col) {
 	m_col = col;
-
-	if (m_pVtxBuff != nullptr) {
-		VERTEX_3D *pVtx;
-		//頂点バッファのロック
-		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
-		//頂点の設定
-		for (int nCntVtx = 0; nCntVtx < m_nNumVtx; nCntVtx++) {
-			pVtx[nCntVtx].col = m_col;
-		}
-
-		//頂点バッファをアンロックする
-		m_pVtxBuff->Unlock();
-	}
 }

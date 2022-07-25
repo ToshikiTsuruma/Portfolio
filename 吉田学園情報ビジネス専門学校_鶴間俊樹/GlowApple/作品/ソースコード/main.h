@@ -37,8 +37,7 @@
 //*****************************************************************************
 #define SCREEN_WIDTH (1280) //ウィンドウの幅
 #define SCREEN_HEIGHT (720) //ウィンドウの高さ
-//#define FVF_VERTEX_2D (D3DFVF_XYZRHW|D3DFVF_DIFFUSE|D3DFVF_TEX1)					//2Dの柔軟な頂点フォーマット
-#define FVF_VERTEX_3D (D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1)	//3Dの柔軟な頂点フォーマット	//モデルの複製のみに使用
+#define FVF_VERTEX_3D (D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1)	//3Dの柔軟な頂点フォーマット	//モデルの複製のみに使用
 #define FPS (60)		// FPSの値
 
 //*****************************************************************************
@@ -57,7 +56,6 @@ typedef struct
 {
 	D3DXVECTOR3 pos;	//頂点座標
 	D3DXVECTOR3 nor;	//法線ベクトル
-	D3DCOLOR col;		//頂点カラー
 	D3DXVECTOR2 tex;	//テクスチャ座標
 } VERTEX_3D;
 

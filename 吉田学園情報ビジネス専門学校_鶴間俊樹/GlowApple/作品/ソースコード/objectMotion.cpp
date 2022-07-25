@@ -153,7 +153,7 @@ CObjectMotion::~CObjectMotion()
 //=============================================================================
 // モーション情報をロード
 //=============================================================================
-void CObjectMotion::LoadMotionText(char* pLoadDirectory, PARTS_INFO** ppPartsInfoArray, int* pNumParts, MOTION_INFO* pMotionInfoArray, int nNumMotionType, int* pIdxWeapon) {
+void CObjectMotion::LoadMotionText(char* pLoadDirectory, PARTS_INFO*& pPartsInfoArray, int& nNumParts, MOTION_INFO* pMotionInfoArray, int nNumMotionType) {
 	//-------------------------------------
 	//ファイルの読み込み
 	//-------------------------------------
@@ -183,275 +183,274 @@ void CObjectMotion::LoadMotionText(char* pLoadDirectory, PARTS_INFO** ppPartsInf
 	//ファイルを開く
 	pFile = fopen(pLoadDirectory, "r");
 
-	if (pFile != nullptr) {
-		//読み込み開始位置まで行を飛ばす
-		while (fgets(sLoadText, MAX_LOAD_TEXT, pFile) != nullptr) //一行ごとに文字列を取得
-		{
-			pLoadText = strtok(sLoadText, " =\t\n");	//文字列の分割（空白 タブ 改行 ＝）
+	//ファイル読み込み失敗時
+	if (pFile == nullptr) return;
+
+	//読み込み開始位置まで行を飛ばす
+	while (fgets(sLoadText, MAX_LOAD_TEXT, pFile) != nullptr) //一行ごとに文字列を取得
+	{
+		pLoadText = strtok(sLoadText, " =\t\n");	//文字列の分割（空白 タブ 改行 ＝）
+		if (pLoadText == nullptr) continue;
+		//読み込み開始
+		if (strcmp(pLoadText, "SCRIPT") == 0) {
+			break;
+		}
+	}
+
+	while (fgets(sLoadText, MAX_LOAD_TEXT, pFile) != nullptr) //一行ごとに文字列を取得
+	{
+		pLoadText = strtok(sLoadText, " =\t\n");	//文字列の分割（空白 タブ 改行 ＝）
+		if (pLoadText == nullptr) continue;
+		//コメント
+		if (strstr(pLoadText, "#") != nullptr) {
+			continue;
+		}
+		//読み込み終了
+		if (strcmp(pLoadText, "END_SCRIPT") == 0) {
+			break;
+		}
+
+		//-------------------------------------------------
+		//モデル読み込み
+		//-------------------------------------------------
+		//モデル数設定
+		if (strcmp(pLoadText, "NUM_MODEL") == 0) {
+			pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
 			if (pLoadText != nullptr) {
-				//読み込み開始
-				if (strcmp(pLoadText, "SCRIPT") == 0) {
-					break;
+				nNumLoadModel = atoi(pLoadText);	//文字列を数字に変換
+				pLoadModelTypeArray = new CModel::MODELTYPE[nNumLoadModel];	//読み込んだモデル数分のタイプ保存用の変数を生成
+			}
+			continue;
+		}
+		//モデルタイプ設定
+		if (strcmp(pLoadText, "MODEL_FILENAME") == 0 && pLoadModelTypeArray != nullptr && nCntLoadModel < nNumLoadModel) {
+			pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
+			if (pLoadText != nullptr) {
+				for (int nCntModel = 0; nCntModel < (int)CModel::MODELTYPE::ENUM_MAX; nCntModel++)
+				{
+					//モデルのディレクトリ名と比較する
+					if (strcmp(pLoadText, CModel::GetPathName((CModel::MODELTYPE)nCntModel)) == 0) {
+						//モデルの種類の番号を設定
+						pLoadModelTypeArray[nCntLoadModel] = (CModel::MODELTYPE)nCntModel;
+						nCntLoadModel++;
+						break;
+					}
 				}
+			}
+			continue;
+		}
+
+		//-------------------------------------------------
+		//キャラクター情報読み込み
+		//-------------------------------------------------
+		//キャラクター設定開始
+		if (strcmp(pLoadText, "CHARACTERSET") == 0) {
+			bSetCharacter = true;
+			//各変数の初期化
+			bSetNumParts = false;
+			nCntParts = 0;
+
+			continue;
+		}
+
+		//キャラクター設定中
+		if (bSetCharacter) {
+			//キャラクター設定終了
+			if (strcmp(pLoadText, "END_CHARACTERSET") == 0) {
+				bSetCharacter = false;
+
+				continue;
+			}
+			//パーツ数設定
+			if (strcmp(pLoadText, "NUM_PARTS") == 0 && !bSetNumParts && pMotionInfoArray != nullptr) {
+				pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
+				if (pLoadText == nullptr) continue;
+
+				nNumParts = atoi(pLoadText);	//文字列を数字に変換
+				//パーツ情報をパーツ数分生成
+				pPartsInfoArray = new PARTS_INFO[nNumParts];
+				//モーション情報のキー情報をパーツ分生成
+				for (int nCntMotionInfo = 0; nCntMotionInfo < nNumMotionType; nCntMotionInfo++)
+				{
+					for (int nCntKeyInfo = 0; nCntKeyInfo < MAX_KEY_MOTION; nCntKeyInfo++)
+					{
+						pMotionInfoArray[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray = new KEY[nNumParts];
+					}
+				}
+				bSetNumParts = true;
+
+				continue;
+			}
+
+
+			//-------------------------------------------------
+			//パーツ情報読み込み
+			//-------------------------------------------------
+			if (pPartsInfoArray == nullptr || !bSetNumParts) continue;
+			//パーツ設定開始
+			if (strcmp(pLoadText, "PARTSSET") == 0 && nCntParts < nNumParts) {
+				bSetParts = true;
+				continue;
+			}
+
+			if (!bSetParts) continue;
+
+			//パーツ設定終了
+			if (strcmp(pLoadText, "END_PARTSSET") == 0) {
+				bSetParts = false;
+				//カウンター加算
+				nCntParts++;
+				continue;
+			}
+			//番号設定
+			if (strcmp(pLoadText, "INDEX") == 0) {
+				pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
+				if (pLoadText != nullptr) {
+					int nIdx = atoi(pLoadText);	//文字列を数字に変換
+					//インデックスの設定
+					pPartsInfoArray[nCntParts].nIdx = nIdx;
+					//モデルのタイプを設定
+					pPartsInfoArray[nCntParts].modelType = pLoadModelTypeArray[nIdx];
+				}
+				continue;
+			}
+			//親パーツの番号設定
+			if (strcmp(pLoadText, "PARENT") == 0) {
+				pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
+				if (pLoadText != nullptr) {
+					pPartsInfoArray[nCntParts].nIdxParent = atoi(pLoadText);	//文字列を数字に変換
+				}
+				continue;
+			}
+			//オフセットの設定
+			if (strcmp(pLoadText, "POS") == 0) {
+				pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
+				if (pLoadText != nullptr) {
+					pPartsInfoArray[nCntParts].offset.x = (float)atof(pLoadText);	//X座標の設定
+					pLoadText = strtok(nullptr, " ");	//文字列の分割
+					pPartsInfoArray[nCntParts].offset.y = (float)atof(pLoadText);	//Y座標の設定
+					pLoadText = strtok(nullptr, " ");	//文字列の分割
+					pPartsInfoArray[nCntParts].offset.z = (float)atof(pLoadText);	//Z座標の設定
+				}
+				continue;
 			}
 		}
 
-		while (fgets(sLoadText, MAX_LOAD_TEXT, pFile) != nullptr) //一行ごとに文字列を取得
-		{
-			pLoadText = strtok(sLoadText, " =\t\n");	//文字列の分割（空白 タブ 改行 ＝）
-			if (pLoadText != nullptr) {
-				//コメント
-				if (strstr(pLoadText, "#") != nullptr) {
-					continue;
-				}
-				//読み込み終了
-				if (strcmp(pLoadText, "END_SCRIPT") == 0) {
-					break;
-				}
-
-				//-------------------------------------------------
-				//モデル読み込み
-				//-------------------------------------------------
-				//モデル数設定
-				if (strcmp(pLoadText, "NUM_MODEL") == 0) {
-					pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
-					if (pLoadText != nullptr) {
-						nNumLoadModel = atoi(pLoadText);	//文字列を数字に変換
-						pLoadModelTypeArray = new CModel::MODELTYPE[nNumLoadModel];	//読み込んだモデル数分のタイプ保存用の変数を生成
-					}
-					continue;
-				}
-				//モデルタイプ設定
-				if (strcmp(pLoadText, "MODEL_FILENAME") == 0 && pLoadModelTypeArray != nullptr && nCntLoadModel < nNumLoadModel) {
-					pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
-					if (pLoadText != nullptr) {
-						for (int nCntModel = 0; nCntModel < (int)CModel::MODELTYPE::ENUM_MAX; nCntModel++)
-						{
-							//モデルのディレクトリ名と比較する
-							if (strcmp(pLoadText, CModel::GetPathName((CModel::MODELTYPE)nCntModel)) == 0) {
-								//モデルの種類の番号を設定
-								pLoadModelTypeArray[nCntLoadModel] = (CModel::MODELTYPE)nCntModel;
-								nCntLoadModel++;
-								break;
-							}
-						}
-					}
-					continue;
-				}
-
-				//-------------------------------------------------
-				//キャラクター情報読み込み
-				//-------------------------------------------------
-				//キャラクター設定開始
-				if (strcmp(pLoadText, "CHARACTERSET") == 0) {
-					bSetCharacter = true;
-					//各変数の初期化
-					bSetNumParts = false;
-					nCntParts = 0;
-
-					continue;
-				}
-				if (bSetCharacter) {
-					//キャラクター設定終了
-					if (strcmp(pLoadText, "END_CHARACTERSET") == 0) {
-						bSetCharacter = false;
-
-						continue;
-					}
-					//武器を持つパーツのインデックス設定
-					if (strcmp(pLoadText, "INDEX_WEAPON") == 0 && pIdxWeapon != nullptr) {
-						pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
-						if (pLoadText != nullptr) {
-							*pIdxWeapon = atoi(pLoadText);	//文字列を数字に変換
-						}
-						continue;
-					}
-					//パーツ数設定
-					if (strcmp(pLoadText, "NUM_PARTS") == 0 && !bSetNumParts && pMotionInfoArray != nullptr) {
-						pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
-						if (pLoadText != nullptr) {
-							*pNumParts = atoi(pLoadText);	//文字列を数字に変換
-							//パーツ情報をパーツ数分生成
-							*ppPartsInfoArray = new PARTS_INFO[*pNumParts];
-							//モーション情報のキー情報をパーツ分生成
-							for (int nCntMotionInfo = 0; nCntMotionInfo < nNumMotionType; nCntMotionInfo++)
-							{
-								for (int nCntKeyInfo = 0; nCntKeyInfo < MAX_KEY_MOTION; nCntKeyInfo++)
-								{
-									pMotionInfoArray[nCntMotionInfo].aKeyInfo[nCntKeyInfo].pKeyArray = new KEY[*pNumParts];
-								}
-							}
-							bSetNumParts = true;
-						}
-						continue;
-					}
-
-
-					if (*ppPartsInfoArray != nullptr && bSetNumParts) {
-						//-------------------------------------------------
-						//パーツ情報読み込み
-						//-------------------------------------------------
-						//パーツ設定開始
-						if (strcmp(pLoadText, "PARTSSET") == 0 && nCntParts < *pNumParts) {
-							bSetParts = true;
-							continue;
-						}
-						if (bSetParts) {
-							//パーツ設定終了
-							if (strcmp(pLoadText, "END_PARTSSET") == 0) {
-								bSetParts = false;
-								//カウンター加算
-								nCntParts++;
-								continue;
-							}
-							//番号設定
-							if (strcmp(pLoadText, "INDEX") == 0) {
-								pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
-								if (pLoadText != nullptr) {
-									int nIdx = atoi(pLoadText);	//文字列を数字に変換
-									//インデックスの設定
-									(*ppPartsInfoArray)[nCntParts].nIdx = nIdx;
-									//モデルのタイプを設定
-									(*ppPartsInfoArray)[nCntParts].modelType = pLoadModelTypeArray[nIdx];
-								}
-								continue;
-							}
-							//親パーツの番号設定
-							if (strcmp(pLoadText, "PARENT") == 0) {
-								pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
-								if (pLoadText != nullptr) {
-									(*ppPartsInfoArray)[nCntParts].nIdxParent = atoi(pLoadText);	//文字列を数字に変換
-								}
-								continue;
-							}
-							//オフセットの設定
-							if (strcmp(pLoadText, "POS") == 0) {
-								pLoadText = strtok(nullptr, " =#\t\n");	//文字列の分割
-								if (pLoadText != nullptr) {
-									(*ppPartsInfoArray)[nCntParts].offset.x = (float)atof(pLoadText);	//X座標の設定
-									pLoadText = strtok(nullptr, " ");	//文字列の分割
-									(*ppPartsInfoArray)[nCntParts].offset.y = (float)atof(pLoadText);	//Y座標の設定
-									pLoadText = strtok(nullptr, " ");	//文字列の分割
-									(*ppPartsInfoArray)[nCntParts].offset.z = (float)atof(pLoadText);	//Z座標の設定
-								}
-								continue;
-							}
-						} //bSetParts
-					} //bSetNumParts
-				} // bSetCharacter
-				//-------------------------------------------------
-				//モーションの読み込み
-				//-------------------------------------------------
-				if (pMotionInfoArray != nullptr) {
-					//モーションセット
-					if (strcmp(pLoadText, "MOTIONSET") == 0 && nCntMotion < nNumMotionType) {
-						bMotionSet = true;
-						nCntKeySet = 0;
-						continue;
-					}
-					//モーションセットの終了
-					if (strcmp(pLoadText, "END_MOTIONSET") == 0) {
-						bMotionSet = false;
-						nCntMotion++;
-						continue;
-					}
-					if (bMotionSet) {
-						//ループ
-						if (strcmp(pLoadText, "LOOP") == 0) {
-							pLoadText = strtok(nullptr, " =#\t\n");
-							if (pLoadText != nullptr) {
-								pMotionInfoArray[nCntMotion].bLoop = atoi(pLoadText) != 0;
-							}
-							continue;
-						}
-						//キー数
-						if (strcmp(pLoadText, "NUM_KEY") == 0) {
-							pLoadText = strtok(nullptr, " =#\t\n");
-							if (pLoadText != nullptr) {
-								pMotionInfoArray[nCntMotion].nNumKey = atoi(pLoadText);
-							}
-							continue;
-						}
-						//キーセット
-						if (strcmp(pLoadText, "KEYSET") == 0 && nCntKeySet < MAX_KEY_MOTION) {
-							bKeySet = true;
-							nCntKey = 0;
-							continue;
-						}
-						//エンドキーセット
-						if (strcmp(pLoadText, "END_KEYSET") == 0) {
-							nCntKeySet++;
-							bKeySet = false;
-							continue;
-						}
-						//フレーム
-						if (strcmp(pLoadText, "FRAME") == 0 && bKeySet) {
-							pLoadText = strtok(nullptr, " =#\t\n");
-							if (pLoadText != nullptr) {
-								pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].nFrame = atoi(pLoadText);
-							}
-							continue;
-						}
-						//各パーツごとの設定
-						if (strcmp(pLoadText, "KEY") == 0 && bKeySet && nCntKey < *pNumParts) {
-							bKey = true;
-							continue;
-						}
-						//各パーツごとの設定の終了
-						if (strcmp(pLoadText, "END_KEY") == 0 && bKeySet) {
-							bKey = false;
-							nCntKey++;
-							continue;
-						}
-						if (pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray != nullptr) {
-							//位置座標の設定
-							if (strcmp(pLoadText, "POS") == 0 && bKeySet && bKey) {
-								pLoadText = strtok(nullptr, " =#\t\n");
-								if (pLoadText != nullptr) {
-									pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].pos.x = (float)atof(pLoadText);
-								}
-								pLoadText = strtok(nullptr, " =#\t\n");
-								if (pLoadText != nullptr) {
-									pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].pos.y = (float)atof(pLoadText);
-								}
-								pLoadText = strtok(nullptr, " =#\t\n");
-								if (pLoadText != nullptr) {
-									pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].pos.z = (float)atof(pLoadText);
-								}
-								continue;
-							}
-							//角度の設定
-							if (strcmp(pLoadText, "ROT") == 0 && bMotionSet && bKeySet && bKey) {
-								pLoadText = strtok(nullptr, " =#\t\n");
-								if (pLoadText != nullptr) {
-									pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].rot.x = (float)atof(pLoadText);
-								}
-								pLoadText = strtok(nullptr, " =#\t\n");
-								if (pLoadText != nullptr) {
-									pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].rot.y = (float)atof(pLoadText);
-								}
-								pLoadText = strtok(nullptr, " =#\t\n");
-								if (pLoadText != nullptr) {
-									pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].rot.z = (float)atof(pLoadText);
-								}
-								continue;
-							}
-						}
-					} //MotionSet
-				} //pMotionInfo
-			} //LoadText
+		//-------------------------------------------------
+		//モーションの読み込み
+		//-------------------------------------------------
+		if (pMotionInfoArray == nullptr) continue;
+		//モーションセット
+		if (strcmp(pLoadText, "MOTIONSET") == 0 && nCntMotion < nNumMotionType) {
+			bMotionSet = true;
+			nCntKeySet = 0;
+			continue;
 		}
-		//ファイルを閉じる
-		fclose(pFile);
-	}
-	else {
-		//ファイルの読み込み失敗時
+		//モーションセットの終了
+		if (strcmp(pLoadText, "END_MOTIONSET") == 0) {
+			bMotionSet = false;
+			nCntMotion++;
+			continue;
+		}
+
+		//----------------------------
+		//モーションの設定
+		//----------------------------
+		if (!bMotionSet) continue;
+
+		//ループ
+		if (strcmp(pLoadText, "LOOP") == 0) {
+			pLoadText = strtok(nullptr, " =#\t\n");
+			if (pLoadText != nullptr) {
+				pMotionInfoArray[nCntMotion].bLoop = atoi(pLoadText) != 0;
+			}
+			continue;
+		}
+		//キー数
+		if (strcmp(pLoadText, "NUM_KEY") == 0) {
+			pLoadText = strtok(nullptr, " =#\t\n");
+			if (pLoadText != nullptr) {
+				pMotionInfoArray[nCntMotion].nNumKey = atoi(pLoadText);
+			}
+			continue;
+		}
+		//キーセット
+		if (strcmp(pLoadText, "KEYSET") == 0 && nCntKeySet < MAX_KEY_MOTION) {
+			bKeySet = true;
+			nCntKey = 0;
+			continue;
+		}
+		//エンドキーセット
+		if (strcmp(pLoadText, "END_KEYSET") == 0) {
+			nCntKeySet++;
+			bKeySet = false;
+			continue;
+		}
+		//フレーム
+		if (strcmp(pLoadText, "FRAME") == 0 && bKeySet) {
+			pLoadText = strtok(nullptr, " =#\t\n");
+			if (pLoadText != nullptr) {
+				pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].nFrame = atoi(pLoadText);
+			}
+			continue;
+		}
+		//各パーツごとの設定
+		if (strcmp(pLoadText, "KEY") == 0 && bKeySet && nCntKey < nNumParts) {
+			bKey = true;
+			continue;
+		}
+		//各パーツごとの設定の終了
+		if (strcmp(pLoadText, "END_KEY") == 0 && bKeySet) {
+			bKey = false;
+			nCntKey++;
+			continue;
+		}
+
+		//----------------------------
+		//キーの設定
+		//----------------------------
+		if (pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray == nullptr || !bMotionSet || !bKeySet || !bKey) continue;
+		//位置座標の設定
+		if (strcmp(pLoadText, "POS") == 0) {
+			pLoadText = strtok(nullptr, " =#\t\n");
+			if (pLoadText != nullptr) {
+				pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].pos.x = (float)atof(pLoadText);
+			}
+			pLoadText = strtok(nullptr, " =#\t\n");
+			if (pLoadText != nullptr) {
+				pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].pos.y = (float)atof(pLoadText);
+			}
+			pLoadText = strtok(nullptr, " =#\t\n");
+			if (pLoadText != nullptr) {
+				pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].pos.z = (float)atof(pLoadText);
+			}
+			continue;
+		}
+		//角度の設定
+		if (strcmp(pLoadText, "ROT") == 0) {
+			pLoadText = strtok(nullptr, " =#\t\n");
+			if (pLoadText != nullptr) {
+				pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].rot.x = (float)atof(pLoadText);
+			}
+			pLoadText = strtok(nullptr, " =#\t\n");
+			if (pLoadText != nullptr) {
+				pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].rot.y = (float)atof(pLoadText);
+			}
+			pLoadText = strtok(nullptr, " =#\t\n");
+			if (pLoadText != nullptr) {
+				pMotionInfoArray[nCntMotion].aKeyInfo[nCntKeySet].pKeyArray[nCntKey].rot.z = (float)atof(pLoadText);
+			}
+			continue;
+		}
 	}
 
+	//ファイルを閉じる
+	fclose(pFile);
+
+	//動的確保したモデルの種類を破棄
 	if (pLoadModelTypeArray != nullptr) {
 		delete[] pLoadModelTypeArray;
 	}
-
 }
 
 //=============================================================================
@@ -461,15 +460,11 @@ HRESULT CObjectMotion::Init(void) {
 	//モーションの0フレームの状態でスタートさせる
 	if (m_ppModelArray != nullptr) {
 		for (int nCntParts = 0; nCntParts < m_nNumParts; nCntParts++) {
-			if (m_ppModelArray[nCntParts] != nullptr && m_pMotionInfoArray != nullptr && m_pUpdateMotionInfoArray != nullptr) {
-				if (m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray != nullptr)
-				{
-					D3DXVECTOR3 rot;
-					rot = m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray[nCntParts].rot;
-					m_ppModelArray[nCntParts]->SetPos(m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray[nCntParts].pos + m_pUpdateMotionInfoArray[nCntParts].offsetPos);
-					m_ppModelArray[nCntParts]->SetRot(m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray[nCntParts].rot);
-				}
-			}
+			if (m_ppModelArray[nCntParts] == nullptr || m_pMotionInfoArray == nullptr || m_pUpdateMotionInfoArray == nullptr) continue;
+			if (m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray == nullptr) continue;
+
+			m_ppModelArray[nCntParts]->SetPos(m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray[nCntParts].pos + m_pUpdateMotionInfoArray[nCntParts].offsetPos);
+			m_ppModelArray[nCntParts]->SetRot(m_pMotionInfoArray[m_nTypeMotion].aKeyInfo[0].pKeyArray[nCntParts].rot);
 		}
 	}
 	return S_OK;

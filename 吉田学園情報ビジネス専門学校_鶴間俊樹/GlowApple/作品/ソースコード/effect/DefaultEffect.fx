@@ -87,7 +87,6 @@ struct VS_OUTPUT
 //------------------------------
 VS_OUTPUT RenderSceneVSDefault(
 	float4 vPos : POSITION,
-	float4 aDiffuse : COLOR0,
 	float4 vTexUV : TEXCOORD0)
 {
 	VS_OUTPUT Out;	//出力
@@ -98,8 +97,7 @@ VS_OUTPUT RenderSceneVSDefault(
 	Out.Pos = mul(Out.Pos, g_mProj);
 
 	//色
-	Out.Diffuse = aDiffuse;
-	//Out.Diffuse.xyz += g_matEmissive.xyz;
+	Out.Diffuse = g_matDiffuse;
 
 	//フォグを計算
 	Out.Fog = 1.0 - saturate(g_fogRange.x + g_fogRange.y * Out.Pos.w);
@@ -136,20 +134,19 @@ VS_OUTPUT RenderSceneVSLight(
 
 	//頂点の法線をワールド変換して正規化
 	float3 nor = normalize(mul((float3)vNor, (float3x3)g_mWorld));	//回転のみ？
-	float3 light = -normalize((float3)g_Light);	//頂点からライトへのベクトル
+	float3 light = normalize((float3)g_Light);	//頂点からライトへのベクトル
 
 	//ディフューズの計算
-	float col = dot(nor, light);	//計算後の色の明るさ
-	 //ハーフランバート？
+	float col = dot(nor, -light);	//計算後の色の明るさ
+	 //ハーフランバート
 	col += 1.0;
 	col *= 0.5;
 
 	//スペキュラーの計算
-	float3 r = normalize(2.0 * nor * dot(nor, light) - light);	//正反射ベクトル
-	float i = saturate(dot(r, vecView));	//反射の明るさ？
+	float3 vecHarf = normalize(-light + vecView);	//ハーフベクトル
 
 	//色と掛け合わせる
-	Out.Diffuse.xyz = g_matDiffuse.xyz * col + pow(g_matSpecular.xyz * i, g_matPower);	//ディフューズ + スペキュラー
+	Out.Diffuse.xyz = g_matDiffuse.xyz * col + pow(g_matSpecular.xyz * saturate(dot(nor, vecHarf)), g_matPower);	//ディフューズ + スペキュラー
 	Out.Diffuse.w = g_matDiffuse.w;
 
 	//輪郭を光らせる
@@ -169,47 +166,6 @@ VS_OUTPUT RenderSceneVSLight(
 
 	return Out;
 }
-
-/*/------------------------------
-//スペキュラー無し
-//------------------------------
-VS_OUTPUT RenderSceneVS(
-	float4 vPos : POSITION,
-	float4 vNor : NORMAL,
-	float4 aDiffuse : COLOR0,
-	float4 vTexUV : TEXCOORD0)
-{
-	VS_OUTPUT Out;	//出力
-
-	//WVP変換
-	Out.Pos = mul(vPos, g_mWorld);
-	Out.Pos = mul(Out.Pos, g_mView);
-	Out.Pos = mul(Out.Pos, g_mProj);
-
-	//頂点の法線をワールド変換して正規化
-	float3 nor = normalize(mul((float3)vNor, (float3x3)g_mWorld));	//回転のみ？
-
-	//法線とライトの逆ベクトルの内積を求める
-	float col = dot(nor, -normalize((float3)g_Light));	//ライトによる頂点の明るさ
-
-	//色を掛け合わせる
-	Out.Diffuse.xyz = aDiffuse.xyz * col;
-	Out.Diffuse.w = aDiffuse.w;
-	
-	//フォグを計算
-	Out.Fog = (1.0 - saturate(g_fogRange.x + g_fogRange.y * Out.Pos.w));
-
-	//テクスチャ座標
-	Out.TexUV = vTexUV;
-
-
-	// ライトの目線によるワールドビュー射影変換をする
-	float4x4 mat = mul(g_mWorld, g_mLightView);
-	mat = mul(mat, g_mLightProj);
-	Out.ZCalcTex = mul(vPos, mat);
-
-	return Out;
-}*/
 
 //=============================================================================
 // ピクセルシェーダ
@@ -285,7 +241,7 @@ PS_OUTPUT RenderScenePS3D(VS_OUTPUT In)
 	float SM_Z = tex2D(texSamplerShadow, TransTexCoord).x;
 
 	// 算出点がシャドウマップのZ値よりも大きければ影と判断
-	if (ZValue > SM_Z + 0.001f && SM_Z < 1.0) {	//シャドウマップが1.0だったらかげができないようにする
+	if (ZValue > SM_Z + 0.001f && SM_Z < 1.0) {	//シャドウマップのZ値が1.0だったら影ができないようにする
 		Out.RGB.xyz = Out.RGB.xyz * 0.5f;
 	}
 
@@ -353,16 +309,18 @@ PS_OUTPUT RenderScenePSLightTex3D(VS_OUTPUT In)
 //=============================================================================
 // 深度バッファ描画用
 //=============================================================================
-struct VS_OUTPUT_Z
+struct VS_OUTPUT_SHADOW
 {
 	float4 Pos : POSITION;   // 射影変換座標
 	float4 ShadowMapTex : TEXCOORD0;   // Zバッファテクスチャ
 };
 
+//------------------------------
 // 頂点シェーダ
-VS_OUTPUT_Z ZBufferCalc_VS(float4 vPos : POSITION, float4 color : COLOR0)
+//------------------------------
+VS_OUTPUT_SHADOW ZBufferCalc_VS(float4 vPos : POSITION, float4 color : COLOR0)
 {
-	VS_OUTPUT_Z Out;
+	VS_OUTPUT_SHADOW Out;
 
 	//WVP変換
 	Out.Pos = mul(vPos, g_mWorld);
@@ -372,18 +330,16 @@ VS_OUTPUT_Z ZBufferCalc_VS(float4 vPos : POSITION, float4 color : COLOR0)
 	// テクスチャ座標を頂点に合わせる
 	Out.ShadowMapTex = Out.Pos;
 
-	//透明なオブジェクトは書き込まないようにしたい
-	//if (g_matDiffuse.w < 1.0) Out.ShadowMapTex = float4(1.0, 1.0, 1.0, 1.0);	//3Dポリゴンの場合は頂点カラー、分岐は後で	//これだとこの後ろのモデルがバグる
-
 	return Out;
 }
 
+//------------------------------
 // ピクセルシェーダ
+//------------------------------
 float4 ZBufferPlot_PS(float4 ShadowMapTex : TEXCOORD0) : COLOR
 {
 	// Z値算出
 	return ShadowMapTex.z / ShadowMapTex.w;
-	//return ShadowMapTex.w / 2000.0;
 }
 
 //=============================================================================

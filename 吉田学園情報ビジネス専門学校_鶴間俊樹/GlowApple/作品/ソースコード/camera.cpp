@@ -8,8 +8,6 @@
 #include "manager.h"
 #include "renderer.h"
 #include "input.h"
-//#include "terrain.h"
-//#include "wallCylinder.h"
 
 #include "scene.h"
 #include "player.h"
@@ -101,7 +99,6 @@ HRESULT CCamera::Init(void) {
 
 	//プロジェクションマトリックスの設定
 	pRenderer->SetEffectMatrixProj(m_mtxProjection);
-	//pDevice->SetTransform(D3DTS_PROJECTION, &m_mtxProjection);
 
 	//上ベクトルの設定
 	m_vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
@@ -168,36 +165,6 @@ void CCamera::SetCamera(void) {
 	m_posV = D3DXVECTOR3(posCamera.x + sinf(m_rot.y) * m_fDistance * cosf(m_rot.x + D3DX_PI),
 		posCamera.y + sinf(m_rot.x + D3DX_PI) * m_fDistance,
 		posCamera.z + cosf(m_rot.y) * m_fDistance * cosf(m_rot.x + D3DX_PI));	//視点が中心の場合から変更したときに移動がないようにX回転にPIを足している
-
-	//------------------------------------
-	//当たり判定
-	//------------------------------------
-	/*
-	//壁との当たり判定
-	D3DXVECTOR2 posCrossWall = D3DXVECTOR2(m_posV.x, m_posV.z);	//壁との交点
-	CWallCylinder::CrossPoint(&posCrossWall, &m_posCreate, &m_posV, 15.0f);
-	//位置の反映
-	m_posV.x = posCrossWall.x;
-	m_posV.z = posCrossWall.y;
-
-	//地形との当たり判定
-	bool bColTerrain = false;	//衝突しているかどうか
-	D3DXVECTOR3 posColTerrain, vecStart, vecEnd;	//接触位置、開始ベクトル、終了ベクトル
-	vecStart = m_posR;
-	vecEnd = m_posV;
-	//当たり判定
-	bColTerrain = CTerrain::Collision(&posColTerrain, vecStart, vecEnd);
-	//接触位置と注視点の距離を計算
-	float fDistCol;	//接触位置との距離
-	D3DXVECTOR3 vecColTerrain = posColTerrain - m_posR;	//注視点から接触位置へのベクトル
-	fDistCol = D3DXVec3Length(&vecColTerrain);
-	//視点と注視点の距離を計算
-	float fDistCamera;	//接触位置との距離
-	D3DXVECTOR3 vecCamera = m_posV - m_posR;	//注視点から接触位置へのベクトル
-	fDistCamera = D3DXVec3Length(&vecCamera);
-	//衝突していて、現在のカメラの距離以内であれば位置の変更
-	if (bColTerrain && fDistCol <= fDistCamera) m_posV = posColTerrain;
-	*/
 
 	//------------------------------------
 	//ビューマトリックスの作成

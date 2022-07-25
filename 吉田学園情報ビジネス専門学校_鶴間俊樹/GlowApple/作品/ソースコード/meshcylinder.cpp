@@ -220,8 +220,6 @@ void CMeshcylinder::SetVtxBuff(void) {
 			pVtx[nCntVtx].nor.z *= -1;
 		}
 
-		pVtx[nCntVtx].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-
 		pVtx[nCntVtx].tex = D3DXVECTOR2((float)(nCntVtx % (m_nNumXZ + 1)) / m_nNumXZ, (float)(nCntVtx / (m_nNumXZ + 1)) / m_nNumY);	//メッシュ全体で画像１枚分
 		//pVtx[nCntVtx].tex = D3DXVECTOR2((float)(nCntVtx % (m_nNumXZ + 1)), (float)(nCntVtx / (m_nNumXZ + 1)));	//メッシュごとに画像一枚分
 	}

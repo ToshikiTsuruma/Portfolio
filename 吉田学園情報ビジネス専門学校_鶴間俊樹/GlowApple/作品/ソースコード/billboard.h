@@ -58,6 +58,7 @@ private:
 	float m_fRatioHeight;	//ポリゴンの高さの割合
 	D3DXVECTOR3 m_offsetPos;//位置のオフセット
 	bool m_bRotateYOnly;	//Y回転のみ
+	D3DXCOLOR m_col;	//頂点色
 
 	bool m_bEnableFog;		//フォグを有効にするかどうか
 	bool m_bZtestAlways;	//深度関係なく描画できるかどうか

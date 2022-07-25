@@ -47,6 +47,7 @@ CGlowApple::~CGlowApple()
 HRESULT CGlowApple::Init(void) {
 	CModel* pModel = GetPtrModel();
 	if (pModel != nullptr) {
+		pModel->SetMaterialPower(4.0f, 0);
 		pModel->SetColorGlow(D3DXCOLOR(1.0f, 0.8f, 0.4f, 1.0f));
 	}
 

@@ -101,8 +101,6 @@ HRESULT CMeshwall::Init(void) {
 			//法線ベクトルの設定
 			pVtx[nCntVtx].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
 
-			pVtx[nCntVtx].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-
 			pVtx[nCntVtx].tex = D3DXVECTOR2((float)(nCntVtx % (m_nNumX + 1)), (float)(nCntVtx / (m_nNumX + 1)));
 		}
 		//頂点バッファをアンロックする
