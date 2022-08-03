@@ -18,7 +18,7 @@
 //=============================================================================
 // デフォルトコンストラクタ
 //=============================================================================
-CTerrain::CTerrain(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 rot) : CObjectModel(typeModel, pos, rot, false)
+CTerrain::CTerrain(CModel::MODELTYPE typeModel) : CObjectModel(typeModel, false)
 {
 	SetObjType(OBJTYPE_TERRAIN);	//オブジェクトタイプの設定
 	SetDrawPriority(DRAW_PRIORITY::BG);
@@ -37,9 +37,11 @@ CTerrain::~CTerrain()
 //=============================================================================
 CTerrain* CTerrain::Create(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 rot) {
 	CTerrain* pTerrain;
-	pTerrain = new CTerrain(typeModel, pos, rot);
+	pTerrain = new CTerrain(typeModel);
 	if (pTerrain == nullptr) return nullptr;
 
+	pTerrain->SetPos(pos);
+	pTerrain->SetRot(rot);
 	pTerrain->Init();
 
 	return pTerrain;

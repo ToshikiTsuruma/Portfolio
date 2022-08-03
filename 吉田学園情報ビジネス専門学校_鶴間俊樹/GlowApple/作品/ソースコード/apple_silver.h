@@ -25,7 +25,7 @@ class CAppleSilver : public CGlowApple
 {
 public:
 	CAppleSilver();		//デフォルトコンストラクタ
-	CAppleSilver(D3DXVECTOR3 pos, CAppleTree* pTree);		//オーバーロードされたコンストラクタ
+	CAppleSilver(CAppleTree* pTree);		//オーバーロードされたコンストラクタ
 	virtual ~CAppleSilver();		//デストラクタ
 	static CAppleSilver* Create(D3DXVECTOR3 pos, CAppleTree* pTree);	//生成処理
 	HRESULT Init(void);	//初期化処理

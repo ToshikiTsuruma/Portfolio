@@ -19,7 +19,7 @@
 class CTerrain : public CObjectModel
 {
 public:
-	CTerrain(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 rot);	//デフォルトコンストラクタ
+	CTerrain(CModel::MODELTYPE typeModel);	//デフォルトコンストラクタ
 	~CTerrain();	//デストラクタ
 	static CTerrain* Create(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 rot);	//生成処理
 	HRESULT Init(void);	//初期化処理

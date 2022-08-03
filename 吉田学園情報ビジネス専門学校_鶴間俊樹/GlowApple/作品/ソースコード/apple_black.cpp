@@ -28,7 +28,7 @@ CAppleBlack::CAppleBlack()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CAppleBlack::CAppleBlack(D3DXVECTOR3 pos, CAppleTree* pTree) : CGlowApple(pos, pTree)
+CAppleBlack::CAppleBlack(CAppleTree* pTree) : CGlowApple(pTree)
 {
 
 }
@@ -46,9 +46,10 @@ CAppleBlack::~CAppleBlack()
 //=============================================================================
 CAppleBlack* CAppleBlack::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 	CAppleBlack* pAppleBlack;
-	pAppleBlack = new CAppleBlack(pos, pTree);
+	pAppleBlack = new CAppleBlack(pTree);
 	if (pAppleBlack == nullptr) return nullptr;
 
+	pAppleBlack->SetPos(pos);
 	pAppleBlack->Init();
 
 	return pAppleBlack;

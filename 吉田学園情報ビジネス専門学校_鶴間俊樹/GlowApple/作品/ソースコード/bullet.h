@@ -24,7 +24,7 @@ class CBullet : public CObjectModel
 {
 public:
 	CBullet();	//デフォルトコンストラクタ
-	CBullet(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos);		//オーバーロードされたコンストラクタ
+	CBullet(CModel::MODELTYPE typeModel);		//オーバーロードされたコンストラクタ
 	~CBullet();	//デストラクタ
 	static CBullet* Create(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 move, int nLife, int nObjtypeAttack, float fRadiusCol, int nDamage);	//生成処理
 	HRESULT Init(void);	//初期化処理

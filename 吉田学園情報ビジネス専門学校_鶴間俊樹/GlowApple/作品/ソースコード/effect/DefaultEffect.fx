@@ -80,6 +80,7 @@ struct VS_OUTPUT
 	float4 TexUV : TEXCOORD0;	//テクスチャ座標
 
 	float4 ZCalcTex : TEXCOORD1;   	// Z値算出用テクスチャ
+	float4 ColShadow : COLOR2;		//影ができる場合の色
 };
 
 //------------------------------
@@ -110,6 +111,8 @@ VS_OUTPUT RenderSceneVSDefault(
 	mat = mul(mat, g_mLightProj);
 	Out.ZCalcTex = mul(vPos, mat);
 
+	//影の色
+	Out.ColShadow = float4(0.0, 0.0, 0.0, 0.0);
 
 	return Out;
 }
@@ -133,11 +136,21 @@ VS_OUTPUT RenderSceneVSLight(
 	Out.Pos = mul(Out.Pos, g_mProj);
 
 	//頂点の法線をワールド変換して正規化
-	float3 nor = normalize(mul((float3)vNor, (float3x3)g_mWorld));	//回転のみ？
+	float3 nor = normalize(mul((float3)vNor, (float3x3)g_mWorld));	//回転のみ
 	float3 light = normalize((float3)g_Light);	//頂点からライトへのベクトル
+
+
+	//影の色
+	Out.ColShadow = float4(0.0, 0.0, 0.0, 0.0);
 
 	//ディフューズの計算
 	float col = dot(nor, -light);	//計算後の色の明るさ
+
+	//光があたっている場合のみオブジェクトに遮られたときの影の色を設定
+	if (col >= 0.0) {
+		Out.ColShadow = float4(1.0, 1.0, 1.0, 1.0);
+	}
+
 	 //ハーフランバート
 	col += 1.0;
 	col *= 0.5;
@@ -241,8 +254,8 @@ PS_OUTPUT RenderScenePS3D(VS_OUTPUT In)
 	float SM_Z = tex2D(texSamplerShadow, TransTexCoord).x;
 
 	// 算出点がシャドウマップのZ値よりも大きければ影と判断
-	if (ZValue > SM_Z + 0.001f && SM_Z < 1.0) {	//シャドウマップのZ値が1.0だったら影ができないようにする
-		Out.RGB.xyz = Out.RGB.xyz * 0.5f;
+	if (ZValue > SM_Z + 0.002f && SM_Z < 1.0) {	//シャドウマップのZ値が1.0だったら影ができないようにする
+		Out.RGB.xyz += Out.RGB.xyz * -0.5f * In.ColShadow.xyz;
 	}
 
 	//エミッシブを加算
@@ -293,8 +306,8 @@ PS_OUTPUT RenderScenePSLightTex3D(VS_OUTPUT In)
 	float SM_Z = tex2D(texSamplerShadow, TransTexCoord).x;
 
 	// 算出点がシャドウマップのZ値よりも大きければ影と判断
-	if (ZValue > SM_Z + 0.001f && SM_Z < 1.0) {	//シャドウマップが1.0だったらかげができないようにする
-		Out.RGB.xyz = Out.RGB.xyz * 0.5f;
+	if (ZValue > SM_Z + 0.002f && SM_Z < 1.0) {	//シャドウマップが1.0だったら影ができないようにする
+		Out.RGB.xyz += Out.RGB.xyz * -0.5f * In.ColShadow.xyz;
 	}
 
 	//エミッシブを加算
@@ -350,8 +363,8 @@ technique RenderScene
 	//深度バッファ描画用
 	pass P0
 	{
-		VertexShader = compile vs_2_0 ZBufferCalc_VS();
-		PixelShader = compile ps_2_0 ZBufferPlot_PS();
+		VertexShader = compile vs_3_0 ZBufferCalc_VS();
+		PixelShader = compile ps_3_0 ZBufferPlot_PS();
 	}
 
 	//-----------------------------------
@@ -361,14 +374,12 @@ technique RenderScene
 	//2d
 	pass P2D
 	{
-		//VertexShader = compile vs_2_0 RenderSceneVSDefault();
-		PixelShader = compile ps_2_0 RenderScenePS2D();
+		PixelShader = compile ps_3_0 RenderScenePS2D();
 	}
 	//2dテクスチャあり
 	pass P2D_TEX
 	{
-		//VertexShader = compile vs_2_0 RenderSceneVSDefault();
-		PixelShader = compile ps_2_0 RenderScenePSTex2D();
+		PixelShader = compile ps_3_0 RenderScenePSTex2D();
 	}
 
 	//-----------------------------------
@@ -377,25 +388,25 @@ technique RenderScene
 	//3d
 	pass P3D
 	{
-		VertexShader = compile vs_2_0 RenderSceneVSDefault();
-		PixelShader = compile ps_2_0 RenderScenePSDefault();
+		VertexShader = compile vs_3_0 RenderSceneVSDefault();
+		PixelShader = compile ps_3_0 RenderScenePSDefault();
 	}
 	//3Dライト
 	pass P3D_LIGHT
 	{
-		VertexShader = compile vs_2_0 RenderSceneVSLight();
-		PixelShader = compile ps_2_0 RenderScenePS3D();
+		VertexShader = compile vs_3_0 RenderSceneVSLight();
+		PixelShader = compile ps_3_0 RenderScenePS3D();
 	}
 	//3dテクスチャ
 	pass P3D_TEX
 	{
-		VertexShader = compile vs_2_0 RenderSceneVSDefault();
-		PixelShader = compile ps_2_0 RenderScenePSTex3D();
+		VertexShader = compile vs_3_0 RenderSceneVSDefault();
+		PixelShader = compile ps_3_0 RenderScenePSTex3D();
 	}
 	//3dライトテクスチャ
 	pass P3D_LIGHT_TEX
 	{
-		VertexShader = compile vs_2_0 RenderSceneVSLight();
-		PixelShader = compile ps_2_0 RenderScenePSLightTex3D();
+		VertexShader = compile vs_3_0 RenderSceneVSLight();
+		PixelShader = compile ps_3_0 RenderScenePSLightTex3D();
 	}
 }

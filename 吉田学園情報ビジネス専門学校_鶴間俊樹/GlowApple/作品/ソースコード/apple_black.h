@@ -24,7 +24,7 @@ class CAppleBlack : public CGlowApple
 {
 public:
 	CAppleBlack();		//デフォルトコンストラクタ
-	CAppleBlack(D3DXVECTOR3 pos, CAppleTree* pTree);		//オーバーロードされたコンストラクタ
+	CAppleBlack(CAppleTree* pTree);		//オーバーロードされたコンストラクタ
 	virtual ~CAppleBlack();		//デストラクタ
 	static CAppleBlack* Create(D3DXVECTOR3 pos, CAppleTree* pTree);	//生成処理
 	HRESULT Init(void);	//初期化処理

@@ -33,7 +33,7 @@ CAppleGold::CAppleGold()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CAppleGold::CAppleGold(D3DXVECTOR3 pos, CAppleTree* pTree) : CGlowApple(pos, pTree)
+CAppleGold::CAppleGold(CAppleTree* pTree) : CGlowApple(pTree)
 {
 
 }
@@ -51,9 +51,10 @@ CAppleGold::~CAppleGold()
 //=============================================================================
 CAppleGold* CAppleGold::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 	CAppleGold* pAppleGold;
-	pAppleGold = new CAppleGold(pos, pTree);
+	pAppleGold = new CAppleGold(pTree);
 	if (pAppleGold == nullptr) return nullptr;
 
+	pAppleGold->SetPos(pos);
 	pAppleGold->Init();
 
 	return pAppleGold;

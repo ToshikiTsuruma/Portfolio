@@ -26,7 +26,7 @@ CBullet::CBullet()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CBullet::CBullet(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos) : CObjectModel(typeModel, pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), false)
+CBullet::CBullet(CModel::MODELTYPE typeModel) : CObjectModel(typeModel, false)
 {
 	m_bCreateParticleFirst = false;
 }
@@ -44,9 +44,10 @@ CBullet::~CBullet()
 //=============================================================================
 CBullet* CBullet::Create(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 move, int nLife, int nObjtypeAttack, float fRadiusCol, int nDamage) {
 	CBullet* pBullet;
-	pBullet = new CBullet(typeModel, pos);
+	pBullet = new CBullet(typeModel);
 	if (pBullet == nullptr) return nullptr;
 
+	pBullet->SetPos(pos);
 	pBullet->m_move = move;
 	pBullet->m_nLife = nLife;
 	pBullet->m_nObjtypeAttack = nObjtypeAttack;

@@ -143,7 +143,7 @@ void CSelectMenu3D::CreateModelUI(void) {
 				0.0f,
 				cosf(D3DX_PI * 2.0f * (1.0f - (float)nCntModel / nNumSelect) + D3DX_PI) * m_fRadiusModel);
 		//UIモデルの生成
-		m_ppObjModelUIArray[nCntModel] = CObjectModelUI::Create(m_typeModel, posModel, D3DXVECTOR3(0.0f, 0.0f, 0.0f), true);
+		m_ppObjModelUIArray[nCntModel] = CObjectModelUI::Create(m_typeModel, posModel, D3DXVECTOR3(0.0f, 0.0f, 0.0f), false);
 
 		if (m_ppObjModelUIArray[nCntModel] == nullptr) continue;
 		//UIモデルのビューマトリックスと視点を設定

@@ -26,7 +26,7 @@ CAppleWhite::CAppleWhite()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CAppleWhite::CAppleWhite(D3DXVECTOR3 pos, CAppleTree* pTree) : CGlowApple(pos, pTree)
+CAppleWhite::CAppleWhite(CAppleTree* pTree) : CGlowApple(pTree)
 {
 
 }
@@ -44,7 +44,7 @@ CAppleWhite::~CAppleWhite()
 //=============================================================================
 CAppleWhite* CAppleWhite::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 	CAppleWhite* pAppleWhite;
-	pAppleWhite = new CAppleWhite(pos, pTree);
+	pAppleWhite = new CAppleWhite(pTree);
 	if (pAppleWhite == nullptr) return nullptr;
 
 	//マネージャーの取得
@@ -64,6 +64,7 @@ CAppleWhite* CAppleWhite::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 	//風の渦のエフェクトを生成
 	pAppleWhite->m_pEffectWind = CEffect::Create(pos + D3DXVECTOR3(0.0f, -15.0f, 0.0f), CEffect::EFFECT_TYPE::WIND, 40.0f, 40.0f, true);
 
+	pAppleWhite->SetPos(pos);
 	pAppleWhite->Init();
 
 	return pAppleWhite;

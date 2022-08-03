@@ -41,15 +41,7 @@
 //=============================================================================
 // デフォルトコンストラクタ
 //=============================================================================
-CAppleTree::CAppleTree()
-{
-
-}
-
-//=============================================================================
-// オーバーロードされたコンストラクタ
-//=============================================================================
-CAppleTree::CAppleTree(D3DXVECTOR3 pos) : CObjectModel(CModel::MODELTYPE::OBJ_APPLE_TREE, pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), false)
+CAppleTree::CAppleTree() : CObjectModel(CModel::MODELTYPE::OBJ_APPLE_TREE, false)
 {
 	m_nNumApple = 0;
 	for (int nCnt = 0; nCnt < MAX_NUM_CREATE_APPLE; nCnt++)
@@ -107,9 +99,10 @@ CAppleTree::~CAppleTree()
 //=============================================================================
 CAppleTree* CAppleTree::Create(D3DXVECTOR3 pos) {
 	CAppleTree* pAppleTree;
-	pAppleTree = new CAppleTree(pos);
+	pAppleTree = new CAppleTree();
 	if (pAppleTree == nullptr) return nullptr;
 
+	pAppleTree->SetPos(pos);
 	pAppleTree->Init();
 
 	return pAppleTree;

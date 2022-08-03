@@ -25,7 +25,7 @@ CObjectModelUI::CObjectModelUI()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CObjectModelUI::CObjectModelUI(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 rot, bool bOutLine) : CObjectModel(typeModel, pos, rot, bOutLine)
+CObjectModelUI::CObjectModelUI(CModel::MODELTYPE typeModel, bool bOutLine) : CObjectModel(typeModel, bOutLine)
 {
 	//描画順の設定
 	SetDrawPriority(DRAW_PRIORITY::UI);
@@ -47,9 +47,11 @@ CObjectModelUI::~CObjectModelUI()
 //=============================================================================
 CObjectModelUI* CObjectModelUI::Create(CModel::MODELTYPE type, D3DXVECTOR3 pos, D3DXVECTOR3 rot, bool bOutLine) {
 	CObjectModelUI* pObjectModelUI;
-	pObjectModelUI = new CObjectModelUI(type, pos, rot, bOutLine);
+	pObjectModelUI = new CObjectModelUI(type, bOutLine);
 	if (pObjectModelUI == nullptr) return nullptr;
 
+	pObjectModelUI->SetPos(pos);
+	pObjectModelUI->SetRot(rot);
 	pObjectModelUI->Init();
 
 	return pObjectModelUI;

@@ -24,9 +24,11 @@ CObjectModel::CObjectModel()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CObjectModel::CObjectModel(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 rot, bool bOutLine)
+CObjectModel::CObjectModel(CModel::MODELTYPE typeModel, bool bOutLine)
 {
-	m_pModel = CModel::Create(typeModel, pos, rot, nullptr, bOutLine);
+	m_pModel = CModel::Create(typeModel, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), nullptr, bOutLine);
+	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 }
 
 //=============================================================================
@@ -42,10 +44,12 @@ CObjectModel::~CObjectModel()
 //=============================================================================
 CObjectModel* CObjectModel::Create(CModel::MODELTYPE type, D3DXVECTOR3 pos, D3DXVECTOR3 rot, bool bOutLine) {
 	CObjectModel* pObjectModel;
-	pObjectModel = new CObjectModel(type, pos, rot, bOutLine);
+	pObjectModel = new CObjectModel(type, bOutLine);
 	if (pObjectModel == nullptr) return nullptr;
 
 	pObjectModel->Init();
+	pObjectModel->SetPos(pos);
+	pObjectModel->SetRot(rot);
 
 	return pObjectModel;
 }
@@ -95,12 +99,17 @@ void CObjectModel::Draw(void) {
 	LPDIRECT3DDEVICE9 pDevice = pRenderer->GetDevice();
 	if (pDevice == nullptr) return;
 
-	//初期化したワールドマトリックスを設定
-	D3DXMATRIX mtxWorld;
+	D3DXMATRIX mtxRot, mtxTrans;	//計算用マトリックス
 	//ワールドマトリックスの初期化
-	D3DXMatrixIdentity(&mtxWorld);
+	D3DXMatrixIdentity(&m_mtxWorld);
+	//向きを反映
+	D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
+	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);
+	//位置を反映
+	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
+	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxTrans);
 	//ワールドマトリックスの設定
-	pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
+	pDevice->SetTransform(D3DTS_WORLD, &m_mtxWorld);
 
 	//-----------------------------------
 	//モデルの描画
@@ -129,7 +138,7 @@ void CObjectModel::Move(void) {
 	}
 
 	//位置の取得
-	D3DXVECTOR3 pos = GetPos();
+	D3DXVECTOR3 pos = m_pos;
 
 	if (pInput->GetPress(CInput::CODE::MOVE_UP)) {
 		//前移動
@@ -157,7 +166,7 @@ void CObjectModel::Move(void) {
 	}
 
 	//位置の移動
-	SetPos(pos);
+	m_pos = pos;
 }
 
 //=============================================================================
@@ -177,7 +186,7 @@ void CObjectModel::Rotate(void) {
 	//--------------------
 	//入力処理
 	//--------------------
-	D3DXVECTOR3 rot = GetRot();
+	D3DXVECTOR3 rot = m_rot;
 	float fRotateSpeed = 0.01f * D3DX_PI;
 
 	//X軸回転
@@ -207,7 +216,7 @@ void CObjectModel::Rotate(void) {
 		}
 	}
 
-	SetRot(rot);
+	m_rot = rot;
 }
 
 //=============================================================================
@@ -229,28 +238,26 @@ CModel* CObjectModel::GetPtrModel(void) {
 // モデルオブジェクトの位置情報の設定
 //=============================================================================
 void CObjectModel::SetPos(D3DXVECTOR3 pos) {	
-	if (m_pModel != nullptr) m_pModel->SetPos(pos);
+	m_pos = pos;
 }
 
 //=============================================================================
 // モデルオブジェクトの位置情報の取得
 //=============================================================================
 D3DXVECTOR3 CObjectModel::GetPos(void) {
-	if (m_pModel != nullptr) return m_pModel->GetPos();
-	return D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	return m_pos;
 }
 
 //=============================================================================
 // モデルオブジェクトの角度の設定
 //=============================================================================
 void CObjectModel::SetRot(D3DXVECTOR3 rot) { 
-	if (m_pModel != nullptr) m_pModel->SetRot(rot);
+	m_rot = rot;
 }
 
 //=============================================================================
 // モデルオブジェクトの角度の取得
 //=============================================================================
 D3DXVECTOR3 CObjectModel::GetRot(void) {
-	if (m_pModel != nullptr) return m_pModel->GetRot();
-	return D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	return m_rot;
 }

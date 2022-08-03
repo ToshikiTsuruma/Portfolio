@@ -23,7 +23,7 @@ CAppleRed::CAppleRed()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CAppleRed::CAppleRed(D3DXVECTOR3 pos, CAppleTree* pTree) : CGlowApple(pos, pTree)
+CAppleRed::CAppleRed(CAppleTree* pTree) : CGlowApple(pTree)
 {
 
 }
@@ -41,9 +41,10 @@ CAppleRed::~CAppleRed()
 //=============================================================================
 CAppleRed* CAppleRed::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 	CAppleRed* pAppleRed;
-	pAppleRed = new CAppleRed(pos, pTree);
+	pAppleRed = new CAppleRed(pTree);
 	if (pAppleRed == nullptr) return nullptr;
 
+	pAppleRed->SetPos(pos);
 	pAppleRed->Init();
 
 	//林檎の木の体力の上限値を上げる

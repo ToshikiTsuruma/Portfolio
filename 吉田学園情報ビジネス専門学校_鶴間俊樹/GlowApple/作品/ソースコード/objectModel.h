@@ -23,7 +23,7 @@ class CObjectModel : public CObject
 public:
 
 	CObjectModel();		//デフォルトコンストラクタ
-	CObjectModel(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 rot, bool bOutLine);		//オーバーロードされたコンストラクタ
+	CObjectModel(CModel::MODELTYPE typeModel, bool bOutLine);		//オーバーロードされたコンストラクタ
 	virtual ~CObjectModel();		//デストラクタ
 	static CObjectModel* Create(CModel::MODELTYPE type, D3DXVECTOR3 pos, D3DXVECTOR3 rot, bool bOutLine);	//生成処理
 	virtual HRESULT Init(void);	//初期化処理
@@ -43,7 +43,9 @@ private:
 	void Rotate(void);	//回転
 
 	CModel* m_pModel;	//モデルへのポインタ
-
+	D3DXVECTOR3 m_pos;
+	D3DXVECTOR3 m_rot;
+	D3DXMATRIX m_mtxWorld;//ワールドマトリックス
 };
 
 #endif // !_OBJECT_MODEL_H_

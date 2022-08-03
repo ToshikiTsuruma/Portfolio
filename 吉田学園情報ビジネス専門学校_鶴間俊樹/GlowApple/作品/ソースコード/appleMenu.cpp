@@ -92,7 +92,8 @@ HRESULT CAppleMenu::Init(void) {
 		if (pAppleModel != nullptr) {		
 			//Ží—Þ‚É‚æ‚Á‚ÄF‚ðÝ’è
 			pAppleModel->SetMaterialDiffuse(CGlowApple::GetAppleColor(m_aTypeApple[nCntModel]), 0);
-			//pAppleModel->SetMaterialEmissive(GLOW_APPLE_EMISSIVE, 0);
+			pAppleModel->SetMaterialPower(4.0f, 0);
+			pAppleModel->SetColorGlow(D3DXCOLOR(1.0f, 0.8f, 0.4f, 1.0f));
 		}
 
 		//UIƒ‚ƒfƒ‹‚Ì‰ñ“]‘¬“x‚ðÝ’è

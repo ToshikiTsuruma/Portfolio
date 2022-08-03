@@ -26,7 +26,7 @@ CAppleGreen::CAppleGreen()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CAppleGreen::CAppleGreen(D3DXVECTOR3 pos, CAppleTree* pTree) : CGlowApple(pos, pTree)
+CAppleGreen::CAppleGreen(CAppleTree* pTree) : CGlowApple(pTree)
 {
 
 }
@@ -44,9 +44,10 @@ CAppleGreen::~CAppleGreen()
 //=============================================================================
 CAppleGreen* CAppleGreen::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 	CAppleGreen* pAppleGreen;
-	pAppleGreen = new CAppleGreen(pos, pTree);
+	pAppleGreen = new CAppleGreen(pTree);
 	if (pAppleGreen == nullptr) return nullptr;
 
+	pAppleGreen->SetPos(pos);
 	pAppleGreen->Init();
 
 	return pAppleGreen;

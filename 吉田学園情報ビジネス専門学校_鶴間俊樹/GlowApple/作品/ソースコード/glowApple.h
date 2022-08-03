@@ -38,7 +38,7 @@ public:
 	};
 
 	CGlowApple();		//デフォルトコンストラクタ
-	CGlowApple(D3DXVECTOR3 pos, CAppleTree* pTree);		//オーバーロードされたコンストラクタ
+	CGlowApple(CAppleTree* pTree);		//オーバーロードされたコンストラクタ
 	virtual ~CGlowApple();		//デストラクタ
 	virtual HRESULT Init(void);	//初期化処理
 	virtual void Uninit(void);	//終了処理

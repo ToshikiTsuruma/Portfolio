@@ -27,7 +27,7 @@ CGlowApple::CGlowApple()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CGlowApple::CGlowApple(D3DXVECTOR3 pos, CAppleTree* pTree) : CObjectModel(CModel::MODELTYPE::OBJ_APPLE, pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), false)
+CGlowApple::CGlowApple(CAppleTree* pTree) : CObjectModel(CModel::MODELTYPE::OBJ_APPLE, false)
 {
 	SetObjType(OBJTYPE_APPLE);
 	m_pAppleTree = pTree;
@@ -150,7 +150,7 @@ D3DXCOLOR CGlowApple::GetAppleColor(APPLE_TYPE type) {
 		return D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
 		break;
 	case CGlowApple::APPLE_TYPE::SILVER:
-		return D3DXCOLOR(0.6f, 0.6f, 0.64f, 1.0f);
+		return D3DXCOLOR(0.5f, 0.5f, 0.64f, 1.0f);
 		break;
 	case CGlowApple::APPLE_TYPE::GOLD:
 		return D3DXCOLOR(1.0f, 0.7f, 0.0f, 1.0f);

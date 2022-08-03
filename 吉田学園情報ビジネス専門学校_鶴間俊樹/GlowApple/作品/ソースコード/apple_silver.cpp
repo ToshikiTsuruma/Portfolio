@@ -26,7 +26,7 @@ CAppleSilver::CAppleSilver()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CAppleSilver::CAppleSilver(D3DXVECTOR3 pos, CAppleTree* pTree) : CGlowApple(pos, pTree)
+CAppleSilver::CAppleSilver(CAppleTree* pTree) : CGlowApple(pTree)
 {
 
 }
@@ -44,7 +44,7 @@ CAppleSilver::~CAppleSilver()
 //=============================================================================
 CAppleSilver* CAppleSilver::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 	CAppleSilver* pAppleSilver;
-	pAppleSilver = new CAppleSilver(pos, pTree);
+	pAppleSilver = new CAppleSilver(pTree);
 	if (pAppleSilver == nullptr) return nullptr;
 
 	//マネージャーの取得
@@ -64,6 +64,7 @@ CAppleSilver* CAppleSilver::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 	//雷のエフェクトを生成
 	pAppleSilver->m_pEffectThunder = CEffect::Create(pos + D3DXVECTOR3(0.0f, -15.0f, 0.0f), CEffect::EFFECT_TYPE::THUNDER, 50.0f, 50.0f, true);
 
+	pAppleSilver->SetPos(pos);
 	pAppleSilver->Init();
 
 	return pAppleSilver;

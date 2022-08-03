@@ -22,7 +22,7 @@ class CObjectModelUI : public CObjectModel
 public:
 
 	CObjectModelUI();		//デフォルトコンストラクタ
-	CObjectModelUI(CModel::MODELTYPE typeModel, D3DXVECTOR3 pos, D3DXVECTOR3 rot, bool bOutLine);		//オーバーロードされたコンストラクタ
+	CObjectModelUI(CModel::MODELTYPE typeModel, bool bOutLine);		//オーバーロードされたコンストラクタ
 	virtual ~CObjectModelUI();		//デストラクタ
 	static CObjectModelUI* Create(CModel::MODELTYPE type, D3DXVECTOR3 pos, D3DXVECTOR3 rot, bool bOutLine);	//生成処理
 	virtual HRESULT Init(void);	//初期化処理

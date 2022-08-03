@@ -30,7 +30,6 @@ class CAppleTree : public CObjectModel
 {
 public:
 	CAppleTree();		//デフォルトコンストラクタ
-	CAppleTree(D3DXVECTOR3 pos);		//オーバーロードされたコンストラクタ
 	virtual ~CAppleTree();		//デストラクタ
 	static CAppleTree* Create(D3DXVECTOR3 pos);	//生成処理
 	HRESULT Init(void);	//初期化処理
