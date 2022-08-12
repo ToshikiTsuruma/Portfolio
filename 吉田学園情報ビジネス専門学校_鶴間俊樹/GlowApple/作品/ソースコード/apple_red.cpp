@@ -10,7 +10,7 @@
 //=============================================================================
 // マクロ定義
 //=============================================================================
-#define ADD_TREE_LIFE (400)
+#define ADD_TREE_LIFE (1000)
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -51,7 +51,7 @@ CAppleRed* CAppleRed::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 	CAppleTree* pAppleTree = pAppleRed->GetAppleTree();
 	if (pAppleTree != nullptr) {
 		pAppleTree->AddMaxLife(ADD_TREE_LIFE);
-		pAppleTree->HealLife(9999);
+		pAppleTree->HealLife(ADD_TREE_LIFE);
 	}
 
 	return pAppleRed;

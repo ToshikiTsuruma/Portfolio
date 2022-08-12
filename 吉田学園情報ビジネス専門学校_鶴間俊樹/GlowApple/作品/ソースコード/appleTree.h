@@ -68,6 +68,7 @@ private:
 
 	bool m_bDead;			//死亡
 	int m_nCntDead;			//死亡後のカウント
+	D3DXCOLOR m_colDeltaDeadColor;	//生存時と死亡時の色の差分
 
 	CAppleMenu* m_pMenuApple;	//林檎のメニュー
 

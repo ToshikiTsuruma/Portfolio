@@ -51,7 +51,7 @@ public:
 		LPD3DXMESH pMesh;	//メッシュ（頂点情報）へのポインタ
 		LPD3DXBUFFER pBuffMat;	//マテリアルへのポインタ
 		DWORD nNumMat;	//マテリアルの数
-	}ModelData;
+	} ModelData;
 
 	CModel();	//デフォルトコンストラクタ
 	~CModel();	//デストラクタ
@@ -60,6 +60,8 @@ public:
 	static void Unload(void);	//モデルデータの解放
 	static ModelData GetModelData(MODELTYPE type);	//モデルデータの取得
 	static char* GetPathName(MODELTYPE type);		//テクスチャのパスの文字列の取得
+	static D3DXCOLOR GetDefaultColor(MODELTYPE type, int nIdx);	//モデルのデフォルトの色を取得
+
 	HRESULT Init(void);	//初期化処理
 	void Uninit(void);	//終了処理
 	void Update(void);	//更新処理
@@ -74,6 +76,7 @@ public:
 	void SetModelType(MODELTYPE type);		//モデルのタイプの設定
 	MODELTYPE GetModelType(void);			//モデルのタイプの取得
 	void SetMaterialDiffuse(D3DXCOLOR col, int nIdx);	//マテリアルの色の設定
+	D3DXCOLOR GetMaterialDiffuse(int nIdx);				//マテリアルの色の取得
 	void SetMaterialDiffuseAlpha(float fAlpha, int nIdx);	//マテリアルのアルファ値を設定
 	void SetMaterialDiffuseAlphaAll(float fAlpha);			//すべてのマテリアルのアルファ値を設定
 	float GetMaterialDiffuseAlpha(int nIdx);				//マテリアルのアルファ値を取得

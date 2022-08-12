@@ -111,12 +111,12 @@ void CGameScene::Init(void) {
 	m_pTimer = CTimer::Create(GAME_TIME, 3, CTexture::TEXTURE_TYPE::NUMBER_003, D3DXVECTOR3(SCREEN_WIDTH / 2.0f + 75.0f, 30.0f, 0.0f), 50.0f, 50.0f);
 
 	//最初の敵の配置
-	CEnemyNormal::Create(D3DXVECTOR3(900.0f, 0.0f, 300.0f));
-	CEnemyNormal::Create(D3DXVECTOR3(-800.0f, 0.0f, 500.0f));
-	CEnemyNormal::Create(D3DXVECTOR3(-600.0f, 0.0f, -700.0f));
+	CEnemyNormal::Create(D3DXVECTOR3(900.0f, -200.0f, 300.0f));
+	CEnemyNormal::Create(D3DXVECTOR3(-800.0f, -200.0f, 500.0f));
+	CEnemyNormal::Create(D3DXVECTOR3(-600.0f, -200.0f, -700.0f));
 
 	//敵のスポナーの生成
-	m_pEnemySpawner = CEnemySpawner::Create(900, 500, 1500);
+	m_pEnemySpawner = CEnemySpawner::Create(900, 1800.0f, 500, 1500);
 
 	//BGMの再生
 	if (pSound != nullptr) {
@@ -166,6 +166,23 @@ void CGameScene::Uninit(void) {
 // ゲームシーンの更新処理
 //=============================================================================
 void CGameScene::Update(void) {
+#ifdef _DEBUG
+	CManager* pManager = CManager::GetManager();	//マネージャーの取得
+	if (pManager == nullptr) return;
+	//現在の入力デバイスの取得
+	CInput* pInput = pManager->GetInputCur();
+	if (pInput == nullptr) return;
+
+	//ゲームクリア
+	if (pInput->GetTrigger(CInput::CODE::DEBUG_0)) {
+		GameClear();
+	}
+	//ゲームオーバー
+	if (pInput->GetTrigger(CInput::CODE::DEBUG_1)) {
+		GameOver();
+	}
+#endif
+
 	//残り時間減少によるスポーン間隔の減少
 	if (m_pEnemySpawner != nullptr && m_pTimer != nullptr) {
 		if (m_pTimer->GetTime() == 260 && m_pTimer->GetCountTimer() == 0) {
@@ -203,6 +220,13 @@ void CGameScene::Update(void) {
 			m_pEnemySpawner->AddSpan(-180);
 			//レベルの設定
 			m_pEnemySpawner->SetLevel(0);	//一番移動速度が早い敵のみにする
+		}
+
+		if (m_pTimer->GetTime() == 20 && m_pTimer->GetCountTimer() == 0) {
+			//レベルの設定
+			m_pEnemySpawner->SetLevel(4);	//一番移動速度が強い敵のみにする
+			//スポーンの半径を縮める
+			m_pEnemySpawner->SetSpawnRadius(800.0f);
 		}
 	}
 
@@ -269,7 +293,7 @@ void CGameScene::UpdateGameClear(void) {
 		for (int nCntTree = 0; nCntTree < nNumCreateApple; nCntTree++)
 		{
 			//木の配置
-			D3DXVECTOR3 posTree = D3DXVECTOR3(sinf(D3DX_PI * 2 * (nCntTree / (float)nNumCreateApple)) * 700.0f, -80.0f, cosf(D3DX_PI * 2 * (nCntTree / (float)nNumCreateApple)) * 700.0f);
+			D3DXVECTOR3 posTree = D3DXVECTOR3(sinf(D3DX_PI * 2 * (nCntTree / (float)nNumCreateApple) + D3DX_PI) * 700.0f, -80.0f, cosf(D3DX_PI * 2 * (nCntTree / (float)nNumCreateApple) + D3DX_PI) * 700.0f);
 			
 			//木の生成
 			CObjectModel* pTree = CObjectModel::Create(CModel::MODELTYPE::OBJ_APPLE_TREE, posTree, D3DXVECTOR3(0.0f, 0.0f, 0.0f), false);

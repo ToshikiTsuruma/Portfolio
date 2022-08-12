@@ -58,6 +58,7 @@ CEnemy::CEnemy(const PARTS_INFO* pPartsInfoArray, int nNumParts, const MOTION_IN
 	m_nLife = nLife;
 	m_bDead = false;
 	m_nCntDead = 0;
+	m_bLand = false;
 	m_bAttackDist = false;
 	m_bGoldEnemy = false;
 
@@ -131,6 +132,23 @@ void CEnemy::Update(void) {
 	if (m_bDead) {
 		m_nCntDead++;
 
+		//重力
+		SetPos(GetPos() + D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f));
+
+		//地形との当たり判定
+		bool bLand = false;	//接地しているかどうか
+		D3DXVECTOR3 posColTerrain, vecStart, vecEnd;	//接触位置、開始ベクトル、終了ベクトル
+		vecStart = GetPos();	//敵の位置を取得
+		vecEnd = vecStart;
+		vecEnd.y += 1.0f;	//上向きのベクトル
+
+		bLand = CTerrain::Collision(&posColTerrain, vecStart, vecEnd);
+		//接地時
+		if (bLand) {
+			SetPos(posColTerrain);	//位置の移動
+		}
+
+		//倒れる時間
 		if (m_nCntDead == FALLDOWN_TIME) {
 			//倒れる音
 			if (pSound != nullptr)pSound->PlaySound(CSound::SOUND_LABEL::STUN);
@@ -173,8 +191,8 @@ void CEnemy::Update(void) {
 	//----------------------------
 	D3DXVECTOR3 rot = GetRot();	//角度の取得
 	
-	//攻撃モーション中ではないときで目標角度と角度が不一致の場合
-	if (GetMotionCategory() != MOTION_CATEGORY::ATTACK && m_rotDestY != GetRot().y) {
+	//目標角度と角度が不一致の場合
+	if (m_rotDestY != GetRot().y) {	//GetMotionCategory() != MOTION_CATEGORY::ATTACK && 
 
 		//目標角度へ回転させる
 		float rotY = rot.y;	//Y軸の角度
@@ -223,11 +241,8 @@ void CEnemy::Update(void) {
 	//----------------------------
 	//移動
 	//----------------------------
-	//重力
-	m_move.y = -POWER_GRAVITY_GROUND;	//ジャンプすることがないので重くする
-
 	//移動
-	if (GetMotionCategory() == MOTION_CATEGORY::MOVE) {
+	if (m_bMove) {
 		m_move.x = sinf(rot.y + D3DX_PI) * m_fMoveSpeed;
 		m_move.z = cosf(rot.y + D3DX_PI) * m_fMoveSpeed;
 	}
@@ -251,14 +266,24 @@ void CEnemy::Update(void) {
 	bLand = CTerrain::Collision(&posColTerrain, vecStart, vecEnd);
 	//接地時
 	if (bLand) {
+		m_bLand = true;
 		m_move.y = -POWER_GRAVITY_GROUND;
 		SetPos(posColTerrain);	//位置の移動
 
+		//木の方へ目標角度を設定
 		SetRotTree();
 
-		if (GetMotionCategory() != MOTION_CATEGORY::MOVE && GetMotionCategory() != MOTION_CATEGORY::ATTACK) {
+		//魔術師敵が移動モーションなしにしているので移動不可時に接地していれば移動モーション
+		if (!m_bMove && GetMotionCategory() != MOTION_CATEGORY::ATTACK) {
+			//移動モーションの設定
 			SetMoveMotion();
+			m_bMove = true;
 		}
+	}
+	else {
+		m_bLand = false;
+		//重力を掛ける
+		m_move.y -= POWER_GRAVITY;
 	}
 
 	//落下死
@@ -296,6 +321,19 @@ void CEnemy::Update(void) {
 //=============================================================================
 void CEnemy::Draw(void) {
 	CObjectMotion::Draw();
+}
+
+//=============================================================================
+// 移動量の設定
+//=============================================================================
+void CEnemy::SetMove(D3DXVECTOR3 move) {
+	m_move = move;
+	//弾き飛ばされたりしてジャンプするような事があればニュートラルモーションを設定（移動モーション中は移動を固定されるため）
+	if (m_move.y > 0.0f) {
+		SetMotion(0);
+		AttackStop();
+		m_bMove = false;
+	}
 }
 
 //=============================================================================
@@ -386,9 +424,6 @@ void CEnemy::Dead(void) {
 		pAppleTree->AddGrow(nGrowValue);
 	}
 
-	//黒林檎のHP吸収
-	CAppleBlack::DrainAllApple();
-
 	//サウンドの取得
 	CSound* pSound = nullptr;
 	if (pManager != nullptr) pSound = pManager->GetSound();
@@ -449,12 +484,13 @@ void CEnemy::AttackDistance(void) {
 //=============================================================================
 void CEnemy::Attack(void) {
 	//攻撃開始条件を満たしていない場合終了
-	if (GetMotionCategory() == MOTION_CATEGORY::ATTACK || !m_bAttackDist) return;
+	if (GetMotionCategory() == MOTION_CATEGORY::ATTACK || !m_bAttackDist || !m_bLand) return;
 
 	//攻撃済みリストの初期化
 	InitObjAttacked();
 	//移動量を重力のみにする
 	m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
+	m_bMove = false;
 	//攻撃開始
 	AttackStart();
 }

@@ -13,7 +13,8 @@
 //=============================================================================
 // マクロ定義
 //=============================================================================
-#define HEAL_VALUE (20)	//回復量
+#define HEAL_VALUE (50)	//回復量
+#define HEAL_SPAN (FPS * 5)	//回復のスパン
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -49,6 +50,7 @@ CAppleGreen* CAppleGreen::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 
 	pAppleGreen->SetPos(pos);
 	pAppleGreen->Init();
+	pAppleGreen->m_nCntHeal = HEAL_SPAN;
 
 	return pAppleGreen;
 }
@@ -83,7 +85,7 @@ void CAppleGreen::Uninit(void) {
 // 緑林檎の更新処理
 //=============================================================================
 void CAppleGreen::Update(void) {
-	if (m_nCntHeal >= FPS * 5) {
+	if (m_nCntHeal >= HEAL_SPAN) {
 		//林檎の木を回復する
 		CAppleTree* pAppleTree = GetAppleTree();
 		if (pAppleTree != nullptr) {

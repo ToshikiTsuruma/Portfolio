@@ -32,10 +32,8 @@ public:
 	void Update(void);	//更新処理
 	void Draw(void);	//描画処理
 
-	static void DrainAllApple(void);	//すべての黒林檎のHP吸収
-	void Drain(void);	//体力の吸収
-
 private:
+	int m_nCntEmit;	//斥力波放出までのカウンター
 
 };
 

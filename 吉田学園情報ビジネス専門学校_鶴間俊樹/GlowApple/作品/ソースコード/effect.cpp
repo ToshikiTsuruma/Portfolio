@@ -111,6 +111,13 @@ HRESULT CEffect::Init(void) {
 		m_nPatternV = 1;
 		m_bDestBlendOne = true;	//â¡éZçáê¨
 		break;
+	case EFFECT_TYPE::REPULSIVEWAVE:
+		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_REPULSIVEWAVE_APPLE);
+		m_nSpanAnim = 1;
+		m_nPatternU = 10;
+		m_nPatternV = 1;
+		m_bDestBlendOne = true;	//â¡éZçáê¨
+		break;
 	case EFFECT_TYPE::FIRE:
 		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_FIRE);
 		m_nSpanAnim = 2;

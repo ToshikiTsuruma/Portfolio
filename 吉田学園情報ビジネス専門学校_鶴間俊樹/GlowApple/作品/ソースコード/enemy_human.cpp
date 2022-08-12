@@ -14,9 +14,9 @@
 #define ROTATE_SPEED (0.03f * D3DX_PI)		//回転速度
 #define NUM_COLLISION (10)			//当たり判定の数
 #define COLLISION_RADIUS (15.0f)	//当たり判定の半径
-#define MAX_LIFE (18)				//体力の最大値
+#define MAX_LIFE (60)				//体力の最大値
 #define DISTANCE_ATTACK (70.0f)		//攻撃する距離
-#define ATTACK_DAMAGE (20)	//攻撃力
+#define ATTACK_DAMAGE (50)	//攻撃力
 #define LIFE_GAUGE_HEIGHT (100.0f)	//敵の位置からの体力ゲージの高さ
 
 //=============================================================================
@@ -198,6 +198,13 @@ void CEnemyHuman::SetDeadMotion(void) {
 void CEnemyHuman::AttackStart(void) {
 	//攻撃モーションの設定
 	SetMotion((int)MOTION_TYPE::ATTACK);
+}
+
+//=============================================================================
+// 攻撃停止
+//=============================================================================
+void CEnemyHuman::AttackStop(void) {
+
 }
 
 //=============================================================================

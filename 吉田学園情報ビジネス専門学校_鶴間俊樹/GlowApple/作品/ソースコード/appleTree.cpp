@@ -29,7 +29,7 @@
 #define NUM_COLLISION (8)			//当たり判定の数
 #define COLLISION_RADIUS (30.0f)	//当たり判定の半径
 
-#define MAX_LIFE_DEFAULT (800)			//体力の最大値
+#define MAX_LIFE_DEFAULT (2000)			//体力の最大値
 #define DANGER_LIFE ((int)(MAX_LIFE_DEFAULT * 0.35f))		//体力の危険値
 #define COLOR_LIFE_GAUGE_SAFE (D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f))	//体力バーの安全時の色
 #define COLOR_LIFE_GAUGE_DANGER (D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	//体力バーの危険時の色
@@ -37,6 +37,9 @@
 
 #define MAX_GROW_VALUE_START (3)	//ゲーム開始時の成長度の最大
 #define FOLD_GROW_VALUE (3)			//成長度を乗算する量
+
+#define DEAD_COLOR (D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	//死亡後の色
+#define END_TIME_CHANGE_DEAD_COLOR (FPS * 2)	//死亡後の色の変更が終了する時間
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -67,7 +70,7 @@ CAppleTree::CAppleTree() : CObjectModel(CModel::MODELTYPE::OBJ_APPLE_TREE, false
 		m_pGaugeLife->CreateGaugeFrame(CTexture::TEXTURE_TYPE::HP_GAUGE_FRAME, D3DXVECTOR3(150.0f + 20.0f, SCREEN_HEIGHT - 30.0f, 0.0f), 200.0f, 20.0f);
 	}
 	//HPアイコンの生成
-	m_pIconHP = CObject2D::Create(D3DXVECTOR3(55.0f, SCREEN_HEIGHT - 30.0f, 0.0f), CTexture::TEXTURE_TYPE::ICON_HP, 40.0f, 40.0f);
+	m_pIconHP = CObject2D::Create(D3DXVECTOR3(52.0f, SCREEN_HEIGHT - 30.0f, 0.0f), CTexture::TEXTURE_TYPE::ICON_HP, 40.0f, 40.0f);
 
 	//成長ゲージの生成
 	m_nGrowValue = 0;
@@ -167,11 +170,32 @@ void CAppleTree::Uninit(void) {
 // 林檎の木の更新処理
 //=============================================================================
 void CAppleTree::Update(void) {
+	//死亡時の更新
+	if (m_bDead) {
+		//死亡後のカウントを進める
+		m_nCntDead++;
+
+		//色の変更時間が終わっていたら終了
+		if (m_nCntDead > END_TIME_CHANGE_DEAD_COLOR) return;
+		//モデルの取得
+		CModel* pModel = GetPtrModel();
+		//モデル取得失敗時終了
+		if (pModel == nullptr) return;
+		//モデルの色を取得
+		D3DXCOLOR colModel = CModel::GetDefaultColor(CModel::MODELTYPE::OBJ_APPLE_TREE, 0) + m_colDeltaDeadColor * ((float)m_nCntDead / END_TIME_CHANGE_DEAD_COLOR);
+		//モデルの色を設定
+		pModel->SetMaterialDiffuse(colModel, 0);
+	}
+
 	CManager* pManager = CManager::GetManager();	//マネージャーの取得
 	CInput* pInput = nullptr;	//現在の入力デバイスへのポインタ
 	if (pManager != nullptr) pInput = pManager->GetInputCur();
 
 	if (pInput != nullptr) {
+#ifdef _DEBUG
+		if (pInput->GetTrigger(CInput::CODE::DEBUG_2)) AddGrow(100);
+#endif
+
 		//メニューがある場合
 		if (m_pMenuApple != nullptr) {
 			//林檎の生成
@@ -275,7 +299,9 @@ void CAppleTree::Dead(void) {
 
 	CEffect::Create(GetPos() + D3DXVECTOR3(0.0f, 400.0f, 0.0f), CEffect::EFFECT_TYPE::DEATH, 666.0f, 666.0f, false);
 
+	//-----------------------
 	//リンゴの破棄
+	//-----------------------
 	for (int nCntApple = 0; nCntApple < MAX_NUM_CREATE_APPLE; nCntApple++)
 	{
 		if (m_apCreateApple[nCntApple] == nullptr) continue;
@@ -288,6 +314,15 @@ void CAppleTree::Dead(void) {
 		m_apCreateApple[nCntApple] = nullptr;
 	}
 
+	//-----------------------
+	// 死亡後の色との差分を設定
+	//-----------------------
+	//死亡後の色とデフォルトの色の差分を求める
+	m_colDeltaDeadColor = DEAD_COLOR - CModel::GetDefaultColor(CModel::MODELTYPE::OBJ_APPLE_TREE, 0);
+
+	//-----------------------
+	// サウンドの再生
+	//-----------------------
 	//マネージャーの取得
 	CManager* pManager = CManager::GetManager();
 
@@ -482,19 +517,12 @@ void CAppleTree::GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECT
 // 体力の最大値の設定
 //=============================================================================
 void CAppleTree::SetMaxLife(int nMaxLife) {
-	int nDeltaLife = nMaxLife - m_nMaxLife;	//体力の差分
-	if (nDeltaLife < 0) nDeltaLife = 0;	//マイナスの場合変更なし
-
 	//最大値を設定
 	m_nMaxLife = nMaxLife;	
-	//ゲージに差分を足して設定
-	m_nLife += nDeltaLife;
 
 	if (m_pGaugeLife != nullptr) {
 		//体力ゲージの最大値の設定
 		m_pGaugeLife->SetMaxValue(nMaxLife);
-		//体力ゲージの設定
-		m_pGaugeLife->SetGaugeValue(m_nLife);
 	}
 }
 

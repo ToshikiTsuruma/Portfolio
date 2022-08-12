@@ -56,7 +56,7 @@ void CTitleScene::Init(void) {
 	CObject2D* pTitleBG = CObject2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f), CTexture::TEXTURE_TYPE::BG_TITLE , SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (pTitleBG != nullptr) pTitleBG->SetDrawPriority(CObject::DRAW_PRIORITY::UI_BG);
 
-	CObject2D::Create(D3DXVECTOR3(180.0f, 60.0f, 0.0f), CTexture::TEXTURE_TYPE::QUIT_GAME, 300.0f, 80.0f);
+	CObject2D::Create(D3DXVECTOR3(120.0f, 40.0f, 0.0f), CTexture::TEXTURE_TYPE::QUIT_GAME, 200.0f, 40.0f);
 	CObject2D* pTitleName = CObject2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f - 100.0f, 0.0f), CTexture::TEXTURE_TYPE::TEXT_TITLENAME, 800.0f, 200.0f);
 
 	//マネージャーの取得
@@ -112,12 +112,18 @@ void CTitleScene::Update(void) {
 		pSound = pManager->GetSound();
 	}
 
-	if (pInput == nullptr) return;
+	if (pInput == nullptr || pFade == nullptr) return;
+
 
 	//決定キーを押したとき
 	if (pInput->GetTrigger(CInput::CODE::SELECT) && m_pSelectMenuTitle != nullptr) {
+		//フェード中だった場合
+		if (pFade->GetFade()) {
+			//フェードをスキップ
+			pFade->SkipFade();
+		}
 		//チュートリアル画面が表示されているとき
-		if (m_pTutorial != nullptr) {
+		else if (m_pTutorial != nullptr) {
 			//チュートリアル画面を閉じる
 			m_pTutorial->Uninit();
 			m_pTutorial = nullptr;

@@ -28,6 +28,7 @@ public:
 		DEATH,			//Ž€–S
 		HEAL_APPLE,		//—ÑŒç‚É‚æ‚é‰ñ•œ
 		DRAIN,			//—ÑŒç‚É‚æ‚éHP‹zŽû
+		REPULSIVEWAVE,	//—ÑŒç‚É‚æ‚éË—Í”g¶¬
 		FIRE_BOLL,		//‰Î‚Ì‹Ê
 		FIRE,			//‰Î
 		THUNDERBOLT,	//—Ž—‹

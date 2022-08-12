@@ -72,6 +72,7 @@ public:
 	virtual D3DXVECTOR3* GetPtrPos(void);	//位置座標のポインタの取得
 	virtual void SetRot(D3DXVECTOR3 rot);	//角度の設定
 	virtual D3DXVECTOR3 GetRot(void);		//角度の取得
+	virtual void SetMove(D3DXVECTOR3 move) {}	//移動量の設定
 	void UpdateMtxWorldAll(void);			//オブジェクトの全モデルのワールドマトリックスの更新
 	void SetColorOutlineAll(D3DXCOLOR col);	//オブジェクトの全モデルの輪郭の色の指定
 

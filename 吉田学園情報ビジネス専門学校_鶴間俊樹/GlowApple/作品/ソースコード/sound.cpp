@@ -35,6 +35,7 @@ CSound::PARAM CSound::m_aParam[(int)SOUND_LABEL::ENUM_MAX] = {
 	{ "data/SOUND/SE/damage_fire.wav", 0 },
 	{ "data/SOUND/SE/stun.wav", 0 },
 	{ "data/SOUND/SE/explosion.wav", 0 },
+	{ "data/SOUND/SE/repulsive_wave.wav", 0 },
 	{ "data/SOUND/SE/thunderbolt.wav", 0 },
 	{ "data/SOUND/SE/damage_thunder.wav", 0 },
 	{ "data/SOUND/SE/spawn_enemy.wav", 0 },

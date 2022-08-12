@@ -17,7 +17,7 @@
 #define THUNDER_WIDTH (400.0f)
 #define THUNDER_HEIGHT (1000.0f)
 
-#define DAMAGE_THUNDER (10)	//落雷のダメージ
+#define DAMAGE_THUNDER (30)	//落雷のダメージ
 #define COLLISION_RADIUS (150.0f)	//当たり判定の半径
 
 //=============================================================================

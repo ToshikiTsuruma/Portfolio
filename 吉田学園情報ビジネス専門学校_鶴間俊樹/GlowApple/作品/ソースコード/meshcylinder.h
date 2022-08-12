@@ -28,8 +28,11 @@ public:
 	virtual void Uninit(void);	//I—¹ˆ—
 	virtual void Update(void);	//XVˆ—
 	virtual void Draw(void);	//•`‰æˆ—
-	float GetRadius(void);		//”¼Œa‚Ìæ“¾
+	float GetRadius(void);		//”¼Œa‚Ìæ“¾i‰ºj
+	float GetRadiusTop(void);	//ã”¼Œa‚Ìæ“¾
 	void AddRadius(float fRadius);	//”¼Œa‚ğ’Ç‰Á
+	void AddRadiusTop(float fRadius);		//ã”¼Œa‚ğ’Ç‰Á
+	void AddRadiusBottom(float fRadius);	//‰º”¼Œa‚ğ’Ç‰Á
 	void AddHeight(float fHeight);	//‚‚³‚ğ’Ç‰Á
 
 private:

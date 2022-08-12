@@ -19,9 +19,9 @@
 #define ROTATE_SPEED (0.01f * D3DX_PI)		//‰ñ“]‘¬“x
 #define NUM_COLLISION (5)			//“–‚½‚è”»’è‚Ì”
 #define COLLISION_RADIUS (30.0f)	//“–‚½‚è”»’è‚Ì”¼Œa
-#define MAX_LIFE (50)				//‘Ì—Í‚ÌÅ‘å’l
-#define DISTANCE_ATTACK (300.0f)	//UŒ‚‚·‚é‹——£
-//#define ATTACK_DAMAGE (5)	//UŒ‚—Í
+#define MAX_LIFE (200)				//‘Ì—Í‚ÌÅ‘å’l
+#define DISTANCE_ATTACK (500.0f)	//UŒ‚‚·‚é‹——£
+#define ATTACK_EXPLOSION_DAMAGE (150)	//”š”­‚ÌUŒ‚—Í
 #define LIFE_GAUGE_HEIGHT (200.0f)	//“G‚ÌˆÊ’u‚©‚ç‚Ì‘Ì—ÍƒQ[ƒW‚Ì‚‚³
 
 //=============================================================================
@@ -173,7 +173,7 @@ CEnemy::MOTION_CATEGORY CEnemySorcerer::GetMotionCategory(void) {
 		//ƒjƒ…[ƒgƒ‰ƒ‹
 	case MOTION_TYPE::NEUTRAL:
 	default:
-		return MOTION_CATEGORY::MOVE;
+		return MOTION_CATEGORY::NEUTRAL;
 
 		//UŒ‚
 	case MOTION_TYPE::ATTACK:
@@ -206,6 +206,19 @@ void CEnemySorcerer::SetDeadMotion(void) {
 void CEnemySorcerer::AttackStart(void) {
 	//UŒ‚ƒ‚[ƒVƒ‡ƒ“‚ÌÝ’è
 	SetMotion((int)MOTION_TYPE::ATTACK);
+}
+
+//=============================================================================
+// UŒ‚’âŽ~
+//=============================================================================
+void CEnemySorcerer::AttackStop(void) {
+	//‰Î‚Ì‹Ê‚Ì”jŠü
+	if (m_pFireBoll != nullptr) {
+		if (m_pFireBoll != nullptr) {
+			m_pFireBoll->Uninit();
+			m_pFireBoll = nullptr;
+		}
+	}
 }
 
 //=============================================================================
@@ -282,7 +295,7 @@ void CEnemySorcerer::MotionAct(void) {
 				}
 			}
 			//”š”­ƒ_ƒ[ƒW
-			pAppleTree->Damage(100, DAMAGE_TYPE::EXPLOSION, nullptr);
+			pAppleTree->Damage(ATTACK_EXPLOSION_DAMAGE, DAMAGE_TYPE::EXPLOSION, nullptr);
 			//”š”­‰¹
 			pSound->PlaySound(CSound::SOUND_LABEL::EXPLOSION);
 		}

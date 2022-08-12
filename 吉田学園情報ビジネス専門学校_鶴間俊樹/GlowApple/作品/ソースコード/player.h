@@ -78,6 +78,7 @@ public:
 private:
 	void StartAttack(void);	//攻撃開始
 	void Move(CInput* pInput, float fRotCameraY);	//移動
+	void DecMove(void);	//移動量の減少
 	void Collision(D3DXVECTOR3* pPos);	//当たり判定
 	void EndMotion(void);		//モーション終了時
 	void MotionAction(void);	//モーション中の処理
@@ -97,7 +98,7 @@ private:
 	int m_nAddDamage;		//追加で与えるダメージ量
 	bool m_bValidAttack;	//攻撃が有効かどうか
 	int m_nNumKillEnemy;	//敵を倒した数
-	bool m_bLockAct;		//攻撃や回避後の硬直中
+	int m_nCntLockAct;		//攻撃や回避後の硬直カウント
 	int m_nNumShockWave;	//攻撃時の衝撃波の数
 	int m_nNumThunder;		//攻撃時の落雷の数
 

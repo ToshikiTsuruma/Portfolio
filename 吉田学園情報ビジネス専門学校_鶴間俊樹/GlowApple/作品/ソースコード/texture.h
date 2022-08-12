@@ -59,6 +59,7 @@ public:
 		EFFECT_DEATH,			// 死亡エフェクト
 		EFFECT_HEAL_APPLE,		// 林檎による回復エフェクト
 		EFFECT_DRAIN_APPLE,		// 林檎によるHP吸収エフェクト
+		EFFECT_REPULSIVEWAVE_APPLE,	// 林檎による斥力波生成エフェクト
 		EFFECT_FIRE_BOLL,		// 火の玉
 		EFFECT_FIRE,			// 火
 		EFFECT_THUNDERBOLT,		// 落雷
@@ -66,6 +67,7 @@ public:
 		EFFECT_WIND,			// 風の渦
 		EFFECT_PARTICLE,		// パーティクル
 		EFFECT_SHOCKWAVE,		// 衝撃波
+		EFFECT_REPULSIVEWAVE,	// 斥力波
 
 		//ナンバーのテクスチャ
 		NUMBER_001,

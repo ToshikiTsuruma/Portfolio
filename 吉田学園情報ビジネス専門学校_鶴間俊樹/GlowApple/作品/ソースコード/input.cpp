@@ -237,6 +237,19 @@ bool CInputKeyboard::GetPress(CODE code) {
 			return true;
 		}
 		break;
+
+		//çUåÇ
+	case CODE::ATTACK_1:
+		if (GetPress(DIK_U)) {
+			return true;
+		}
+		break;
+		//çUåÇ
+	case CODE::ATTACK_2:
+		if (GetPress(DIK_O)) {
+			return true;
+		}
+		break;
 	}
 	return false;
 }
@@ -340,13 +353,19 @@ bool CInputKeyboard::GetTrigger(CODE code) {
 		break;
 
 		//çUåÇ
-	case CODE::ATTACK:
+	case CODE::ATTACK_1:
 		if (GetTrigger(DIK_U)) {
 			return true;
 		}
 		break;
+		//çUåÇ
+	case CODE::ATTACK_2:
+		if (GetTrigger(DIK_O)) {
+			return true;
+		}
+		break;
 
-
+#ifdef _DEBUG
 	case CODE::DEBUG_0:
 		if (GetTrigger(DIK_F1)) {
 			return true;
@@ -362,6 +381,7 @@ bool CInputKeyboard::GetTrigger(CODE code) {
 			return true;
 		}
 		break;
+#endif
 
 	}
 	return false;
@@ -643,6 +663,20 @@ bool CInputGamepadX::GetPress(CODE code) {
 			return true;
 		}
 		break;
+
+		//çUåÇ
+	case CODE::ATTACK_1:
+		if (GetButtonPress(XINPUT_GAMEPAD_R)) {
+			return true;
+		}
+		break;
+		//çUåÇ
+	case CODE::ATTACK_2:
+		if (GetButtonPress(XINPUT_GAMEPAD_L)) {
+			return true;
+		}
+		break;
+
 	}
 	return false;
 }
@@ -714,8 +748,14 @@ bool CInputGamepadX::GetTrigger(CODE code) {
 
 
 		//çUåÇ
-	case CODE::ATTACK:
+	case CODE::ATTACK_1:
 		if (GetButtonTrigger(XINPUT_GAMEPAD_R)) {
+			return true;
+		}
+		break;
+		//çUåÇ
+	case CODE::ATTACK_2:
+		if (GetButtonTrigger(XINPUT_GAMEPAD_L)) {
 			return true;
 		}
 		break;

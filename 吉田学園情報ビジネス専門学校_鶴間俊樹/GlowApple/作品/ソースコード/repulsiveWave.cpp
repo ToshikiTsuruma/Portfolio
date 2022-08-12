@@ -1,10 +1,10 @@
 //=============================================================================
 //
-// 衝撃波処理 [shockWave.cpp]
+// 斥力波処理 [repulsiveWave.cpp]
 // Author : 鶴間俊樹
 //
 //=============================================================================
-#include "shockWave.h"
+#include "repulsiveWave.h"
 #include "manager.h"
 #include "renderer.h"
 #include "objectList.h"
@@ -12,7 +12,6 @@
 //=============================================================================
 // マクロ定義
 //=============================================================================
-#define DAMAGE_SHOCKWAVE (10)	//衝撃波のダメージ
 
 //=============================================================================
 // 静的メンバ変数宣言
@@ -21,7 +20,7 @@
 //=============================================================================
 // デフォルトコンストラクタ
 //=============================================================================
-CShockwave::CShockwave() : CMeshcylinder()
+CRepulsivewave::CRepulsivewave() : CMeshcylinder()
 {
 
 }
@@ -29,12 +28,11 @@ CShockwave::CShockwave() : CMeshcylinder()
 //=============================================================================
 //オーバーロードされたコンストラクタ
 //=============================================================================
-CShockwave::CShockwave(D3DXVECTOR3 pos, float fRadiusTop, float fRadiusBottom, float fHeight) : CMeshcylinder(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), 50, fRadiusTop, fRadiusBottom, 1, fHeight, true)
+CRepulsivewave::CRepulsivewave(D3DXVECTOR3 pos, float fRadiusInside, float fRadiusOutside) : CMeshcylinder(pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), 50, fRadiusInside, fRadiusOutside, 1, 0.0f, true)
 {
 	SetDrawPriority(DRAW_PRIORITY::EFFECT);
 
 	m_fAddRadius = 0.0f;
-	m_fAddHeight = 0.0f;
 	m_fRotateSpeed = 0.0f;
 	//オブジェクトリストの生成
 	m_pListAttacked = new CObjectList;
@@ -43,76 +41,81 @@ CShockwave::CShockwave(D3DXVECTOR3 pos, float fRadiusTop, float fRadiusBottom, f
 //=============================================================================
 // デストラクタ
 //=============================================================================
-CShockwave::~CShockwave()
+CRepulsivewave::~CRepulsivewave()
 {
 	//オブジェクトリストの破棄
 	if (m_pListAttacked != nullptr) delete m_pListAttacked;
 }
 
 //=============================================================================
-// 衝撃波の生成処理
+// 斥力波の生成処理
 //=============================================================================
-CShockwave* CShockwave::Create(D3DXVECTOR3 pos, float fRadiusTop, float fRadiusBottom, float fAddRadius, float fHeight, float fAddHeight, int nLife, float fRotSpeed) {
-	CShockwave* pShockwave;
-	pShockwave = new CShockwave(pos, fRadiusTop, fRadiusBottom, fHeight);
-	if (pShockwave == nullptr) return nullptr;
+CRepulsivewave* CRepulsivewave::Create(D3DXVECTOR3 pos, float fRadiusInside, float fRadiusOutside, float fAddRadius, int nLife, float fRotSpeed) {
+	CRepulsivewave* pRepulsivewave;
+	pRepulsivewave = new CRepulsivewave(pos, fRadiusInside, fRadiusOutside);
+	if (pRepulsivewave == nullptr) return nullptr;
 
 	//衝撃波のテクスチャを設定
-	pShockwave->SetTexType(CTexture::TEXTURE_TYPE::EFFECT_SHOCKWAVE);
+	pRepulsivewave->SetTexType(CTexture::TEXTURE_TYPE::EFFECT_REPULSIVEWAVE);
 
-	pShockwave->m_nLife = nLife;
-	pShockwave->m_fAddRadius = fAddRadius;
-	pShockwave->m_fAddHeight = fAddHeight;
-	pShockwave->m_fRotateSpeed = fRotSpeed;
+	pRepulsivewave->m_nLife = nLife;
+	pRepulsivewave->m_fAddRadius = fAddRadius;
+	pRepulsivewave->m_fRotateSpeed = fRotSpeed;
 
-	pShockwave->Init();
+	pRepulsivewave->Init();
 
-	return pShockwave;
+	return pRepulsivewave;
 }
 
 //=============================================================================
-// 衝撃波の初期化処理
+// 斥力波の初期化処理
 //=============================================================================
-HRESULT CShockwave::Init(void) {
+HRESULT CRepulsivewave::Init(void) {
 
 	CMeshcylinder::Init();
 	return S_OK;
 }
 
 //=============================================================================
-// 衝撃波の終了処理
+// 斥力波の終了処理
 //=============================================================================
-void CShockwave::Uninit(void) {
+void CRepulsivewave::Uninit(void) {
 	CMeshcylinder::Uninit();
 }
 
 //=============================================================================
-// 衝撃波の更新処理
+// 斥力波の更新処理
 //=============================================================================
-void CShockwave::Update(void) {
-	//半径を増加
-	AddRadius(m_fAddRadius);
-
-	//高さを増加
-	AddHeight(m_fAddHeight);
-
+void CRepulsivewave::Update(void) {
 	//回転させる
 	Rotate();
+
+	CMeshcylinder::Update();
+
+	//ライフが尽きた場合
+	if (m_nLife <= 0) {
+		//内側だけ半径を広げる
+		AddRadiusTop(m_fAddRadius);
+		//内側が外側より大きくなったら破棄
+		if (GetRadius() <= GetRadiusTop()) Uninit();
+		return;
+	}
+
+	//半径を増加
+	AddRadius(m_fAddRadius);
 
 	//攻撃の当たり判定
 	AttackCollision(OBJTYPE_ENEMY);
 
-	CMeshcylinder::Update();
 
 	//ライフの減少
 	m_nLife--;
-	if (m_nLife <= 0) Uninit();
 }
 
 //=============================================================================
-// 衝撃波の描画処理
+// 斥力波の描画処理
 //=============================================================================
-void CShockwave::Draw(void) {
+void CRepulsivewave::Draw(void) {
 	//マネージャーの取得
 	CManager* pManager = CManager::GetManager();
 	if (pManager == nullptr) return;
@@ -130,8 +133,6 @@ void CShockwave::Draw(void) {
 	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	//ライトを無効
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
-	//加算合成
-	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 	//Zバッファの更新
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
@@ -142,8 +143,6 @@ void CShockwave::Draw(void) {
 	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 	//ライトを有効
 	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
-	//加算合成を戻す
-	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	//Zバッファの更新
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
@@ -151,14 +150,14 @@ void CShockwave::Draw(void) {
 //=============================================================================
 // 回転する
 //=============================================================================
-void CShockwave::Rotate(void) {
+void CRepulsivewave::Rotate(void) {
 	SetRot(GetRot() + D3DXVECTOR3(0.0f, m_fRotateSpeed, 0.0f));
 }
 
 //=============================================================================
 // 攻撃の当たり判定
 //=============================================================================
-void CShockwave::AttackCollision(int nObjtype) {
+void CRepulsivewave::AttackCollision(int nObjtype) {
 	CObject* pObject = GetObjectTopAll();	//全オブジェクトのリストの先頭を取得
 
 	while (pObject != nullptr) {
@@ -192,7 +191,7 @@ void CShockwave::AttackCollision(int nObjtype) {
 		D3DXVECTOR2 vecObj = D3DXVECTOR2(pObject->GetPos().x - GetPos().x, pObject->GetPos().z - GetPos().z);	//衝撃波の位置とオブジェクトのベクトル
 		float fDistObj = D3DXVec2Length(&vecObj);	//攻撃位置とオブジェクトの距離
 
-		//衝撃波の範囲内に敵がいない場合当たり判定失敗
+		//斥力波の範囲内に敵がいない場合当たり判定失敗
 		if (fDistObj > GetRadius()) {
 			pObject = pObjNext;	//リストの次のオブジェクトを代入
 			continue;	//次のループ
@@ -201,13 +200,13 @@ void CShockwave::AttackCollision(int nObjtype) {
 		//---------------------------
 		//当たり判定時の処理
 		//---------------------------
-		//オブジェクトにダメージを与える
-		pObject->Damage(DAMAGE_SHOCKWAVE, DAMAGE_TYPE::SHOCKWAVE, nullptr);
+		D3DXVec2Normalize(&vecObj, &vecObj);	//オブジェクト方向へのベクトルを正規化
+		D3DXVECTOR3 moveObj = D3DXVECTOR3(vecObj.x * 3.0f, 15.0f, vecObj.y * 3.0f);	//オブジェクトの移動量
+		//オブジェクトを吹き飛ばす
+		pObject->SetMove(moveObj);
 
-		//オブジェクトが死亡していない場合攻撃済みリストに追加
-		if (!pObject->GetDeath()) {
-			if (m_pListAttacked != nullptr) m_pListAttacked->AppendNode(pObject);
-		}
+		//攻撃済みリストに追加
+		if (m_pListAttacked != nullptr) m_pListAttacked->AppendNode(pObject);
 
 		pObject = pObjNext;	//リストの次のオブジェクトを代入
 	}

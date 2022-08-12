@@ -39,6 +39,7 @@ data/TEXTURE/EFFECT/damage_bullet.png
 data/TEXTURE/EFFECT/death.png
 data/TEXTURE/EFFECT/apple_heal.png
 data/TEXTURE/EFFECT/apple_drain.png
+data/TEXTURE/EFFECT/repulsive_wave.png
 data/TEXTURE/EFFECT/fire_boll.png
 data/TEXTURE/EFFECT/fire.png
 data/TEXTURE/EFFECT/thunderbolt.png
@@ -46,6 +47,7 @@ data/TEXTURE/EFFECT/thunder.png
 data/TEXTURE/EFFECT/wind.png
 data/TEXTURE/EFFECT/particle.jpg
 data/TEXTURE/EFFECT/shockwave.jpg
+data/TEXTURE/EFFECT/repulsivewave.jpg
 
 data/TEXTURE/NUMBER/number_001.png
 data/TEXTURE/NUMBER/number_002.png

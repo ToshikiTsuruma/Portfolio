@@ -36,12 +36,13 @@ CEnemySpawner::~CEnemySpawner()
 //=============================================================================
 // 敵スポナーの生成処理
 //=============================================================================
-CEnemySpawner* CEnemySpawner::Create(int nSpan, int nDistMin, int nDistMax) {
+CEnemySpawner* CEnemySpawner::Create(int nSpan, float fRadius, int nDistMin, int nDistMax) {
 	CEnemySpawner* pEnemySpawner;
 	pEnemySpawner = new CEnemySpawner();
 	if (pEnemySpawner == nullptr) return nullptr;
 
 	pEnemySpawner->m_nSpanSpawn = nSpan;
+	pEnemySpawner->m_fRadiusSpawn = fRadius;
 	pEnemySpawner->m_nDistEnemyMin = nDistMin;
 	pEnemySpawner->m_nDistEnemyMax = nDistMax;
 	pEnemySpawner->Init();
@@ -75,7 +76,7 @@ void CEnemySpawner::Update(void) {
 		m_nCntSpawn = 0;
 
 		//敵をスポーンさせる
-		SetEnemyCircle(D3DXVECTOR3(0.0f, 1500.0f, 0.0f), 1, 1800.0f, m_nDistEnemyMin, m_nDistEnemyMax);
+		SetEnemyCircle(D3DXVECTOR3(0.0f, 1500.0f, 0.0f), 1, m_fRadiusSpawn, m_nDistEnemyMin, m_nDistEnemyMax);
 
 		//マネージャーの取得
 		CManager* pManager = CManager::GetManager();
@@ -146,14 +147,6 @@ void CEnemySpawner::SetEnemyCircle(D3DXVECTOR3 posCenter, int nNumCircle, float 
 }
 
 //=============================================================================
-// 敵の生成間隔を増加
-//=============================================================================
-void CEnemySpawner::AddDistEnemy(int nDist) {
-	m_nDistEnemyMin += nDist;
-	m_nDistEnemyMax += nDist;
-}
-
-//=============================================================================
 // レベルごとの生成確率の取得
 //=============================================================================
 void CEnemySpawner::GetSpawnRate(int nLevel, int* pRateArray) {
@@ -183,6 +176,12 @@ void CEnemySpawner::GetSpawnRate(int nLevel, int* pRateArray) {
 		pRateArray[(int)ENEMYTYPE::NORMAL] = 10;
 		pRateArray[(int)ENEMYTYPE::HUMAN] = 80;
 		pRateArray[(int)ENEMYTYPE::SORCERER] = 10;
+		break;
+
+	case 4:
+		pRateArray[(int)ENEMYTYPE::NORMAL] = 0;
+		pRateArray[(int)ENEMYTYPE::HUMAN] = 0;
+		pRateArray[(int)ENEMYTYPE::SORCERER] = 100;
 		break;
 
 	default:

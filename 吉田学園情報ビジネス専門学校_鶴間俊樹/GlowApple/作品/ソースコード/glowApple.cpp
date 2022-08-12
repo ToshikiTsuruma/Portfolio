@@ -117,7 +117,7 @@ void CGlowApple::CreateGlowParticle(APPLE_TYPE type) {
 		colGlow = D3DXCOLOR(0.6f, 1.0f, 0.0f, 1.0f);
 		break;
 	case CGlowApple::APPLE_TYPE::BLACK:
-		colGlow = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
+		colGlow = D3DXCOLOR(0.5f, 0.0f, 1.0f, 1.0f);
 		break;
 	case CGlowApple::APPLE_TYPE::SILVER:
 		colGlow = D3DXCOLOR(0.0f, 0.7f, 1.0f, 1.0f);
@@ -168,7 +168,7 @@ void CGlowApple::GetAppleText(char* pStr, APPLE_TYPE type) {
 	switch (type)
 	{
 	case CGlowApple::APPLE_TYPE::RED:
-		strcpy(pStr, "Red Apple : ‘Ì—Í‚ÌÅ‘å’l‚ª‘‚¦‚é & ‘Ì—Í‘S‰ñ•œ");
+		strcpy(pStr, "Red Apple : ‘Ì—Í‚ÌÅ‘å’l‚ª‘‚¦‚é");
 		break;
 	case CGlowApple::APPLE_TYPE::GREEN:
 		strcpy(pStr, "Green Apple : ”•b‚²‚Æ‚É‰ñ•œ‚·‚é");
@@ -177,7 +177,7 @@ void CGlowApple::GetAppleText(char* pStr, APPLE_TYPE type) {
 		strcpy(pStr, "White Apple : ÕŒ‚”g‚Ì”‚ª‘‚¦‚é");
 		break;
 	case CGlowApple::APPLE_TYPE::BLACK:
-		strcpy(pStr, "Black Apple : “G‚ğ“|‚µ‚½‚Æ‚«‚É‰ñ•œ‚·‚é");
+		strcpy(pStr, "Black Apple : –Ø‚Ì’†S‚©‚çË—Í”g‚ğ•ú‚Â");
 		break;
 	case CGlowApple::APPLE_TYPE::SILVER:
 		strcpy(pStr, "Silver Apple : UŒ‚‚Ì——‹‚Ì”‚ª‘‚¦‚é");

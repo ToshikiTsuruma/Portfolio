@@ -33,7 +33,7 @@ public:
 
 	CEnemySpawner();	//デフォルトコンストラクタ
 	~CEnemySpawner();	//デストラクタ
-	static CEnemySpawner* Create(int nSpan, int nDistMin, int nDistMax);	//生成処理
+	static CEnemySpawner* Create(int nSpan, float fRadius, int nDistMin, int nDistMax);	//生成処理
 	HRESULT Init(void);	//初期化処理
 	void Uninit(void);	//終了処理
 	void Update(void);	//更新処理
@@ -42,7 +42,7 @@ public:
 	void AddLevel(int nLevel) { m_nLevel += nLevel; }	//レベルの増加
 	void SetLevel(int nLevel) { m_nLevel = nLevel; }	//レベルの設定
 	void AddSpan(int nSpan) { m_nSpanSpawn += nSpan; }	//スポーンのスパンを増加
-	void AddDistEnemy(int nDist);	//敵の生成間隔を増加
+	void SetSpawnRadius(float fRadius) { m_fRadiusSpawn = fRadius; }	//スポーンの半径を設定
 
 private:
 	static void GetSpawnRate(int nLevel, int* pRateArray);	//レベルごとの生成確率の取得
@@ -51,6 +51,7 @@ private:
 	int m_nLevel;		//スポナーのレベル
 	int m_nSpanSpawn;	//スポーンのスパン
 	int m_nCntSpawn;	//スポーンまでのカウント
+	float m_fRadiusSpawn;	//スポーンの半径
 	int m_nDistEnemyMin;	//スポーンする敵同士の距離の最小
 	int m_nDistEnemyMax;	//スポーンする敵同士の距離の最大
 };

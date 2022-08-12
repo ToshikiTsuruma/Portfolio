@@ -42,6 +42,7 @@ public:
 	virtual void Uninit(void);		//終了処理
 	virtual void Update(void);		//更新処理
 	virtual void Draw(void);		//描画処理
+	void SetMove(D3DXVECTOR3 move);	//移動量の設定
 	void Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead);		//ダメージ
 	void Dead(void);		//死亡時処理
 
@@ -51,6 +52,7 @@ public:
 	virtual void SetMoveMotion(void) = 0;	//移動時のモーションを設定
 	virtual void SetDeadMotion(void) = 0;	//死亡時のモーションを設定
 	virtual void AttackStart(void) = 0;		//攻撃開始時
+	virtual void AttackStop(void) = 0;		//攻撃停止
 	virtual void MotionEnd(void) = 0;	//モーション終了時
 	virtual void MotionAct(void) = 0;	//モーション中の行動
 
@@ -65,7 +67,9 @@ private:
 	const int m_nMaxLife;	//最大の体力
 
 	D3DXVECTOR3 m_move;		//移動量
+	bool m_bMove;			//移動可能かどうか
 	float m_rotDestY;		//目標のY軸の角度
+	bool m_bLand;			//接地しているかどうか
 	bool m_bAttackDist;		//攻撃可能な距離かどうか
 	int m_nLife;			//体力
 	bool m_bDead;			//死亡

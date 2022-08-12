@@ -40,6 +40,7 @@ public:
 		DAMAGE_FIRE,	//炎のダメージ音
 		STUN,			//気絶音
 		EXPLOSION,		//爆発音
+		REPULSIVE_WAVE,	//斥力波生成音
 		THUNDERBOLT,	//落雷音
 		DAMAGE_THUNDER,	//雷ダメージ音
 		SPAWN_ENEMY,	//敵のスポーン

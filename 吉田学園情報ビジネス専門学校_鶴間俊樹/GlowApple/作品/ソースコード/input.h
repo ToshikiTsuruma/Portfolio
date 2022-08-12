@@ -37,12 +37,16 @@ public:
 		SELECT_LFET,
 		SELECT_RIGHT,
 		//アクション
-		ATTACK,
+		ATTACK_1,
+		ATTACK_2,
 		DASH,
+
+#ifdef _DEBUG
 		//デバッグ用
 		DEBUG_0,
 		DEBUG_1,
 		DEBUG_2,
+#endif
 
 		CODE_MAX
 	};

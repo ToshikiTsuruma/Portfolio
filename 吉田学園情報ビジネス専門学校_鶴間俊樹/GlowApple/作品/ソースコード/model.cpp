@@ -196,6 +196,7 @@ void CModel::Unload(void) {
 // モデルデータの取得
 //=============================================================================
 CModel::ModelData CModel::GetModelData(MODELTYPE type) {
+	if (type < MODELTYPE(0) || type >= MODELTYPE::ENUM_MAX) return ModelData();
 	return m_aModelData[(int)type];
 }
 
@@ -203,7 +204,17 @@ CModel::ModelData CModel::GetModelData(MODELTYPE type) {
 // モデルのパスの取得
 //=============================================================================
 char* CModel::GetPathName(MODELTYPE type) {
+	if (type < MODELTYPE(0) || type >= MODELTYPE::ENUM_MAX) return nullptr;
 	return m_asFilePath[(int)type];
+}
+
+//=============================================================================
+// モデルのデフォルトの色を取得
+//=============================================================================
+D3DXCOLOR CModel::GetDefaultColor(MODELTYPE type, int nIdx) {
+	if (type < MODELTYPE(0) || type >= MODELTYPE::ENUM_MAX) return D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);
+	if (nIdx < 0 || nIdx >= MAX_MATERIAL) return D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);
+	return m_aMatDefault[(int)type][nIdx].MatD3D.Diffuse;
 }
 
 //=============================================================================
@@ -489,6 +500,15 @@ void CModel::SetMaterialDiffuse(D3DXCOLOR col, int nIdx) {
 	m_aMat[nIdx].MatD3D.Diffuse.g = col.g;
 	m_aMat[nIdx].MatD3D.Diffuse.b = col.b;
 	m_aMat[nIdx].MatD3D.Diffuse.a = col.a;
+}
+
+//=============================================================================
+// マテリアルの色の取得
+//=============================================================================
+D3DXCOLOR CModel::GetMaterialDiffuse(int nIdx) {
+	if (nIdx < 0 || nIdx >= MAX_MATERIAL) return D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);
+
+	return m_aMat[nIdx].MatD3D.Diffuse;
 }
 
 //=============================================================================

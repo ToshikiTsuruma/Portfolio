@@ -35,7 +35,7 @@
 //移動
 //--------------------------------
 #define ADD_MOVE_SPEED (1.2f)			//加速
-#define DEC_MOVE_SPEED_GROUND (1.0f)	//地上での減速
+#define DEC_MOVE_SPEED_GROUND (0.5f)	//地上での減速
 #define DEC_MOVE_SPEED_AIR (0.05f)		//空中での減速
 #define MAX_MOVE_SPEED_WALK (6.0f)		//歩行速度
 #define MAX_MOVE_SPEED_DASH (12.0f)		//走行速度
@@ -51,8 +51,8 @@
 //--------------------------------
 //攻撃
 //--------------------------------
-#define ATTACK_DAMAGE_PUNCH (20)
-#define ATTACK_DAMAGE_STANP (30)
+#define ATTACK_DAMAGE_PUNCH (60)
+#define ATTACK_DAMAGE_STANP (150)
 
 //--------------------------------
 //その他
@@ -87,7 +87,7 @@ CPlayer::CPlayer() : CObjectMotion(m_pPartsInfoArray, m_nNumParts, &m_aMotionInf
 	m_nAddDamage = 0;
 	m_bValidAttack = false;
 	m_nNumKillEnemy = 0;
-	m_bLockAct = false;
+	m_nCntLockAct = 0;
 	m_nNumShockWave = 0;
 	m_nNumThunder = 0;
 
@@ -249,19 +249,15 @@ void CPlayer::Update(void) {
 	//----------------------------
 	//硬直中
 	//----------------------------
-	if (m_bLockAct) {
-		//モーションの遷移が完了した場合
-		if (!GetTransMotion()) {
-			//硬直の解除
-			m_bLockAct = false;
-		}
+	if (m_nCntLockAct > 0) {
+		m_nCntLockAct--;
 	}
 
 	//----------------------------
 	//攻撃
 	//----------------------------
 	if (pInput != nullptr) {
-		if (pInput->GetTrigger(CInput::CODE::ATTACK) && !m_bLockAct) {
+		if (GetMotionCategory() != MOTION_CATEGORY::ATTACK && m_nCntLockAct <= 0) {
 			StartAttack();
 		}
 	}
@@ -275,9 +271,12 @@ void CPlayer::Update(void) {
 	}
 
 	//移動と回転
-	if (pInput != nullptr && GetMotionCategory() != MOTION_CATEGORY::ATTACK && !m_bLockAct) {
+	if (pInput != nullptr && GetMotionCategory() != MOTION_CATEGORY::ATTACK && m_nCntLockAct <= 0) {
 		Move(pInput, fRotCameraY);
 	}
+
+	//減速
+	DecMove();
 
 	//----------------------------
 	//移動の反映
@@ -350,7 +349,7 @@ void CPlayer::GameClear(void) {
 
 	//移動量を重力のみにする
 	m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
-	m_bLockAct = false;
+	m_nCntLockAct = 0;
 }
 
 //=============================================================================
@@ -359,7 +358,7 @@ void CPlayer::GameClear(void) {
 void CPlayer::GameOver(void) {
 	//移動量を重力のみにする
 	m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
-	m_bLockAct = false;
+	m_nCntLockAct = 0;
 }
 
 //=============================================================================
@@ -421,21 +420,22 @@ float CPlayer::GetRadius(void) {
 // 攻撃開始
 //=============================================================================
 void CPlayer::StartAttack(void) {
-	//まだ攻撃していない場合
-	if (GetMotionCategory() != MOTION_CATEGORY::ATTACK) {
+	//マネージャーの取得
+	CManager* pManager = CManager::GetManager();
+	if (pManager == nullptr) return;
+	//入力デバイスの取得
+	CInput* pInput = pManager->GetInputCur();
+	if (pInput == nullptr) return;
+
+	//パンチ
+	if (pInput->GetPress(CInput::CODE::ATTACK_1)) {
 		//モーションの設定
 		SetMotion((int)MOTION_TYPE::PUNCH);
-
-		//移動量を重力のみにする
-		m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
 	}
-	//攻撃中の場合
-	else {
-		//1回目の攻撃の最後のキーの場合
-		if (GetMotionType() == (int)MOTION_TYPE::PUNCH && (GetCurKey() == 2 && GetCurMotionCnt() > 8)) {
-			//モーションの設定
-			SetMotion((int)MOTION_TYPE::STAMP);
-		}
+	//踏みつけ
+	else if (pInput->GetPress(CInput::CODE::ATTACK_2)) {
+		//モーションの設定
+		SetMotion((int)MOTION_TYPE::STAMP);
 	}
 }
 
@@ -443,6 +443,8 @@ void CPlayer::StartAttack(void) {
 // 移動
 //=============================================================================
 void CPlayer::Move(CInput* pInput, float fRotCameraY) {
+	if (pInput == nullptr) return;
+
 	//上下左右キー入力状態の取得
 	const bool bPressUp = pInput->GetPress(CInput::CODE::MOVE_UP);
 	const bool bPressDown = pInput->GetPress(CInput::CODE::MOVE_DOWN);
@@ -454,7 +456,7 @@ void CPlayer::Move(CInput* pInput, float fRotCameraY) {
 	bRotateUp = bRotateDown = bRotateLeft = bRotateRight = false;
 
 	D3DXVECTOR3 moveAddSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	//追加する移動量
-	D3DXVECTOR3 moveMaxSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	//追加する移動量の最大
+	D3DXVECTOR3 moveMaxSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	//移動量の最大
 
 	//------------------------
 	//移動速度の最大を計算
@@ -559,42 +561,6 @@ void CPlayer::Move(CInput* pInput, float fRotCameraY) {
 			if (m_move.z < moveMax.z) {
 				m_move.z = moveMax.z;
 			}
-		}
-	}
-
-	//------------------------
-	//移動量の減速
-	//------------------------
-	float fDecSpeed = DEC_MOVE_SPEED_GROUND;	//減速量
-	if (!m_bLand) fDecSpeed = DEC_MOVE_SPEED_AIR;	//空中
-	D3DXVECTOR2 vecMoveDec = D3DXVECTOR2(-m_move.x, -m_move.z);	//移動量ベクトルの逆
-	D3DXVec2Normalize(&vecMoveDec, &vecMoveDec);	//正規化
-	vecMoveDec *= fDecSpeed;	//移動量の加算
-
-	//減速
-	m_move.x += vecMoveDec.x;
-	m_move.z += vecMoveDec.y;
-
-	//X方向の移動量の停止
-	if (vecMoveDec.x > 0.0f) {
-		if (m_move.x > 0.0f) {
-			m_move.x = 0.0f;
-		}
-	}
-	else if (vecMoveDec.x < 0.0f) {
-		if (m_move.x < 0.0f) {
-			m_move.x = 0.0f;
-		}
-	}
-	//Z方向の移動量の停止
-	if (vecMoveDec.y > 0.0f) {
-		if (m_move.z > 0.0f) {
-			m_move.z = 0.0f;
-		}
-	}
-	else if (vecMoveDec.x < 0.0f) {
-		if (m_move.z < 0.0f) {
-			m_move.z = 0.0f;
 		}
 	}
 
@@ -714,6 +680,44 @@ void CPlayer::Move(CInput* pInput, float fRotCameraY) {
 }
 
 //=============================================================================
+// 移動量の減少
+//=============================================================================
+void CPlayer::DecMove(void) {
+	float fDecSpeed = DEC_MOVE_SPEED_GROUND;	//減速量
+	if (!m_bLand) fDecSpeed = DEC_MOVE_SPEED_AIR;	//空中
+	D3DXVECTOR2 vecMoveDec = D3DXVECTOR2(-m_move.x, -m_move.z);	//移動量ベクトルの逆
+	D3DXVec2Normalize(&vecMoveDec, &vecMoveDec);	//正規化
+	vecMoveDec *= fDecSpeed;	//移動量の加算
+
+	//減速
+	m_move.x += vecMoveDec.x;
+	m_move.z += vecMoveDec.y;
+
+	//X方向の移動量の停止
+	if (vecMoveDec.x > 0.0f) {
+		if (m_move.x > 0.0f) {
+			m_move.x = 0.0f;
+		}
+	}
+	else if (vecMoveDec.x < 0.0f) {
+		if (m_move.x < 0.0f) {
+			m_move.x = 0.0f;
+		}
+	}
+	//Z方向の移動量の停止
+	if (vecMoveDec.y > 0.0f) {
+		if (m_move.z > 0.0f) {
+			m_move.z = 0.0f;
+		}
+	}
+	else if (vecMoveDec.x < 0.0f) {
+		if (m_move.z < 0.0f) {
+			m_move.z = 0.0f;
+		}
+	}
+}
+
+//=============================================================================
 // 当たり判定
 //=============================================================================
 void CPlayer::Collision(D3DXVECTOR3* pPos) {
@@ -731,6 +735,8 @@ void CPlayer::Collision(D3DXVECTOR3* pPos) {
 
 	//接地時
 	if (bLand) {
+		m_move.y = -POWER_GRAVITY_GROUND;
+
 		*pPos = posColTerrain;	//位置の移動
 		//着地
 		if (!m_bLand) {
@@ -750,25 +756,21 @@ void CPlayer::Collision(D3DXVECTOR3* pPos) {
 // モーション終了時
 //=============================================================================
 void CPlayer::EndMotion(void) {
-	switch ((MOTION_TYPE)GetMotionType())
-	{
-		//--------------------------
-		//攻撃モーション
-		//--------------------------
-		//硬直ありのモーション
-	case MOTION_TYPE::PUNCH:
-	case MOTION_TYPE::STAMP:
-		m_bLockAct = true;	//硬直の設定
 
-		//硬直なしのモーション
-	//case MOTION_TYPE::ENUM_MAX:
-		SetMotion((int)MOTION_TYPE::NEUTRAL);
-		//移動量を重力のみにする
-		m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
-
-		m_bValidAttack = false;
-		break;
+	//硬直ありのモーション
+	if (GetMotionType() == (int)MOTION_TYPE::PUNCH) {
+		m_nCntLockAct = 25;
 	}
+	else if (GetMotionType() == (int)MOTION_TYPE::STAMP) {
+		m_nCntLockAct = 35;
+	}
+
+	//ニュートラルモーションを設定
+	SetMotion((int)MOTION_TYPE::NEUTRAL);
+	//移動量を重力のみにする
+	m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
+
+	m_bValidAttack = false;
 }
 
 //=============================================================================
@@ -845,10 +847,10 @@ void CPlayer::MotionAction(void) {
 			if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::SHOCK_PUNCH);
 			//衝撃波生成
 			D3DXVECTOR3 posWave = GetPos() + D3DXVECTOR3(sinf(GetRot().y + D3DX_PI), 0.0f, cosf(GetRot().y + D3DX_PI)) * 200.0f;	//プレイヤーの前方
-			CShockWaveEmitter::Create(m_nNumShockWave + 1, 4, posWave, 40.0f, 10.0f, 15.0f, 60.0f, -1.0f, 18, D3DX_PI * 0.02f);
+			CShockWaveEmitter::Create(m_nNumShockWave + 1, 4, posWave, 40.0f, 10.0f, 20.0f, 70.0f, -1.0f, 14, D3DX_PI * 0.02f);
 
 			//雷の生成
-			CThunderEmitter::CreateStraight(m_nNumThunder, 5, posWave, posWave - GetPos(), 100.0f);
+			if (m_nNumThunder > 0) CThunderEmitter::CreateStraight(m_nNumThunder + 1, 5, posWave, posWave - GetPos(), 100.0f);
 		}
 		break;
 
@@ -871,7 +873,7 @@ void CPlayer::MotionAction(void) {
 			if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::SHOCK_STAMP);
 			//衝撃波生成
 			D3DXVECTOR3 posWave = GetPos();
-			CShockWaveEmitter::Create(m_nNumShockWave + 2, 4, posWave, 40.0f, 10.0f, 15.0f, 80.0f, -1.0f, 22, D3DX_PI * 0.02f);
+			CShockWaveEmitter::Create(m_nNumShockWave + 2, 4, posWave, 40.0f, 10.0f, 25.0f, 90.0f, -1.0f, 16, D3DX_PI * 0.02f);
 			//雷の生成
 			if(m_nNumThunder > 0) CThunderEmitter::CreateRound(m_nNumThunder + 1, 3, posWave, GetRot().y + D3DX_PI, 300.0f);
 		}
@@ -960,10 +962,6 @@ CPlayer::MOTION_CATEGORY CPlayer::GetMotionCategory(void) {
 		return MOTION_CATEGORY::ATTACK;
 			break;
 
-	//case MOTION_TYPE::DODGE_BACK:
-	//case MOTION_TYPE::DODGE_FRONT:
-		//return MOTION_CATEGORY::DODGE;
-		//break;
 		//その他
 	default:
 		return MOTION_CATEGORY::NONE;

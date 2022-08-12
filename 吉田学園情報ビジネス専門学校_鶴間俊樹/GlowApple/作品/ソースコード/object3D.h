@@ -48,7 +48,7 @@ private:
 	LPDIRECT3DINDEXBUFFER9 m_pIdxBuff; //インデックスバッファへのポインタ
 	int m_nNumVtx;	//頂点数
 	int m_nNumIdx;	//インデックス数
-	D3DXCOLOR m_col;	//頂点色
+	D3DXCOLOR m_col;	//マテリアルの色
 };
 
 #endif // !_OBJECT3D_H_

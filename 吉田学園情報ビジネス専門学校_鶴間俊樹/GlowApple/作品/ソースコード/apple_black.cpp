@@ -8,14 +8,13 @@
 #include "appleTree.h"
 #include "manager.h"
 #include "sound.h"
-#include "gameScene.h"
-#include "enemySpawner.h"
 #include "effect.h"
+#include "repulsiveWave.h"
 
 //=============================================================================
 // マクロ定義
 //=============================================================================
-#define HEAL_VALUE (2)	//回復量
+#define EMIT_SPAN (FPS * 20)	//斥力波放出のスパン
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -51,6 +50,7 @@ CAppleBlack* CAppleBlack::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 
 	pAppleBlack->SetPos(pos);
 	pAppleBlack->Init();
+	pAppleBlack->m_nCntEmit = EMIT_SPAN;
 
 	return pAppleBlack;
 }
@@ -83,6 +83,31 @@ void CAppleBlack::Uninit(void) {
 // 黒林檎の更新処理
 //=============================================================================
 void CAppleBlack::Update(void) {
+	if (m_nCntEmit >= EMIT_SPAN) {
+		//斥力波を放出する
+		CAppleTree* pAppleTree = GetAppleTree();
+		if (pAppleTree != nullptr) {
+			CRepulsivewave::Create(pAppleTree->GetPos() + D3DXVECTOR3(0.0f, 150.0f, 0.0f), 0.0f, 120.0f, 25.0f, 25, 0.2f);
+		}
+
+		//林檎の位置から放出のエフェクトを出す
+		D3DXVECTOR3 posEffect = GetPos();
+		posEffect.y -= 15.0f;	//位置の調整
+		CEffect::Create(posEffect, CEffect::EFFECT_TYPE::REPULSIVEWAVE, 80.0f, 80.0f, false);
+
+		//マネージャーの取得
+		CManager* pManager = CManager::GetManager();
+		CSound* pSound = nullptr;	//サウンドへのポインタ
+		//サウンドの取得
+		if (pManager != nullptr) pSound = pManager->GetSound();
+		//放出音の再生
+		if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::REPULSIVE_WAVE);
+
+		m_nCntEmit = 0;
+	}
+	else {
+		m_nCntEmit++;
+	}
 
 	CGlowApple::Update();
 }
@@ -92,59 +117,4 @@ void CAppleBlack::Update(void) {
 //=============================================================================
 void CAppleBlack::Draw(void) {
 	CGlowApple::Draw();
-}
-
-//=============================================================================
-// すべての黒林檎のHP吸収
-//=============================================================================
-void CAppleBlack::DrainAllApple(void) {
-	CObject* pObject = GetObjectTopAll();	//全オブジェクトのリストの先頭を取得
-
-	while (pObject != nullptr) {
-		CObject* pObjNext = GetObjectNextAll(pObject);	//リストの次のオブジェクトのポインタを取得
-
-		//オブジェクトタイプの確認
-		bool bMatchType = false;
-		if (pObject->GetObjType() & OBJTYPE_APPLE) bMatchType = true;
-
-		//死亡フラグ確認
-		bool bDeath = pObject->GetDeath();
-
-		//黒林檎にダイナミックキャスト
-		CAppleBlack* pAppleBlack = dynamic_cast<CAppleBlack*>(pObject);
-
-		//次のループに飛ばす
-		if (!bMatchType || bDeath || pAppleBlack == nullptr) {
-			pObject = pObjNext;	//リストの次のオブジェクトを代入
-			continue;
-		}
-
-		//黒林檎のHP吸収処理を行う
-		pAppleBlack->Drain();
-
-		pObject = pObjNext;	//リストの次のオブジェクトを代入
-	}
-}
-
-//=============================================================================
-// 体力の吸収
-//=============================================================================
-void CAppleBlack::Drain(void) {
-	//林檎の木を回復する
-	CAppleTree* pAppleTree = GetAppleTree();
-	if (pAppleTree != nullptr) {
-		pAppleTree->HealLife(HEAL_VALUE);
-	}
-	//林檎の位置からHP吸収のエフェクトを出す
-	D3DXVECTOR3 posEffect = GetPos();
-	posEffect.y -= 15.0f;	//位置の調整
-	CEffect::Create(posEffect, CEffect::EFFECT_TYPE::DRAIN, 80.0f, 80.0f, false);
-
-	//マネージャーの取得
-	CManager* pManager = CManager::GetManager();
-	CSound* pSound = nullptr;	//サウンドへのポインタ
-	//サウンドの取得
-	if (pManager != nullptr) pSound = pManager->GetSound();
-	//HP吸収音の再生
-	if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::DRAIN);
 }
