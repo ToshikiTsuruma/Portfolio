@@ -128,7 +128,7 @@ void CObject3D::Draw(void) {
 	//ライトがある場合フラグを追加
 	if (dwEnableLight) dwPassFlag |= PASS_LIGHT;	
 
-	//モデルが設定したマテリアルの影響を受けないようにマテリアルの設定	3Dの頂点色要らないかも？
+	//モデルが設定したマテリアルの影響を受けないようにマテリアルの設定
 	pRenderer->SetEffectMaterialDiffuse(m_col);
 	pRenderer->SetEffectMaterialEmissive(D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f));
 	pRenderer->SetEffectMaterialSpecular(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));

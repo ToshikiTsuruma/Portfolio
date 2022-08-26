@@ -484,12 +484,22 @@ void CObjectMotion::Uninit(void) {
 //=============================================================================
 void CObjectMotion::Update(void) {
 	if (m_ppModelArray == nullptr) return;	//モデルの配列がnullの場合終了
-	//モデルがnullの場合終了
+
 	for (int nCnt = 0; nCnt < m_nNumParts; nCnt++) {
-		if (m_ppModelArray[nCnt] == nullptr) return;
+		if (m_ppModelArray[nCnt] == nullptr) {
+			//モデルがnullの場合終了
+			return;
+		}
+		else {
+			//各モデルの更新処理
+			m_ppModelArray[nCnt]->Update();
+		}
 	}
+
+	//モーション情報がnullの場合終了
 	if (m_pMotionInfoArray == nullptr || m_pUpdateMotionInfoArray == nullptr) return;
 	
+	//モーションのキー情報がnullの場合終了
 	for (int nCntMotion = 0; nCntMotion < m_nNumTypeMotion; nCntMotion++)
 	{
 		for (int nCntKey = 0; nCntKey < MAX_KEY_MOTION; nCntKey++)
@@ -497,6 +507,7 @@ void CObjectMotion::Update(void) {
 			if (m_pMotionInfoArray[nCntMotion].aKeyInfo[nCntKey].pKeyArray == nullptr) return;
 		}
 	}
+
 	//----------------------------------------------------------
 	//モーションの遷移
 	//----------------------------------------------------------
@@ -990,6 +1001,19 @@ void CObjectMotion::SetSpecularModelAll(D3DXCOLOR col, int nIdx) {
 		}
 		//色の設定
 		m_ppModelArray[nCnt]->SetMaterialSpecular(col, nIdx);
+	}
+}
+
+//=============================================================================
+// モデルのマテリアルの色の変更の開始
+//=============================================================================
+void CObjectMotion::StartChangeDiffuseAll(int nIdxMat, D3DXCOLOR colDest, int nTimeFin) {
+	for (int nCnt = 0; nCnt < m_nNumParts; nCnt++) {
+		//モデルがnullの場合ループを飛ばす
+		if (m_ppModelArray[nCnt] == nullptr) continue;
+		
+		//目標色の設定
+		m_ppModelArray[nCnt]->StartChangeMaterialDiffuse(nIdxMat, colDest, nTimeFin);
 	}
 }
 

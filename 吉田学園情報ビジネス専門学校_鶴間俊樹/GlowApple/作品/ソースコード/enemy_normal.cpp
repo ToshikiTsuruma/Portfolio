@@ -10,13 +10,13 @@
 // マクロ定義
 //=============================================================================
 #define TEXT_FILE_NAME_LOAD_MOTION "data/MOTION/motion_enemyNormal.txt"
-#define MOVE_SPEED (0.8f)			//移動速度
+#define MOVE_SPEED (1.2f)			//移動速度
 #define ROTATE_SPEED (0.05f * D3DX_PI)		//回転速度
 #define NUM_COLLISION (1)			//当たり判定の数
 #define COLLISION_RADIUS (25.0f)	//当たり判定の半径
-#define MAX_LIFE (30)				//体力の最大値
+#define MAX_LIFE (20)				//体力の最大値
 #define DISTANCE_ATTACK (50.0f)		//攻撃する距離
-#define ATTACK_DAMAGE (30)	//攻撃力
+#define ATTACK_DAMAGE (20)	//攻撃力
 #define LIFE_GAUGE_HEIGHT (80.0f)	//敵の位置からの体力ゲージの高さ
 
 //=============================================================================

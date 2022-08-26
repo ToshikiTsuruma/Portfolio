@@ -26,9 +26,9 @@ class CSelectMenu3D : public CSelectMenu
 public:
 
 	CSelectMenu3D();		//デフォルトコンストラクタ
-	CSelectMenu3D(int nNumSelect, D3DXVECTOR3 posCenter, float fRadiusModel, CModel::MODELTYPE typeModel, float fDistCamera, float fHeightCamera);	//オーバーロードされたコンストラクタ
+	CSelectMenu3D(int nNumSelect, D3DXVECTOR3 posCenter, float fRadiusModel, CModel::MODELTYPE typeModel, float fDistCamera, float fHeightCamera, bool bUseBG);	//オーバーロードされたコンストラクタ
 	virtual ~CSelectMenu3D();		//デストラクタ
-	static CSelectMenu3D* Create(int nNumSelect, D3DXVECTOR3 posCenter, float fRadius, CModel::MODELTYPE typeModel, float fDistCamera, float fHeightCamera);	//生成処理
+	static CSelectMenu3D* Create(int nNumSelect, D3DXVECTOR3 posCenter, float fRadius, CModel::MODELTYPE typeModel, float fDistCamera, float fHeightCamera, bool bUseBG);	//生成処理
 	virtual HRESULT Init(void);	//初期化処理
 	virtual void Uninit(void);	//終了処理
 	virtual void Update(void);	//更新処理

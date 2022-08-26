@@ -20,7 +20,7 @@
 //=============================================================================
 // デフォルトコンストラクタ
 //=============================================================================
-CSelectMenu2D::CSelectMenu2D() : CSelectMenu(0)
+CSelectMenu2D::CSelectMenu2D() : CSelectMenu(0, false)
 {
 
 }
@@ -28,9 +28,10 @@ CSelectMenu2D::CSelectMenu2D() : CSelectMenu(0)
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CSelectMenu2D::CSelectMenu2D(int nNumSelect) : CSelectMenu(nNumSelect)
+CSelectMenu2D::CSelectMenu2D(int nNumSelect, bool bUseBG) : CSelectMenu(nNumSelect , bUseBG)
 {
 	CreateSelectUI();
+	m_pPosSelectIconOffsetArray = nullptr;
 }
 
 //=============================================================================
@@ -53,9 +54,9 @@ CSelectMenu2D::~CSelectMenu2D()
 //=============================================================================
 // 2D選択メニューの生成処理
 //=============================================================================
-CSelectMenu2D* CSelectMenu2D::Create(int nNumSelect) {
+CSelectMenu2D* CSelectMenu2D::Create(int nNumSelect, bool bUseBG) {
 	CSelectMenu2D* pSelectMenu2D;
-	pSelectMenu2D = new CSelectMenu2D(nNumSelect);
+	pSelectMenu2D = new CSelectMenu2D(nNumSelect, bUseBG);
 	if (pSelectMenu2D == nullptr) return nullptr;
 
 	pSelectMenu2D->Init();
@@ -94,6 +95,12 @@ void CSelectMenu2D::Uninit(void) {
 		m_pSelectIcon = nullptr;
 	}
 
+	//選択のオフセットの破棄
+	if (m_pPosSelectIconOffsetArray != nullptr) {
+		delete[] m_pPosSelectIconOffsetArray;
+		m_pPosSelectIconOffsetArray = nullptr;
+	}
+
 	CSelectMenu::Uninit();
 }
 
@@ -123,7 +130,7 @@ void CSelectMenu2D::CreateSelectUI(void) {
 	for (int nCntModel = 0; nCntModel < nNumSelect; nCntModel++)
 	{
 		//選択肢UIの生成
-		m_ppSelectUIArray[nCntModel] = CObject2D::Create(D3DXVECTOR3(), CTexture::TEXTURE_TYPE::NONE, 0.0f, 0.0f);	//後に外部で設定するので値は適当
+		m_ppSelectUIArray[nCntModel] = CObject2D::Create();	//後に外部で設定するので値は適当
 	}
 }
 
@@ -134,14 +141,14 @@ void CSelectMenu2D::BeginChangeSelect(void) {
 	if (m_ppSelectUIArray == nullptr) return;
 
 	//選択中のアイコンがある場合
-	if (m_pSelectIcon != nullptr) {
+	if (m_pSelectIcon != nullptr && m_pPosSelectIconOffsetArray != nullptr) {
 		//現在の選択肢UIの位置を取得
 		D3DXVECTOR3 posSelectUI;
 		int nIdxSelect = GetIdxCurSelect();
 		if (m_ppSelectUIArray[nIdxSelect] != nullptr) posSelectUI = m_ppSelectUIArray[nIdxSelect]->GetPos();
 
 		//選択中アイコンを選択中の選択肢UIの隣に配置する
-		m_pSelectIcon->SetPos(posSelectUI + m_posSelectIconOffset);
+		m_pSelectIcon->SetPos(posSelectUI + m_pPosSelectIconOffsetArray[nIdxSelect]);
 	}
 	//選択中のアイコンがない場合
 	else {
@@ -176,19 +183,60 @@ void CSelectMenu2D::CreateSelectIcon(D3DXVECTOR3 posOffset, float fWidth, float 
 	//すでに生成済みの場合は終了
 	if (m_pSelectIcon != nullptr) return;
 
+	//選択のオフセットが生成済みの場合破棄
+	if (m_pPosSelectIconOffsetArray != nullptr) {
+		delete[] m_pPosSelectIconOffsetArray;
+		m_pPosSelectIconOffsetArray = nullptr;
+	}
+
+	const int nNumSelect = GetNumSelect();	//選択肢の数
+
 	//選択中アイコンの生成
 	m_pSelectIcon = CObject2D::Create(D3DXVECTOR3(), typeTex, fWidth, fHeight);
-	//オフセットの設定
-	m_posSelectIconOffset = posOffset;
 
+	//選択のオフセットの配列を生成
+	m_pPosSelectIconOffsetArray = new D3DXVECTOR3[nNumSelect];
+
+	//すべての選択のオフセットの設定
+	if (m_pPosSelectIconOffsetArray != nullptr) {
+		for (int nCnt = 0; nCnt < nNumSelect; nCnt++)
+		{
+			m_pPosSelectIconOffsetArray[nCnt] = posOffset;
+		}
+	}
+	
+	//選択中アイコンの位置の更新
+	UpdateSelectIconPos();
+}
+
+//=============================================================================
+// 選択アイコンの位置のオフセットを設定
+//=============================================================================
+void CSelectMenu2D::SetIconPosOffset(int nIdx, D3DXVECTOR3 posOffset) {
+	const int nNumSelect = GetNumSelect();	//選択肢の数
+
+	//nullの場合は終了
+	if (m_pPosSelectIconOffsetArray == nullptr || nIdx < 0 || nIdx >= nNumSelect) return;
+
+	//オフセットの設定
+	m_pPosSelectIconOffsetArray[nIdx] = posOffset;
+
+	//選択中アイコンの位置の更新
+	UpdateSelectIconPos();
+}
+
+//=============================================================================
+// 選択アイコンの位置を更新
+//=============================================================================
+void CSelectMenu2D::UpdateSelectIconPos(void) {
 	//選択中アイコンの位置の設定
-	if (m_ppSelectUIArray != nullptr && m_pSelectIcon != nullptr) {
+	if (m_ppSelectUIArray != nullptr && m_pSelectIcon != nullptr && m_pPosSelectIconOffsetArray != nullptr) {
 		//現在の選択肢UIの位置を取得
 		D3DXVECTOR3 posSelectUI;
 		int nIdxSelect = GetIdxCurSelect();
 		if (m_ppSelectUIArray[nIdxSelect] != nullptr) posSelectUI = m_ppSelectUIArray[nIdxSelect]->GetPos();
 
 		//選択中アイコンを選択中の選択肢UIの隣に配置する
-		m_pSelectIcon->SetPos(posSelectUI + m_posSelectIconOffset);
+		m_pSelectIcon->SetPos(posSelectUI + m_pPosSelectIconOffsetArray[nIdxSelect]);
 	}
 }

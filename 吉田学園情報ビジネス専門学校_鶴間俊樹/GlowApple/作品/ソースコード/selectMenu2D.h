@@ -26,9 +26,9 @@ class CSelectMenu2D : public CSelectMenu
 public:
 
 	CSelectMenu2D();		//デフォルトコンストラクタ
-	CSelectMenu2D(int nNumSelect);	//オーバーロードされたコンストラクタ
+	CSelectMenu2D(int nNumSelect, bool bUseBG);	//オーバーロードされたコンストラクタ
 	virtual ~CSelectMenu2D();		//デストラクタ
-	static CSelectMenu2D* Create(int nNumSelect);	//生成処理
+	static CSelectMenu2D* Create(int nNumSelect, bool bUseBG);	//生成処理
 	virtual HRESULT Init(void);	//初期化処理
 	virtual void Uninit(void);	//終了処理
 	virtual void Update(void);	//更新処理
@@ -39,14 +39,16 @@ public:
 
 	void SetSelectUI(int nIdx, D3DXVECTOR3 pos, float fWidth, float fHeight, CTexture::TEXTURE_TYPE typeTex);	//選択肢UIの設定
 	void CreateSelectIcon(D3DXVECTOR3 posOffset, float fWidth, float fHeight, CTexture::TEXTURE_TYPE typeTex);	//選択中アイコンの生成
+	void SetIconPosOffset(int nIdx, D3DXVECTOR3 posOffset);	//選択アイコンの位置のオフセットを設定
 
 private:
 	void CreateSelectUI(void);	//UIを生成
+	void UpdateSelectIconPos(void);	//選択アイコンの位置を更新
 
 	CObject2D** m_ppSelectUIArray;	//選択肢のUIの動的配列
 
 	CObject2D* m_pSelectIcon;	//選択中の選択肢の隣に生成されるアイコン
-	D3DXVECTOR3 m_posSelectIconOffset;	//選択中アイコンの選択肢からのオフセット位置
+	D3DXVECTOR3* m_pPosSelectIconOffsetArray;	//選択中アイコンの選択肢からのオフセット位置の動的配列のポインタ
 };
 
 #endif // !_SELECT_MENU_3D_H_

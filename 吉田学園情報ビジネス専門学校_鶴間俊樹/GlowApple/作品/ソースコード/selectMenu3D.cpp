@@ -29,8 +29,8 @@ CSelectMenu3D::CSelectMenu3D() : m_posCenter(D3DXVECTOR3()), m_fRadiusModel(0.0f
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CSelectMenu3D::CSelectMenu3D(int nNumSelect, D3DXVECTOR3 posCenter, float fRadiusModel, CModel::MODELTYPE typeModel, float fDistCamera, float fHeightCamera)
-	: CSelectMenu(nNumSelect), m_posCenter(posCenter), m_fRadiusModel(fRadiusModel)
+CSelectMenu3D::CSelectMenu3D(int nNumSelect, D3DXVECTOR3 posCenter, float fRadiusModel, CModel::MODELTYPE typeModel, float fDistCamera, float fHeightCamera, bool bUseBG)
+	: CSelectMenu(nNumSelect,bUseBG), m_posCenter(posCenter), m_fRadiusModel(fRadiusModel)
 {
 	m_bMoveModel = false;
 	m_fRotModelY = 0.0f;
@@ -55,9 +55,9 @@ CSelectMenu3D::~CSelectMenu3D()
 //=============================================================================
 // 3D選択メニューの生成処理
 //=============================================================================
-CSelectMenu3D* CSelectMenu3D::Create(int nNumSelect, D3DXVECTOR3 posCenter, float fRadius, CModel::MODELTYPE typeModel, float fDistCamera, float fHeightCamera) {
+CSelectMenu3D* CSelectMenu3D::Create(int nNumSelect, D3DXVECTOR3 posCenter, float fRadius, CModel::MODELTYPE typeModel, float fDistCamera, float fHeightCamera, bool bUseBG) {
 	CSelectMenu3D* pSelectMenu3D;
-	pSelectMenu3D = new CSelectMenu3D(nNumSelect, posCenter, fRadius, typeModel, fDistCamera, fHeightCamera);
+	pSelectMenu3D = new CSelectMenu3D(nNumSelect, posCenter, fRadius, typeModel, fDistCamera, fHeightCamera, bUseBG);
 	if (pSelectMenu3D == nullptr) return nullptr;
 
 	pSelectMenu3D->Init();

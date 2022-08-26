@@ -19,6 +19,7 @@ public:
 		//ÉVÉXÉeÉÄ
 		SELECT = 0,
 		BACK,
+		PAUSE,
 		//à⁄ìÆ
 		MOVE_UP,	//è„
 		MOVE_DOWN,	//â∫
@@ -46,6 +47,7 @@ public:
 		DEBUG_0,
 		DEBUG_1,
 		DEBUG_2,
+		DEBUG_3,
 #endif
 
 		CODE_MAX

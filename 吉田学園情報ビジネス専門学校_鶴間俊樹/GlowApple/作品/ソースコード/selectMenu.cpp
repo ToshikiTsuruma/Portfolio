@@ -26,10 +26,15 @@ CSelectMenu::CSelectMenu() : m_nNumSelect(0)
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CSelectMenu::CSelectMenu(int nNumSelect) : m_nNumSelect(nNumSelect)
+CSelectMenu::CSelectMenu(int nNumSelect, bool bUseBG) : m_nNumSelect(nNumSelect)
 {
 	m_typeSelect = SELECT_TYPE::VERTICAL;
 	m_nIdxCurSelect = 0;
+
+	if (bUseBG) {
+		//背景の生成
+		m_pMenuBG = CObject2D::Create(D3DXVECTOR3(), CTexture::TEXTURE_TYPE::NONE, 0.0f, 0.0f);	//後で値を設定する
+	}
 }
 
 //=============================================================================
@@ -44,11 +49,9 @@ CSelectMenu::~CSelectMenu()
 // 選択メニューの初期化処理
 //=============================================================================
 HRESULT CSelectMenu::Init(void) {
-	//メニュー開いたときにも更新を続けるようにする
-	SetUpdatePriority(UPDATE_PRIORITY::MENU_UPDATE);
-
 	m_nIdxCurSelect = 0;
-	m_bLockChangeSelect = false;
+	m_bLockChangeSelect = true;
+	m_bFirstFrame = true;
 
 	return S_OK;
 }
@@ -72,6 +75,13 @@ void CSelectMenu::Uninit(void) {
 void CSelectMenu::Update(void) {
 	//選択の変更
 	if(!m_bLockChangeSelect) ChangeSelect();
+
+	//最初の１フレームだった場合
+	if (m_bFirstFrame) {
+		m_bFirstFrame = false;
+		//入力のロックを解除
+		m_bLockChangeSelect = false;
+	}
 }
 
 //=============================================================================
@@ -132,17 +142,13 @@ void CSelectMenu::ChangeSelect(void) {
 }
 
 //=============================================================================
-// メニューの背景を生成
+// メニューの背景の設定
 //=============================================================================
-void CSelectMenu::CreateMenuBG(CTexture::TEXTURE_TYPE typeTex, D3DXVECTOR3 pos, float fWidth, float fHeight) {
-	if (m_pMenuBG != nullptr) return;
-
-	//背景の生成
-	m_pMenuBG = CObject2D::Create(pos, typeTex, fWidth, fHeight);
-
-	//生成されていない場合終了
+void CSelectMenu::SetMenuBG(CTexture::TEXTURE_TYPE typeTex, D3DXVECTOR3 pos, float fWidth, float fHeight) {
 	if (m_pMenuBG == nullptr) return;
 
-	//描画順の設定
-	m_pMenuBG->SetDrawPriority(CObject::DRAW_PRIORITY::UI_BG);
+	//背景の設定
+	m_pMenuBG->SetTexType(typeTex);
+	m_pMenuBG->SetPos(pos);
+	m_pMenuBG->SetSize(D3DXVECTOR3(fWidth, fHeight, 0.0f));
 }

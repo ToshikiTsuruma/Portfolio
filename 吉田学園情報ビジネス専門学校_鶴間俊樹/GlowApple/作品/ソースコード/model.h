@@ -22,6 +22,7 @@
 class CModel
 {
 public:
+	//モデルの種類
 	enum class MODELTYPE{
 		//地形
 		TERRAIN = 0,	//地形
@@ -46,12 +47,20 @@ public:
 		ENUM_MAX	//最大数
 	};
 
+	//モデルデータ
 	typedef struct
 	{
 		LPD3DXMESH pMesh;	//メッシュ（頂点情報）へのポインタ
 		LPD3DXBUFFER pBuffMat;	//マテリアルへのポインタ
 		DWORD nNumMat;	//マテリアルの数
 	} ModelData;
+
+	//色の変更
+	typedef struct {
+		D3DXCOLOR colAdd;	//変更中はフレーム毎に加算される色
+		int nTimeFinish;	//色の変更にかかる時間
+		int nCnt;			//カウンター
+	} ChangeDiffuse;
 
 	CModel();	//デフォルトコンストラクタ
 	~CModel();	//デストラクタ
@@ -83,6 +92,7 @@ public:
 	void SetMaterialSpecular(D3DXCOLOR col, int nIdx);	//マテリアルのスペキュラー色の設定
 	void SetMaterialEmissive(D3DXCOLOR col, int nIdx);	//マテリアルの発光色の設定
 	void SetMaterialPower(float fPower, int nIdx);		//マテリアルの反射の質感の設定
+	void StartChangeMaterialDiffuse(int nIdxMat, D3DXCOLOR colDest, int nTimeFin);	//マテリアルの色の変更の開始
 	void SetColorGlow(D3DXCOLOR col);	//輪郭の発光色の設定
 
 	void CreateCloneMesh(void);		//複製メッシュの生成
@@ -91,6 +101,8 @@ public:
 	void SetDrawOutline(bool bDraw);		//輪郭の表示設定
 
 private:
+	void UpdateColorChange(void);	//色の変更の更新
+
 	static ModelData m_aModelData[(int)MODELTYPE::ENUM_MAX];	//全モデルの情報
 	static char m_asFilePath[(int)MODELTYPE::ENUM_MAX][MAX_MODEL_FILE_PATH];	// モデルのテキストファイルのパス
 	static D3DXMATERIAL m_aMatDefault[(int)MODELTYPE::ENUM_MAX][MAX_MATERIAL];	//モデルのマテリアルの初期値
@@ -103,10 +115,11 @@ private:
 	CModel* m_pParent;		//親のモデルへのポインタ
 	int m_nIdxParent;		//親のインデックス
 	D3DXMATERIAL m_aMat[MAX_MATERIAL];	//モデルのマテリアル
-	D3DXCOLOR m_colOutline;	//輪郭の色
+	ChangeDiffuse m_aChangeDiffuse[MAX_MATERIAL];	//モデルのマテリアルの色を変更する構造体の配列
 	D3DXCOLOR m_colGlow;	//輪郭の発光色の色
 
 	bool m_bOutline;			//輪郭があるかどうか
+	D3DXCOLOR m_colOutline;	//輪郭の色
 	LPD3DXMESH m_pCloneMesh;	//複製したメッシュのポインタ
 };
 

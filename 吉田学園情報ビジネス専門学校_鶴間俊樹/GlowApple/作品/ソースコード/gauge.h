@@ -22,16 +22,17 @@
 //*****************************************************************************
 // ゲージクラス
 //*****************************************************************************
-class CGauge
+class CGauge : public CObject
 {
 public:
 
 	CGauge();		//デフォルトコンストラクタ
 	CGauge(int nMaxValue, bool bVertical);		//オーバーロードされたコンストラクタ
 	virtual ~CGauge();		//デストラクタ
-	virtual void Init(void);	//初期化処理
+	virtual HRESULT Init(void);	//初期化処理
 	virtual void Uninit(void);	//終了処理
 	virtual void Update(void);	//更新処理
+	virtual void Draw(void) {}	//描画処理
 	virtual void CreateGauge(CTexture::TEXTURE_TYPE typeTex, D3DXVECTOR3 pos, float fWidth, float fHeight) = 0;			//ゲージを生成
 	virtual void CreateGaugeBG(CTexture::TEXTURE_TYPE typeTex, D3DXVECTOR3 pos, float fWidth, float fHeight) = 0;		//ゲージの背景を生成
 	virtual void CreateGaugeFrame(CTexture::TEXTURE_TYPE typeTex, D3DXVECTOR3 pos, float fWidth, float fHeight) = 0;	//ゲージの枠を生成
@@ -56,6 +57,7 @@ public:
 	void SetGaugeFrameColor(D3DXCOLOR col);	//ゲージの枠の色の設定
 
 protected:
+	//このオブジェクト生成以前のオブジェクトを設定するとおそらくオブジェクト全破棄時に壊れるので注意
 	void SetGaugePtr(CObject* pGauge);				//ゲージのポインタを設定
 	void SetGaugeBGPtr(CObject* pGaugeBG);			//ゲージの背景のポインタを設定
 	void SetGaugeFramePtr(CObject* pGaugeFrame);	//ゲージの枠のポインタを設定

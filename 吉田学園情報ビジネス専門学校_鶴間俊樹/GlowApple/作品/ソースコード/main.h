@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <XInput.h>
+#include <vector>
+#include <string>
 
 //*****************************************************************************
 // ライブラリファイルのリンク

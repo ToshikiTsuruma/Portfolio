@@ -16,7 +16,7 @@
 #define SPAN_BULLET (30)	//弾の生成間隔
 #define BULLET_MOVE_SPEED (20.0f)	//弾の移動速度
 #define	MAX_DISTANCE_BULLET (1000.0f)	//弾が発射可能な最大の距離
-#define	BULLET_DAMAGE (6)	//弾のダメージ
+#define	BULLET_DAMAGE (5)	//弾のダメージ
 
 //=============================================================================
 // 静的メンバ変数宣言

@@ -185,7 +185,7 @@ void CCamera::SetCamera(void) {
 	D3DXMATRIX mtxLightView;   // ライトビュー変換
 	D3DXVECTOR3 posLight;
 	//posLight = m_posV + D3DXVECTOR3(0.0f, 1600.0f, -800.0f);
-	posLight = D3DXVECTOR3(0.0f, 2200.0f, -1200.0f);
+	posLight = D3DXVECTOR3(0.0f, 2200.0f, -1800.0f);
 	D3DXVECTOR3 vecLight = D3DXVECTOR3(0.0f, -1.0f, 0.4f);	//ライトのベクトル
 	//ライトのビューマトリックスを生成
 	D3DXMatrixLookAtLH(&mtxLightView, &posLight, &D3DXVECTOR3(posLight + vecLight), &D3DXVECTOR3(0, 1, 0));

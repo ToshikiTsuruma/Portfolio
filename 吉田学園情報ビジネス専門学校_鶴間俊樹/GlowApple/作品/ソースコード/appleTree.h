@@ -39,6 +39,7 @@ public:
 	void Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead);		//ダメージ
 	void Dead(void);		//死亡時処理
 
+	void CreateApple(CGlowApple::APPLE_TYPE typeApple);	//林檎の生成
 	static D3DXVECTOR3 GetOffsetPosApple(int nIdxApple);	//林檎生成位置の取得
 	void SetMaxLife(int nMaxLife);	//体力の最大値の設定
 	void AddMaxLife(int nAddLife);	//体力の最大値の増加
@@ -50,7 +51,6 @@ public:
 
 private:
 	void GrowUp(void);	//成長
-	void CreateApple(void);	//林檎の生成
 
 	int m_nNumApple;	//生成した林檎の数
 	CGlowApple* m_apCreateApple[MAX_NUM_CREATE_APPLE];	//生成したリンゴのポインタ
@@ -68,7 +68,6 @@ private:
 
 	bool m_bDead;			//死亡
 	int m_nCntDead;			//死亡後のカウント
-	D3DXCOLOR m_colDeltaDeadColor;	//生存時と死亡時の色の差分
 
 	CAppleMenu* m_pMenuApple;	//林檎のメニュー
 

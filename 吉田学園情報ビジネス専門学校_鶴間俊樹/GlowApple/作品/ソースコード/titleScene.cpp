@@ -25,7 +25,7 @@
 //=============================================================================
 CTitleScene::CTitleScene()
 {
-	m_pSelectMenuTitle = CSelectMenu2D::Create(3);
+	m_pSelectMenuTitle = CSelectMenu2D::Create(3, false);
 	if (m_pSelectMenuTitle != nullptr) {
 		//縦選択
 		m_pSelectMenuTitle->SetSelectType(CSelectMenu::SELECT_TYPE::VERTICAL);
@@ -35,6 +35,8 @@ CTitleScene::CTitleScene()
 		m_pSelectMenuTitle->SetSelectUI(2, D3DXVECTOR3(SCREEN_WIDTH / 2.0f, 630.0f, 0.0f), 350.0f, 70.0f, CTexture::TEXTURE_TYPE::TEXT_CREDIT);
 		//選択肢アイコンの生成
 		m_pSelectMenuTitle->CreateSelectIcon(D3DXVECTOR3(-200.0f, 0.0f, 0.0f), 50.0f, 50.0f, CTexture::TEXTURE_TYPE::SELECT_ICON);
+		m_pSelectMenuTitle->SetIconPosOffset(1, D3DXVECTOR3(-160.0f, 0.0f, 0.0f));
+		m_pSelectMenuTitle->SetIconPosOffset(2, D3DXVECTOR3(-140.0f, 0.0f, 0.0f));
 	}
 	m_pTutorial = nullptr;
 	m_pCreadit = nullptr;
@@ -53,6 +55,9 @@ CTitleScene::~CTitleScene()
 // タイトルシーンの初期化処理
 //=============================================================================
 void CTitleScene::Init(void) {
+	//オブジェクトのポーズが無いように設定
+	CObject::SetUpdatePauseLevel(0);
+
 	CObject2D* pTitleBG = CObject2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f), CTexture::TEXTURE_TYPE::BG_TITLE , SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (pTitleBG != nullptr) pTitleBG->SetDrawPriority(CObject::DRAW_PRIORITY::UI_BG);
 
@@ -85,9 +90,9 @@ void CTitleScene::Uninit(void) {
 	CSound* pSound = nullptr;
 	if (pManager != nullptr) pSound = pManager->GetSound();
 
-	//BGMの停止
+	//音の停止
 	if (pSound != nullptr) {
-		pSound->StopSound(pSound->GetBGM());
+		pSound->StopSound();
 	}
 }
 

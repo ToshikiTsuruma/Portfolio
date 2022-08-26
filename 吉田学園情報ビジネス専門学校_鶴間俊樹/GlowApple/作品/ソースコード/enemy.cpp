@@ -21,7 +21,9 @@
 // マクロ定義
 //=============================================================================
 #define FALLDOWN_TIME (35)	//死亡時の倒れる時間
-#define DEAD_TIME (120)	//死亡後消えるまでの時間
+#define FINISH_TIME_CHANGE_COLOR_GAMEOVER (60)	//死亡後の色変更にかかる時間
+#define START_CHANGE_COLOR_DELETE (180)	//死亡後の破棄開始時間
+#define FINISH_TIME_DELETE (60)		//死亡後の破棄にかかる時間
 
 #define GOLD_RATE (7)	//金の敵になる確率
 #define DEFAULT_GROW_VALUE (1)	//デフォルトの敵死亡時の林檎の木成長量
@@ -164,20 +166,23 @@ void CEnemy::Update(void) {
 			//パーティクルの情報
 			CParticleEffect::PARTICLE_INFO particleInfo = { 60, 25.0f, -0.25f, 2.0f, D3DXVECTOR3(0.0f, -0.01f, 0.0f), colEffectStart, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f) };
 			//エフェクトの生成
-			CParticleEffect::Create(particleInfo, posParticle, DEAD_TIME - FALLDOWN_TIME, 10, 0.05f * D3DX_PI, true);
+			CParticleEffect::Create(particleInfo, posParticle, START_CHANGE_COLOR_DELETE - FALLDOWN_TIME, 10, 0.05f * D3DX_PI, true);
+
+			//色を白く変更
+			StartChangeDiffuseAll(0, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), FINISH_TIME_CHANGE_COLOR_GAMEOVER);
+		}
+
+		//エネミーの色の変更開始
+		if (m_nCntDead == START_CHANGE_COLOR_DELETE) {
+			//透明にしていく
+			StartChangeDiffuseAll(0, D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f), FINISH_TIME_DELETE);
 		}
 
 		//エネミーの破棄
-		if (m_nCntDead > DEAD_TIME) {
-			//フェードアウト
-			bool bEndFade = false;
-			bEndFade = FadeModelAll(0.0f, -0.01f);
-			//フェード終了時
-			if (bEndFade) {
-				//終了処理
-				Uninit();
-				return;
-			}
+		if (m_nCntDead >= START_CHANGE_COLOR_DELETE + FINISH_TIME_DELETE) {
+			//終了処理
+			Uninit();
+			return;
 		}
 
 		//モーションの更新
@@ -309,8 +314,6 @@ void CEnemy::Update(void) {
 	MotionAct();
 
 	if (m_pGaugeLife != nullptr) {
-		//体力ゲージの更新
-		m_pGaugeLife->Update();
 		//体力ゲージの位置を更新
 		m_pGaugeLife->SetAllGaugePos(D3DXVECTOR3(GetPos().x, GetPos().y + m_fHeightLifeGauge, GetPos().z));
 	}

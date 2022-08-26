@@ -20,6 +20,8 @@
 class CEffect : public CBillboard
 {
 public:
+
+	//エフェクトの種類
 	enum class EFFECT_TYPE{
 		EXPLOSION = 0,	//爆発
 		DAMAGE_PLAYER,	//プレイヤー攻撃のダメージ
@@ -35,7 +37,7 @@ public:
 		THUNDER,		//雷
 		WIND,			//風の渦
 		ENUM_MAX
-	};	//エフェクトの種類
+	};	
 
 	CEffect();	//デフォルトコンストラクタ
 	CEffect(EFFECT_TYPE type, bool bLoop);	//オーバーロードされたコンストラクタ

@@ -201,7 +201,7 @@ void CRepulsivewave::AttackCollision(int nObjtype) {
 		//当たり判定時の処理
 		//---------------------------
 		D3DXVec2Normalize(&vecObj, &vecObj);	//オブジェクト方向へのベクトルを正規化
-		D3DXVECTOR3 moveObj = D3DXVECTOR3(vecObj.x * 3.0f, 15.0f, vecObj.y * 3.0f);	//オブジェクトの移動量
+		D3DXVECTOR3 moveObj = D3DXVECTOR3(vecObj.x * 4.0f, 15.0f, vecObj.y * 4.0f);	//オブジェクトの移動量
 		//オブジェクトを吹き飛ばす
 		pObject->SetMove(moveObj);
 

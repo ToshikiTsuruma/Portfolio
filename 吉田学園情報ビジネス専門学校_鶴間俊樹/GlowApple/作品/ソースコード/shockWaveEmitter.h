@@ -28,7 +28,6 @@ public:
 	void Update(void);	//XVˆ—
 	void Draw(void) {}	//•`‰æˆ—
 
-
 private:
 	void CreateShockWave(void);	//ÕŒ‚”g‚ğ¶¬
 

@@ -150,7 +150,7 @@ D3DXCOLOR CGlowApple::GetAppleColor(APPLE_TYPE type) {
 		return D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
 		break;
 	case CGlowApple::APPLE_TYPE::SILVER:
-		return D3DXCOLOR(0.5f, 0.5f, 0.64f, 1.0f);
+		return D3DXCOLOR(0.4f, 0.4f, 0.6f, 1.0f);
 		break;
 	case CGlowApple::APPLE_TYPE::GOLD:
 		return D3DXCOLOR(1.0f, 0.7f, 0.0f, 1.0f);
@@ -174,7 +174,7 @@ void CGlowApple::GetAppleText(char* pStr, APPLE_TYPE type) {
 		strcpy(pStr, "Green Apple : ”•b‚²‚Æ‚É‰ñ•œ‚·‚é");
 		break;
 	case CGlowApple::APPLE_TYPE::WHITE:
-		strcpy(pStr, "White Apple : ÕŒ‚”g‚Ì”‚ª‘‚¦‚é");
+		strcpy(pStr, "White Apple :  UŒ‚‚ÌÕŒ‚”g‚Ì”‚ª‘‚¦‚é");
 		break;
 	case CGlowApple::APPLE_TYPE::BLACK:
 		strcpy(pStr, "Black Apple : –Ø‚Ì’†S‚©‚çË—Í”g‚ğ•ú‚Â");

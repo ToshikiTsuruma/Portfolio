@@ -27,10 +27,13 @@ data/TEXTURE/UI/grow_gauge_frame.png
 data/TEXTURE/UI/text_growup.png
 data/TEXTURE/UI/arrow_left.png
 data/TEXTURE/UI/arrow_right.png
+data/TEXTURE/UI/pause_bg.png
 data/TEXTURE/UI/text_gameclear.png
 data/TEXTURE/UI/text_gameover.png
 data/TEXTURE/UI/text_quit.png
 data/TEXTURE/UI/text_retry.png
+data/TEXTURE/UI/text_continue.png
+data/TEXTURE/UI/text_title.png
 
 data/TEXTURE/EFFECT/explosion.png
 data/TEXTURE/EFFECT/damage_player.png

@@ -140,20 +140,20 @@ VS_OUTPUT RenderSceneVSLight(
 	float3 light = normalize((float3)g_Light);	//頂点からライトへのベクトル
 
 
-	//影の色
-	Out.ColShadow = float4(0.0, 0.0, 0.0, 0.0);
+	//影の色(減算する量)
+	Out.ColShadow = float4(1.0, 1.0, 1.0, 1.0);
 
 	//ディフューズの計算
-	float col = dot(nor, -light);	//計算後の色の明るさ
+	float col = saturate(dot(nor, -light));	//計算後の色の明るさ
 
-	//光があたっている場合のみオブジェクトに遮られたときの影の色を設定
-	if (col >= 0.0) {
-		Out.ColShadow = float4(1.0, 1.0, 1.0, 1.0);
+	//光があたっていない場合影なし
+	if (col <= 0.0) {
+		Out.ColShadow = float4(0.0, 0.0, 0.0, 0.0);
 	}
 
 	 //ハーフランバート
-	col += 1.0;
-	col *= 0.5;
+	//col += 1.0;
+	//col *= 0.5;
 
 	//スペキュラーの計算
 	float3 vecHarf = normalize(-light + vecView);	//ハーフベクトル
@@ -163,7 +163,7 @@ VS_OUTPUT RenderSceneVSLight(
 	Out.Diffuse.w = g_matDiffuse.w;
 
 	//輪郭を光らせる
-	Out.Diffuse.xyz += pow(1.0 - saturate(dot(vecView, nor)), 2) * g_colGlow.xyz;
+	Out.Diffuse.xyz += (pow(1.0 - saturate(dot(vecView, nor)), 3) + 0.1) * (g_colGlow.xyz - Out.Diffuse.xyz);
 
 	//フォグを計算
 	Out.Fog = 1.0 - saturate(g_fogRange.x + g_fogRange.y * Out.Pos.w);
@@ -242,6 +242,9 @@ PS_OUTPUT RenderScenePS3D(VS_OUTPUT In)
 
 	Out.RGB = In.Diffuse;
 
+	//-----------------------------
+	//影の描画
+	//-----------------------------
 	// ライト目線によるZ値の再算出
 	float ZValue = In.ZCalcTex.z / In.ZCalcTex.w;
 
@@ -250,18 +253,38 @@ PS_OUTPUT RenderScenePS3D(VS_OUTPUT In)
 	TransTexCoord.x = (1.0f + In.ZCalcTex.x / In.ZCalcTex.w) * 0.5f;
 	TransTexCoord.y = (1.0f - In.ZCalcTex.y / In.ZCalcTex.w) * 0.5f;
 
-	// 同じ座標のZ値を抽出
-	float SM_Z = tex2D(texSamplerShadow, TransTexCoord).x;
+	float visibility = 0.0;	//影の濃度
 
-	// 算出点がシャドウマップのZ値よりも大きければ影と判断
-	if (ZValue > SM_Z + 0.002f && SM_Z < 1.0) {	//シャドウマップのZ値が1.0だったら影ができないようにする
-		Out.RGB.xyz += Out.RGB.xyz * -0.5f * In.ColShadow.xyz;
+	float2 poissonDisk[4] = {
+		float2(-0.94201624, -0.39906216),
+		float2(0.94558609, -0.76890725),
+		float2(-0.094184101, -0.92938870),
+		float2(0.34495938, 0.29387760)
+	};
+
+	//ポアソンサンプリング
+	for (int nCnt = 0; nCnt < 4; nCnt++)
+	{
+		// 同じ座標のZ値を抽出　少しずらす
+		float SM_Z = tex2D(texSamplerShadow, TransTexCoord + poissonDisk[nCnt] / 1300.0).x;
+
+		// 算出点がシャドウマップのZ値よりも大きければ影と判断
+		if (ZValue > SM_Z + 0.001f && SM_Z < 1.0) {	//シャドウマップのZ値が1.0だったら影ができないようにする
+			visibility -= 0.2;
+		}
 	}
 
+	//影の色を描画
+	Out.RGB.xyz += Out.RGB.xyz * visibility * In.ColShadow.xyz;
+
+	//-----------------------------
 	//エミッシブを加算
+	//-----------------------------
 	Out.RGB.xyz += g_matEmissive.xyz;
 
+	//-----------------------------
 	//フォグを加算
+	//-----------------------------
 	if (g_bEnableFog) Out.RGB.xyz += (g_fogColor - Out.RGB) * In.Fog;
 
 	return Out;
@@ -294,6 +317,9 @@ PS_OUTPUT RenderScenePSLightTex3D(VS_OUTPUT In)
 
 	Out.RGB = tex2D(texSampler, In.TexUV) * In.Diffuse;
 
+	//-----------------------------
+	//影の描画
+	//-----------------------------
 	// ライト目線によるZ値の再算出
 	float ZValue = In.ZCalcTex.z / In.ZCalcTex.w;
 
@@ -302,18 +328,38 @@ PS_OUTPUT RenderScenePSLightTex3D(VS_OUTPUT In)
 	TransTexCoord.x = (1.0f + In.ZCalcTex.x / In.ZCalcTex.w) * 0.5f;
 	TransTexCoord.y = (1.0f - In.ZCalcTex.y / In.ZCalcTex.w) * 0.5f;
 
-	// 同じ座標のZ値を抽出
-	float SM_Z = tex2D(texSamplerShadow, TransTexCoord).x;
+	float visibility = 0.0;	//影の濃度
 
-	// 算出点がシャドウマップのZ値よりも大きければ影と判断
-	if (ZValue > SM_Z + 0.002f && SM_Z < 1.0) {	//シャドウマップが1.0だったら影ができないようにする
-		Out.RGB.xyz += Out.RGB.xyz * -0.5f * In.ColShadow.xyz;
+	float2 poissonDisk[4] = {
+		float2(-0.94201624, -0.39906216),
+		float2(0.94558609, -0.76890725),
+		float2(-0.094184101, -0.92938870),
+		float2(0.34495938, 0.29387760)
+	};
+
+	//ポアソンサンプリング
+	for (int nCnt = 0; nCnt < 4; nCnt++)
+	{
+		// 同じ座標のZ値を抽出　少しずらす
+		float SM_Z = tex2D(texSamplerShadow, TransTexCoord + poissonDisk[nCnt] / 1300.0).x;
+
+		// 算出点がシャドウマップのZ値よりも大きければ影と判断
+		if (ZValue > SM_Z + 0.001f && SM_Z < 1.0) {	//シャドウマップのZ値が1.0だったら影ができないようにする
+			visibility -= 0.2;
+		}
 	}
 
+	//影の色を描画
+	Out.RGB.xyz += Out.RGB.xyz * visibility * In.ColShadow.xyz;
+
+	//-----------------------------
 	//エミッシブを加算
+	//-----------------------------
 	Out.RGB.xyz += g_matEmissive.xyz;
 
+	//-----------------------------
 	//フォグを加算
+	//-----------------------------
 	if (g_bEnableFog) Out.RGB.xyz += (g_fogColor - Out.RGB) * In.Fog;
 
 	return Out;

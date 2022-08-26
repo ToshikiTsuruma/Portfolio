@@ -85,12 +85,13 @@ void CAppleGreen::Uninit(void) {
 // 緑林檎の更新処理
 //=============================================================================
 void CAppleGreen::Update(void) {
-	if (m_nCntHeal >= HEAL_SPAN) {
+	CAppleTree* pAppleTree = GetAppleTree();
+
+	//カウントが達していて、木が存在している場合
+	if (m_nCntHeal >= HEAL_SPAN && pAppleTree != nullptr) {
 		//林檎の木を回復する
-		CAppleTree* pAppleTree = GetAppleTree();
-		if (pAppleTree != nullptr) {
-			pAppleTree->HealLife(HEAL_VALUE);
-		}
+		pAppleTree->HealLife(HEAL_VALUE);
+
 		//林檎の位置から回復のエフェクトを出す
 		D3DXVECTOR3 posEffect = GetPos();
 		posEffect.y -= 15.0f;	//位置の調整

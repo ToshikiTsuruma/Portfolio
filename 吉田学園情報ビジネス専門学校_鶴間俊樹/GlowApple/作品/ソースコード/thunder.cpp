@@ -17,8 +17,8 @@
 #define THUNDER_WIDTH (400.0f)
 #define THUNDER_HEIGHT (1000.0f)
 
-#define DAMAGE_THUNDER (30)	//落雷のダメージ
-#define COLLISION_RADIUS (150.0f)	//当たり判定の半径
+#define DAMAGE_THUNDER (40)	//落雷のダメージ
+#define COLLISION_RADIUS (120.0f)	//当たり判定の半径
 
 //=============================================================================
 // 静的メンバ変数宣言
@@ -73,7 +73,7 @@ HRESULT CThunder::Init(void) {
 	bLand = CTerrain::Collision(&posColTerrain, vecStart, vecEnd);
 	//接地時
 	if (bLand) {
-		SetPos(posColTerrain + D3DXVECTOR3(0.0f, 380.0f, 0.0f));	//位置の移動 ビルボードの中心がposなので下が地面に来るように調整する
+		SetPos(posColTerrain + D3DXVECTOR3(0.0f, (THUNDER_HEIGHT * 0.7f) / 2.0f, 0.0f));	//位置の移動 ビルボードの中心がposなので下が地面に来るように調整する
 	}
 
 	//マネージャーの取得

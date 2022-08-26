@@ -12,8 +12,10 @@
 #include "fade.h"
 
 #include "timer.h"
+#include "pauseMenu.h"
 #include "stage.h"
 #include "wallCylinder.h"
+#include "object2D.h"
 
 #include "player.h"
 #include "enemy_human.h"
@@ -24,11 +26,8 @@
 #include "glowApple.h"
 #include "selectMenu2D.h"
 #include "enemySpawner.h"
-
 #include "effect.h"
-
 #include "shockWaveEmitter.h"
-
 
 #include "apple_red.h"
 #include "apple_green.h"
@@ -89,6 +88,9 @@ void CGameScene::Init(void) {
 	CEnemyHuman::LoadMotionInfo();
 	CEnemySorcerer::LoadMotionInfo();
 
+	//オブジェクトのポーズが無いように設定
+	CObject::SetUpdatePauseLevel(0);
+
 	//ステージの生成
 	if(m_pStage == nullptr) m_pStage = new CStage;
 	if(m_pStage != nullptr) m_pStage->CreateStage(TEXT_FILE_NAME_STAGE_GAME);
@@ -108,7 +110,7 @@ void CGameScene::Init(void) {
 	SetPlayer(pPlayer);
 
 	//タイマーの生成
-	m_pTimer = CTimer::Create(GAME_TIME, 3, CTexture::TEXTURE_TYPE::NUMBER_003, D3DXVECTOR3(SCREEN_WIDTH / 2.0f + 75.0f, 30.0f, 0.0f), 50.0f, 50.0f);
+	m_pTimer = CTimer::Create(GAME_TIME, 3, CTexture::TEXTURE_TYPE::NUMBER_003, D3DXVECTOR3(SCREEN_WIDTH / 2.0f + 75.0f, 30.0f, 0.0f), 50.0f);
 
 	//最初の敵の配置
 	CEnemyNormal::Create(D3DXVECTOR3(900.0f, -200.0f, 300.0f));
@@ -123,6 +125,16 @@ void CGameScene::Init(void) {
 		pSound->PlaySound(CSound::SOUND_LABEL::BGM_GAME);
 		pSound->SetBGM(CSound::SOUND_LABEL::BGM_GAME);
 	}
+
+#ifdef _DEBUG
+	//Zバッファテクスチャの表示
+	CObject2D* pZBuff = CObject2D::Create(D3DXVECTOR3(SCREEN_WIDTH - 70.0f, 0.0f + 70.0f, 0.0f), CTexture::TEXTURE_TYPE::NONE, 100.0f, 100.0f);
+	if (pZBuff != nullptr) {
+		pZBuff->SetDrawPriority(CObject::DRAW_PRIORITY::FRONT);
+		pZBuff->SetUseZBuffTexture(true);
+	}
+#endif
+
 }
 
 //=============================================================================
@@ -153,9 +165,9 @@ void CGameScene::Uninit(void) {
 	CSound* pSound = nullptr;
 	if (pManager != nullptr) pSound = pManager->GetSound();
 
-	//BGMの停止
+	//音の停止
 	if (pSound != nullptr) {
-		pSound->StopSound(pSound->GetBGM());
+		pSound->StopSound();
 	}
 
 	//ゴールドラッシュ無効
@@ -181,71 +193,61 @@ void CGameScene::Update(void) {
 	if (pInput->GetTrigger(CInput::CODE::DEBUG_1)) {
 		GameOver();
 	}
+
+	//タイム追加
+	if (pInput->GetTrigger(CInput::CODE::DEBUG_3)) {
+		if (m_pTimer != nullptr) m_pTimer->AddScore(50);
+	}
 #endif
-
-	//残り時間減少によるスポーン間隔の減少
-	if (m_pEnemySpawner != nullptr && m_pTimer != nullptr) {
-		if (m_pTimer->GetTime() == 260 && m_pTimer->GetCountTimer() == 0) {
-			//スポーン間隔の減少
-			m_pEnemySpawner->AddSpan(-60);
-			//レベルの設定
-			m_pEnemySpawner->SetLevel(1);
-		}
-
-		if (m_pTimer->GetTime() == 220 && m_pTimer->GetCountTimer() == 0) {
-			//スポーン間隔の減少
-			m_pEnemySpawner->AddSpan(-120);
-			//レベルの設定
-			m_pEnemySpawner->SetLevel(2);
-		}
-
-		if (m_pTimer->GetTime() == 180 && m_pTimer->GetCountTimer() == 0) {
-			//スポーン間隔の減少
-			m_pEnemySpawner->AddSpan(-140);
-			//レベルの設定
-			m_pEnemySpawner->SetLevel(3);
-			//ゴールドラッシュ有効
-			CEnemy::SetGoldRush(true);
-		}
-
-		if (m_pTimer->GetTime() == 100 && m_pTimer->GetCountTimer() == 0) {
-			//スポーン間隔の減少
-			m_pEnemySpawner->AddSpan(-160);
-			//ゴールドラッシュ無効
-			CEnemy::SetGoldRush(false);
-		}
-
-		if (m_pTimer->GetTime() == 50 && m_pTimer->GetCountTimer() == 0) {
-			//スポーン間隔の減少
-			m_pEnemySpawner->AddSpan(-180);
-			//レベルの設定
-			m_pEnemySpawner->SetLevel(0);	//一番移動速度が早い敵のみにする
-		}
-
-		if (m_pTimer->GetTime() == 20 && m_pTimer->GetCountTimer() == 0) {
-			//レベルの設定
-			m_pEnemySpawner->SetLevel(4);	//一番移動速度が強い敵のみにする
-			//スポーンの半径を縮める
-			m_pEnemySpawner->SetSpawnRadius(800.0f);
-		}
-	}
-
-	//ゲーム終了していないときにタイマーが０になった場合
-	if (m_pTimer != nullptr && !m_bGameClear && !m_bGameOver) {
-		if (m_pTimer->GetTime() <= 0) {
-			//ゲームクリア
-			GameClear();
-		}
-	}
 
 	//ゲームクリア時
 	if (m_bGameClear) {
 		UpdateGameClear();
 	}
-
 	//ゲームオーバー時
-	if (m_bGameOver) {
+	else if (m_bGameOver) {
 		UpdateGameOver();
+	}
+	//ゲーム中
+	else
+	{
+		UpdateGame();
+	}
+}
+
+//=============================================================================
+// ゲーム中の更新
+//=============================================================================
+void CGameScene::UpdateGame(void) {
+	//ポーズメニューがある場合は更新なし
+	if (m_pMenuPause != nullptr) return;
+
+	//ゲーム終了していないときにタイマーが０になった場合
+	if (m_pTimer != nullptr && !m_bGameClear && !m_bGameOver) {
+		if (m_pTimer->GetScore() <= 0) {
+			//ゲームクリア
+			GameClear();
+		}
+	}
+
+	CManager* pManager = CManager::GetManager();	//マネージャーの取得
+	if (pManager == nullptr) return;
+	//現在の入力デバイスの取得
+	CInput* pInput = pManager->GetInputCur();
+	if (pInput == nullptr) return;
+	//サウンドの取得
+	CSound* pSound = pManager->GetSound();	//サウンドへのポインタ
+	if (pSound == nullptr) return;
+	//フェードの取得
+	CFade* pFade = pManager->GetFade();	//フェードのポインタ
+	if (pFade == nullptr) return;
+
+	//ポーズ
+	if (pInput->GetTrigger(CInput::CODE::PAUSE) && !pFade->GetFade()) {
+		//ポーズメニュークラスを生成
+		m_pMenuPause = CPauseMenu::Create();
+		//サウンドを再生
+		pSound->PlaySound(CSound::SOUND_LABEL::TITLE_OPEN);
 	}
 }
 
@@ -359,9 +361,9 @@ void CGameScene::UpdateGameClear(void) {
 		//ゲームクリアテキストの表示
 		CObject2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, 300.0f, 0.0f), CTexture::TEXTURE_TYPE::TEXT_GAMECLEAR, 600.0f, 150.0f);
 		//クリア音を再生
-		if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::GAMECLEAR);
+		pSound->PlaySound(CSound::SOUND_LABEL::GAMECLEAR);
 	}
-	if (m_nCntGameClear == 840) {
+	if (m_nCntGameClear == 900) {
 		//カメラの動きの固定を解除
 		pCamera->SetLockControll(false);
 		//タイトルへフェード
@@ -410,6 +412,17 @@ void CGameScene::UpdateGameOver(void) {
 }
 
 //=============================================================================
+// ポーズメニューの破棄
+//=============================================================================
+void CGameScene::DeletePauseMenu(void) {
+	//ポーズメニューの破棄
+	if (m_pMenuPause != nullptr) {
+		m_pMenuPause->Uninit();
+		m_pMenuPause = nullptr;
+	}
+}
+
+//=============================================================================
 // ゲームクリア
 //=============================================================================
 void CGameScene::GameClear(void) {
@@ -448,6 +461,9 @@ void CGameScene::GameClear(void) {
 		m_pEnemySpawner->Uninit();
 		m_pEnemySpawner = nullptr;
 	}
+
+	//オブジェクトのポーズが無いように設定（念のため）
+	CObject::SetUpdatePauseLevel(0);
 }
 
 //=============================================================================
@@ -491,6 +507,9 @@ void CGameScene::GameOver(void) {
 		m_pEnemySpawner->Uninit();
 		m_pEnemySpawner = nullptr;
 	}
+
+	//オブジェクトのポーズが無いように設定（念のため）
+	CObject::SetUpdatePauseLevel(0);
 }
 
 //=============================================================================
@@ -501,17 +520,17 @@ void CGameScene::CreateMenuEndGame(void) {
 	if (m_pMenuGameEnd != nullptr) return;
 
 	//メニューの生成
-	m_pMenuGameEnd = CSelectMenu2D::Create(2);
+	m_pMenuGameEnd = CSelectMenu2D::Create(2, true);
 	if (m_pMenuGameEnd == nullptr) return;
 
+	//背景の設定
+	m_pMenuGameEnd->SetMenuBG(CTexture::TEXTURE_TYPE::MENU_BG, D3DXVECTOR3(SCREEN_WIDTH / 2.0f, 600.0f, 0.0f), 600.0f, 80.0f);
 	//横選択
 	m_pMenuGameEnd->SetSelectType(CSelectMenu::SELECT_TYPE::HORIZONTAL);
 	//選択肢UIの詳細設定
 	m_pMenuGameEnd->SetSelectUI(0, D3DXVECTOR3(SCREEN_WIDTH / 2.0f - 130.0f, 600.0f, 0.0f), 220.0f, 40.0f, CTexture::TEXTURE_TYPE::TEXT_QUIT);
 	m_pMenuGameEnd->SetSelectUI(1, D3DXVECTOR3(SCREEN_WIDTH / 2.0f + 130.0f, 600.0f, 0.0f), 220.0f, 40.0f, CTexture::TEXTURE_TYPE::TEXT_RETRY);
 	//選択肢アイコンの生成
-	m_pMenuGameEnd->CreateSelectIcon(D3DXVECTOR3(-110.0f, 0.0f, 0.0f), 50.0f, 50.0f, CTexture::TEXTURE_TYPE::SELECT_ICON);
-	//背景の生成
-	m_pMenuGameEnd->CreateMenuBG(CTexture::TEXTURE_TYPE::MENU_BG , D3DXVECTOR3(SCREEN_WIDTH / 2.0f, 600.0f, 0.0f), 600.0f, 80.0f);
-
+	m_pMenuGameEnd->CreateSelectIcon(D3DXVECTOR3(-80.0f, 0.0f, 0.0f), 50.0f, 50.0f, CTexture::TEXTURE_TYPE::SELECT_ICON);
+	m_pMenuGameEnd->SetIconPosOffset(1, D3DXVECTOR3(-105.0f, 0.0f, 0.0f));
 }

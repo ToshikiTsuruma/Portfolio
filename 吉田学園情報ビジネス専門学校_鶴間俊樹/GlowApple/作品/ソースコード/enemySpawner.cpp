@@ -7,6 +7,8 @@
 #include "enemySpawner.h"
 #include "manager.h"
 #include "sound.h"
+#include "gameScene.h"
+#include "timer.h"
 #include "enemy_normal.h"
 #include "enemy_human.h"
 #include "enemy_sorcerer.h"
@@ -89,8 +91,72 @@ void CEnemySpawner::Update(void) {
 	else {
 		m_nCntSpawn++;
 	}
+
+	//タイマーによるレベルの設定
+	SetTimeLevel();
 }
 
+//=============================================================================
+// 時間経過によるレベルの設定
+//=============================================================================
+void CEnemySpawner::SetTimeLevel(void) {
+	CManager* pManager = CManager::GetManager();	//マネージャーの取得
+	if (pManager == nullptr) return;
+	CGameScene* pGameScene = pManager->GetGameScene();;	//ゲームシーンのポインタ
+	if (pGameScene == nullptr) return;
+	CTimer* pTimer = pGameScene->GetTimer();;	//タイマーのポインタ
+	if (pTimer == nullptr) return;
+
+	//時間が切り替わった瞬間のみ
+	if (pTimer->GetCountTimer() != 0) return;
+
+	switch (pTimer->GetScore())
+	{
+	case 260:
+		//スポーン間隔の減少
+		AddSpan(-60);
+		//レベルの設定
+		SetLevel(1);
+		break;
+
+	case 220:
+		//スポーン間隔の減少
+		AddSpan(-120);
+		break;
+		//レベルの設定
+		SetLevel(2);
+
+	case 180:
+		//スポーン間隔の減少
+		AddSpan(-140);
+		//レベルの設定
+		SetLevel(3);
+		//ゴールドラッシュ有効
+		CEnemy::SetGoldRush(true);
+		break;
+
+	case 100:
+		//スポーン間隔の減少
+		AddSpan(-160);
+		//ゴールドラッシュ無効
+		CEnemy::SetGoldRush(false);
+		break;
+
+	case 50:
+		//スポーン間隔の減少
+		AddSpan(-180);
+		//レベルの設定
+		SetLevel(0);	//一番移動速度が早い敵のみにする
+		break;
+
+	case 30:
+		//レベルの設定
+		SetLevel(4);	//一番強い敵のみにする
+		//スポーンの半径を縮める
+		SetSpawnRadius(1000.0f);
+		break;
+	}
+}
 
 //=============================================================================
 // 同心円状にランダムに角度ずらして敵を配置する
@@ -179,9 +245,9 @@ void CEnemySpawner::GetSpawnRate(int nLevel, int* pRateArray) {
 		break;
 
 	case 4:
-		pRateArray[(int)ENEMYTYPE::NORMAL] = 0;
-		pRateArray[(int)ENEMYTYPE::HUMAN] = 0;
-		pRateArray[(int)ENEMYTYPE::SORCERER] = 100;
+		pRateArray[(int)ENEMYTYPE::NORMAL] = 10;
+		pRateArray[(int)ENEMYTYPE::HUMAN] = 10;
+		pRateArray[(int)ENEMYTYPE::SORCERER] = 80;
 		break;
 
 	default:

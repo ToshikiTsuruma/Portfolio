@@ -34,9 +34,12 @@ CModel::CModel()
 	D3DXMatrixIdentity(&m_mtxWorld);
 	m_pParent = nullptr;
 	m_nIdxParent = -1;
-	m_colOutline = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	memset(&m_aMat, 0, sizeof(m_aMat));
+	memset(&m_aChangeDiffuse, 0, sizeof(m_aChangeDiffuse));
 	m_colGlow = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);
+
 	m_bOutline = false;
+	m_colOutline = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	m_pCloneMesh = nullptr;
 }
 
@@ -64,6 +67,7 @@ CModel* CModel::Create(MODELTYPE type, D3DXVECTOR3 pos, D3DXVECTOR3 rot, CModel*
 	//マテリアルの設定
 	for (int nCntMat = 0; nCntMat < MAX_MATERIAL; nCntMat++)
 	{
+		//デフォルトのマテリアルを取得
 		pModel->m_aMat[nCntMat] = m_aMatDefault[(int)type][nCntMat];
 	}
 
@@ -247,7 +251,8 @@ void CModel::Uninit(void) {
 // モデルの更新処理
 //=============================================================================
 void CModel::Update(void) {
-
+	//色の変更の更新
+	UpdateColorChange();
 }
 
 //=============================================================================
@@ -573,6 +578,17 @@ void CModel::SetMaterialPower(float fPower, int nIdx) {
 }
 
 //=============================================================================
+// マテリアルの色の変更の開始
+//=============================================================================
+void CModel::StartChangeMaterialDiffuse(int nIdxMat, D3DXCOLOR colDest, int nTimeFin) {
+	//現在のマテリアルの色と目標の色との差分から毎フレーム加算される色を計算
+	m_aChangeDiffuse[nIdxMat].colAdd = (colDest - GetMaterialDiffuse(nIdxMat)) / (float)nTimeFin;
+	//初期化
+	m_aChangeDiffuse[nIdxMat].nTimeFinish = nTimeFin;
+	m_aChangeDiffuse[nIdxMat].nCnt = 0;
+}
+
+//=============================================================================
 // 輪郭の発光色の設定
 //=============================================================================
 void CModel::SetColorGlow(D3DXCOLOR col) {
@@ -660,5 +676,24 @@ void CModel::SetDrawOutline(bool bDraw) {
 			m_pCloneMesh->Release();
 			m_pCloneMesh = nullptr;
 		}
+	}
+}
+
+//=============================================================================
+// 色の変更の更新
+//=============================================================================
+void CModel::UpdateColorChange(void) {
+	for (int nIdxMat = 0; nIdxMat < MAX_MATERIAL; nIdxMat++)
+	{
+		//カウンターが終了時間を過ぎていた場合ループを飛ばす
+		if (m_aChangeDiffuse[nIdxMat].nCnt >= m_aChangeDiffuse[nIdxMat].nTimeFinish) continue;
+
+		//カウンターを加算
+		m_aChangeDiffuse[nIdxMat].nCnt++;
+
+		//モデルの現在の色を取得
+		const D3DXCOLOR colModel = GetMaterialDiffuse(nIdxMat);
+		//色の設定
+		SetMaterialDiffuse(colModel + m_aChangeDiffuse[nIdxMat].colAdd, nIdxMat);
 	}
 }

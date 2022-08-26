@@ -14,7 +14,7 @@
 //=============================================================================
 // マクロ定義
 //=============================================================================
-#define EMIT_SPAN (FPS * 20)	//斥力波放出のスパン
+#define EMIT_SPAN (FPS * 40)	//斥力波放出のスパン
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -83,12 +83,12 @@ void CAppleBlack::Uninit(void) {
 // 黒林檎の更新処理
 //=============================================================================
 void CAppleBlack::Update(void) {
-	if (m_nCntEmit >= EMIT_SPAN) {
+	CAppleTree* pAppleTree = GetAppleTree();	//リンゴの木の取得
+
+	//カウントが達していて、木が存在している場合
+	if (m_nCntEmit >= EMIT_SPAN && pAppleTree != nullptr) {
 		//斥力波を放出する
-		CAppleTree* pAppleTree = GetAppleTree();
-		if (pAppleTree != nullptr) {
-			CRepulsivewave::Create(pAppleTree->GetPos() + D3DXVECTOR3(0.0f, 150.0f, 0.0f), 0.0f, 120.0f, 25.0f, 25, 0.2f);
-		}
+		CRepulsivewave::Create(pAppleTree->GetPos() + D3DXVECTOR3(0.0f, 150.0f, 0.0f), 0.0f, 120.0f, 25.0f, 25, 0.2f);
 
 		//林檎の位置から放出のエフェクトを出す
 		D3DXVECTOR3 posEffect = GetPos();

@@ -25,7 +25,9 @@ CObject2D::CObject2D()
 	m_fHeight = 0.0f;
 	m_fRatioHeight = 1.0f;
 	m_fAngle = 0.0f;
-	m_col = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);
+	m_col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+
+	m_bUseZBuffTexture = false;
 
 	SetDrawPriority(DRAW_PRIORITY::UI);
 }
@@ -39,31 +41,25 @@ CObject2D::~CObject2D()
 }
 
 //=============================================================================
+// 2Dオブジェクトの初期設定なしの生成処理
+//=============================================================================
+CObject2D* CObject2D::Create(void) {
+	CObject2D* pObject2D;
+	pObject2D = new CObject2D;
+	if (pObject2D == nullptr) return nullptr;
+
+	pObject2D->Init();
+
+	return pObject2D;
+}
+
+//=============================================================================
 // 2Dオブジェクトの生成処理
 //=============================================================================
 CObject2D* CObject2D::Create(D3DXVECTOR3 pos, CTexture::TEXTURE_TYPE type, float fWidth, float fHeight) {
 	CObject2D* pObject2D;
 	pObject2D = new CObject2D;
 	if (pObject2D == nullptr) return nullptr;
-
-	LPDIRECT3DDEVICE9 pDevice = nullptr;	//デバイスへのポインタ
-	//マネージャーの取得
-	CManager* pManager = CManager::GetManager();
-	//レンダラーの取得
-	CRenderer* pRenderer = nullptr;
-	if (pManager != nullptr) pRenderer = pManager->GetRenderer();
-	//デバイスの取得
-	if (pRenderer != nullptr) pDevice = pRenderer->GetDevice();
-
-	if (pDevice != nullptr) {
-		//頂点バッファの生成
-		pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * 4,
-			D3DUSAGE_WRITEONLY,
-			0,
-			D3DPOOL_MANAGED,
-			&(pObject2D->m_pVtxBuff),
-			nullptr);
-	}
 
 	pObject2D->m_pos = pos;
 	pObject2D->m_fWidth = fWidth;
@@ -78,10 +74,32 @@ CObject2D* CObject2D::Create(D3DXVECTOR3 pos, CTexture::TEXTURE_TYPE type, float
 // 2Dオブジェクトの初期化処理
 //=============================================================================
 HRESULT CObject2D::Init(void) {
-	m_col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	//マネージャーの取得
+	CManager* pManager = CManager::GetManager();
+	//レンダラーの取得
+	CRenderer* pRenderer = nullptr;
+	if (pManager != nullptr) pRenderer = pManager->GetRenderer();
+	//デバイスの取得
+	LPDIRECT3DDEVICE9 pDevice = nullptr;	//デバイスへのポインタ
+	if (pRenderer != nullptr) pDevice = pRenderer->GetDevice();
 
-	VERTEX_2D *pVtx;
+	//頂点バッファを生成する前に破棄
+	if (m_pVtxBuff != nullptr) {
+		m_pVtxBuff->Release();
+		m_pVtxBuff = nullptr;
+	}
 
+	//頂点バッファの生成
+	if (pDevice != nullptr) {
+		pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * 4,
+			D3DUSAGE_WRITEONLY,
+			0,
+			D3DPOOL_MANAGED,
+			&m_pVtxBuff,
+			nullptr);
+	}
+
+	VERTEX_2D *pVtx;	//頂点バッファ
 	if (m_pVtxBuff != nullptr) {
 		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 		// 頂点情報を設定
@@ -108,6 +126,7 @@ HRESULT CObject2D::Init(void) {
 		//頂点バッファをアンロックする
 		m_pVtxBuff->Unlock();
 	}
+
 	return S_OK;
 }
 
@@ -155,6 +174,8 @@ void CObject2D::Draw(void) {
 
 	//テクスチャの取得
 	LPDIRECT3DTEXTURE9 pTexture = CTexture::GetTexture(GetTexType());
+	//Zバッファのテクスチャを使用する場合取得
+	if (m_bUseZBuffTexture) pTexture = pRenderer->GetZBuffTex();
 
 	pDevice->SetStreamSource(0, m_pVtxBuff, 0, sizeof(VERTEX_2D));	//頂点バッファをデバイスのデータストリームに設定	
 
@@ -278,7 +299,7 @@ void CObject2D::SetRatioHeight(float fRatio) {
 }
 
 //=============================================================================
-//角度の設定
+// 角度の設定
 //=============================================================================
 void CObject2D::SetAngle(float fAngle) {
 	m_fAngle = fAngle;
@@ -287,12 +308,12 @@ void CObject2D::SetAngle(float fAngle) {
 }
 
 //=============================================================================
-//角度の取得
+// 角度の取得
 //=============================================================================
 float CObject2D::GetAngle(void) { return m_fAngle; }
 
 //=============================================================================
-//各頂点の位置を更新
+// 各頂点の位置を更新
 //=============================================================================
 void CObject2D::SetVtxPos(void) {
 	if (m_pVtxBuff != nullptr) {
@@ -313,7 +334,7 @@ void CObject2D::SetVtxPos(void) {
 }
 
 //=============================================================================
-//カラーの設定
+// カラーの設定
 //=============================================================================
 void CObject2D::SetColor(D3DXCOLOR col) {
 	m_col = col;
@@ -335,12 +356,12 @@ void CObject2D::SetColor(D3DXCOLOR col) {
 }
 
 //=============================================================================
-//カラーの取得
+// カラーの取得
 //=============================================================================
 D3DXCOLOR CObject2D::GetColor(void) { return m_col; }
 
 //=============================================================================
-//テクスチャ座標の設定
+// テクスチャ座標の設定
 //=============================================================================
 void CObject2D::SetTexPos(float startU, float startV, float endU, float endV) {
 	VERTEX_2D *pVtx;
@@ -351,6 +372,23 @@ void CObject2D::SetTexPos(float startU, float startV, float endU, float endV) {
 	pVtx[1].tex = D3DXVECTOR2(endU, startV);
 	pVtx[2].tex = D3DXVECTOR2(startU, endV);
 	pVtx[3].tex = D3DXVECTOR2(endU, endV);
+
+	//頂点バッファをアンロックする
+	m_pVtxBuff->Unlock();
+}
+
+//=============================================================================
+// 数字に対応したテクスチャ座標の設定
+//=============================================================================
+void CObject2D::SetTexNumber(int nNumber) {
+	VERTEX_2D *pVtx;
+	//頂点バッファのロック
+	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+	// 頂点情報を設定
+	pVtx[0].tex = D3DXVECTOR2(nNumber / 10.0f, 0.0f);
+	pVtx[1].tex = D3DXVECTOR2((nNumber + 1) / 10.0f, 0.0f);
+	pVtx[2].tex = D3DXVECTOR2(nNumber / 10.0f, 1.0f);
+	pVtx[3].tex = D3DXVECTOR2((nNumber + 1) / 10.0f, 1.0f);
 
 	//頂点バッファをアンロックする
 	m_pVtxBuff->Unlock();

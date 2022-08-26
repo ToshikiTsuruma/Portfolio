@@ -124,6 +124,7 @@ void CTexture::Unload(void) {
 // テクスチャの取得
 //=============================================================================
 LPDIRECT3DTEXTURE9 CTexture::GetTexture(TEXTURE_TYPE type) {
+	if (type < (TEXTURE_TYPE)0 || type >= TEXTURE_TYPE::ENUM_MAX) return nullptr;
 	return m_apTexture[(int)type];
 }
 
@@ -131,5 +132,6 @@ LPDIRECT3DTEXTURE9 CTexture::GetTexture(TEXTURE_TYPE type) {
 // テクスチャのパスの取得
 //=============================================================================
 char* CTexture::GetPathName(TEXTURE_TYPE type) {
+	if (type < (TEXTURE_TYPE)0 || type >= TEXTURE_TYPE::ENUM_MAX) return nullptr;
 	return m_asFilePath[(int)type];
 }

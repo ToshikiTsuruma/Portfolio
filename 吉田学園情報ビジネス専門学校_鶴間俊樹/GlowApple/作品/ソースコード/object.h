@@ -40,7 +40,6 @@ public:
 	//更新順（更新停止でも必要な場合は定義）
 	enum class UPDATE_PRIORITY {
 		DEFAULT = 0,	//更新順が影響しないもの
-		MENU_UPDATE,	//メニュークラス生成時に更新が停止されないオブジェクト
 		PLAYER,			//プレイヤー
 		ENEMY,			//敵
 		ENUM_MAX
@@ -106,8 +105,11 @@ public:
 	static void ReleaseObjtype(OBJTYPE objtype);	//指定したタイプのオブジェクトの解放処理
 	static void DeadObjtype(OBJTYPE objtype);		//指定したタイプの死亡処理
 
-	static void SetStopUpdateAll(bool bFlag);	//更新停止するすべての更新順の設定
-	static void SetStopUpdate(UPDATE_PRIORITY update, bool bFlag) { m_abStopUpdate[(int)update] = bFlag; }	//更新停止する更新順の設定
+	static void SetUpdatePauseLevel(int nLevel) { m_nUpdatePauseLevel = nLevel; }	//更新可能なポーズレベル設定
+	static int AddUpdatePauseLevel(void) { return ++m_nUpdatePauseLevel; }			//更新可能なポーズレベル加算
+	static int SubUpdatePauseLevel(void) { return --m_nUpdatePauseLevel; }			//更新可能なポーズレベル減算
+	void SetPauseLevel(int nLevel) { m_nPauseLevel = nLevel; }	//ポーズレベルの設定
+	int GetPauseLevel(void) { return m_nPauseLevel; }			//ポーズレベルの取得
 
 	static bool GetNearObject(const D3DXVECTOR3 pos, const OBJTYPE type, D3DXVECTOR3* pPosNearObj, float* pfDistNearObj, D3DXVECTOR3* pVecNearObj);	//ある位置からオブジェクトへの最も近い距離を求める
 
@@ -137,7 +139,8 @@ private:
 	bool m_bEnableCollision;	//当たり判定が有効
 	bool m_bDraw;	//描画するかどうか
 
-	static bool m_abStopUpdate[(int)UPDATE_PRIORITY::ENUM_MAX];	//更新停止するオブジェクトタイプ
+	static int m_nUpdatePauseLevel;	//更新可能なポーズレベル
+	int m_nPauseLevel;	//ポーズのレベル
 
 	//全オブジェクトのリスト
 	static CObject* m_pTopAll;	//先頭のオブジェクトのポインタ

@@ -87,6 +87,7 @@ public:
 	int GetCurMotionCnt(void);	//現在のモーションのカウントの取得
 	void SetDiffuseModelAll(D3DXCOLOR col, int nIdx);	//モデルのディフューズ色を設定する
 	void SetSpecularModelAll(D3DXCOLOR col, int nIdx);	//モデルのスペキュラー色を設定する
+	void StartChangeDiffuseAll(int nIdxMat, D3DXCOLOR colDest, int nTimeFin);	//モデルのマテリアルの色の変更の開始
 	void SetColorGlowAll(D3DXCOLOR col);	//モデルの輪郭の発光色を設定する
 	bool FadeModelAll(float fDestAlpha, float fSpeedFade);	//モデルの色をフェードさせる
 	void SetDrawOutlineAll(bool bDraw);	//モデルの輪郭の表示設定

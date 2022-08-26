@@ -13,7 +13,7 @@
 //=============================================================================
 // 静的メンバ変数宣言
 //=============================================================================
-bool CObject::m_abStopUpdate[(int)UPDATE_PRIORITY::ENUM_MAX] = {};
+int CObject::m_nUpdatePauseLevel = 0;
 CObject* CObject::m_pTopAll = nullptr;
 CObject* CObject::m_pCurAll = nullptr;
 CObject* CObject::m_apTopUpdate[(int)UPDATE_PRIORITY::ENUM_MAX] = {};
@@ -32,6 +32,7 @@ CObject::CObject()
 	m_drawPriority = DRAW_PRIORITY::DEFAULT;
 	m_texType = CTexture::TEXTURE_TYPE::NONE;
 	m_bDraw = true;
+	m_nPauseLevel = 0;
 
 	//全オブジェクトのリストの初期設定
 	m_pPrevAll = m_pCurAll;	//前のポインタの設定
@@ -143,18 +144,28 @@ void CObject::ReleaseObjtype(OBJTYPE objtype) {
 // 全オブジェクトの更新処理
 //=============================================================================
 void CObject::UpdateAll(void) {
+	//オブジェクトの更新
 	for (int nCnt = 0; nCnt < (int)UPDATE_PRIORITY::ENUM_MAX; nCnt++) {
-		//このオブジェクトタイプが停止状態の場合ループを飛ばす
-		if (m_abStopUpdate[nCnt]) continue;
-
 		CObject* pObjectUpdate = m_apTopUpdate[nCnt];	//更新するオブジェクト
+
 		while (pObjectUpdate != nullptr) {
-			CObject* pObjectNext = pObjectUpdate->m_pNextUpdate;
+			CObject* pObjectNext = pObjectUpdate->m_pNextUpdate;	//次のオブジェクトを取得
+
+			//現在のポーズレベルより低い場合、更新せずに次のオブジェクト
+			if (pObjectUpdate->m_nPauseLevel < m_nUpdatePauseLevel) {
+				//次のオブジェクトを代入
+				pObjectUpdate = pObjectNext;
+				continue;
+			}
+
 			//死亡フラグが立っていない場合更新
 			if (!pObjectUpdate->m_bDeath) pObjectUpdate->Update();	
+
+			//次のオブジェクトを代入
 			pObjectUpdate = pObjectNext;
 		}
 	}
+
 	//死亡フラグが立ったオブジェクトを破棄
 	CObject* pObjectAll = m_pTopAll;	//全オブジェクトのポインタを先頭から順に代入
 	while (pObjectAll != nullptr)
@@ -220,16 +231,6 @@ void CObject::DeadObjtype(OBJTYPE objtype) {
 		if (!pObject->m_bDeath) pObject->Dead();
 		//次のオブジェクトを代入
 		pObject = pObjectNext;
-	}
-}
-
-//=============================================================================
-// 更新停止するすべての更新順の設定
-//=============================================================================
-void CObject::SetStopUpdateAll(bool bFlag) {
-	for (int nCnt = 0; nCnt < (int)UPDATE_PRIORITY::ENUM_MAX; nCnt++)
-	{
-		m_abStopUpdate[nCnt] = bFlag;
 	}
 }
 

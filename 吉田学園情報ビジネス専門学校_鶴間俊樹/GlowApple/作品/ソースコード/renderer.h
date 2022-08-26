@@ -50,6 +50,7 @@ public:
 	void BeginPassEffect(DWORD dwPassFlag);	//エフェクトのパスを開始
 	void EndPassEffect(void);			//エフェクトのパスを終了
 	bool GetDrawZTex(void) { return m_bDrawZTex; }	//Zテクスチャに描画中かどうか
+	LPDIRECT3DTEXTURE9 GetZBuffTex(void) { return m_pTexZBuff; }	//Zバッファのテクスチャを取得
 
 	//シェーダのグローバル変数の設定
 	void SetEffectMatrixWorld(D3DXMATRIX mtxWorld);		//シェーダのワールドマトリックスを設定

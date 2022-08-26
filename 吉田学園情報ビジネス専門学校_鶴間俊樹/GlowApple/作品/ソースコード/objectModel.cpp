@@ -79,6 +79,11 @@ void CObjectModel::Uninit(void) {
 // モデルオブジェクトの更新処理
 //=============================================================================
 void CObjectModel::Update(void) {
+	//モデルの更新
+	if (m_pModel != nullptr) {
+		m_pModel->Update();
+	}
+
 	//移動処理
 	//Move();
 	//回転処理

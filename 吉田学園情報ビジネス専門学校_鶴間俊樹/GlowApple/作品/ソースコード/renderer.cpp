@@ -82,20 +82,26 @@ HRESULT CRenderer::Init(HWND hWnd, bool bWindow) {
 	D3DPRESENT_PARAMETERS d3dpp;
 	D3DDISPLAYMODE d3ddm;
 
+	//---------------------------------------
 	// Direct3Dオブジェクトの作成
+	//---------------------------------------
 	m_pD3D = Direct3DCreate9(D3D_SDK_VERSION);
 	if (m_pD3D == nullptr)
 	{
 		return E_FAIL;
 	}
 
+	//---------------------------------------
 	// 現在のディスプレイモードを取得
+	//---------------------------------------
 	if (FAILED(m_pD3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm)))
 	{
 		return E_FAIL;
 	}
 
+	//---------------------------------------
 	// デバイスのプレゼンテーションパラメータの設定
+	//---------------------------------------
 	ZeroMemory(&d3dpp, sizeof(d3dpp));					// ワークをゼロクリア
 	d3dpp.BackBufferCount = 1;							// バックバッファの数
 	d3dpp.BackBufferWidth = SCREEN_WIDTH;				// ゲーム画面サイズ(幅)
@@ -108,7 +114,9 @@ HRESULT CRenderer::Init(HWND hWnd, bool bWindow) {
 	d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;	// リフレッシュレート
 	d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;	// インターバル
 
+	//---------------------------------------
 	// デバイスの生成
+	//---------------------------------------
 	// ディスプレイアダプタを表すためのデバイスを作成
 	// 描画と頂点処理をハードウェアで行なう
 	if (FAILED(m_pD3D->CreateDevice(D3DADAPTER_DEFAULT,
@@ -138,20 +146,26 @@ HRESULT CRenderer::Init(HWND hWnd, bool bWindow) {
 		}
 	}
 
+	//---------------------------------------
 	// レンダーステートの設定
+	//---------------------------------------
 	m_pD3DDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);				// カリングを行わない
 	m_pD3DDevice->SetRenderState(D3DRS_ZENABLE, TRUE);						// Zバッファを使用
 	m_pD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);				// αブレンドを行う
 	m_pD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);		// αソースカラーの指定
 	m_pD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);	// αデスティネーションカラーの指定
 
+	//---------------------------------------
 	// サンプラーステートの設定
+	//---------------------------------------
 	m_pD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);	// テクスチャアドレッシング方法(U値)を設定
 	m_pD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);	// テクスチャアドレッシング方法(V値)を設定
 	m_pD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);	// テクスチャ縮小フィルタモードを設定
 	m_pD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);	// テクスチャ拡大フィルタモードを設定
 
+	//---------------------------------------
 	// テクスチャステージステートの設定
+	//---------------------------------------
 	m_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 	m_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
 	m_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
@@ -161,21 +175,15 @@ HRESULT CRenderer::Init(HWND hWnd, bool bWindow) {
 
 
 
+	//---------------------------------------
 	// 描画デバイスサーフェイス群を取得保持
+	//---------------------------------------
 	m_pD3DDevice->GetRenderTarget(0, &m_pDefaultSurf);
 	m_pD3DDevice->GetDepthStencilSurface(&m_pDefaultDepthSurf);
 
-	////////////////////////////////////////////////////////////
+	//---------------------------------------
 	// Z値テクスチャとZ値用深度バッファサーフェイスの作成
-	/////
-	/*/ デバイスの深度バッファの幅と高さを取得			//普通にマクロ定義したものと同じサイズを取得しているのでなくても良い?	恐らくこの値が深度バッファの解像度
-	UINT uiDevZBufWidth;    // デバイスバッファ幅
-	UINT uiDevZBufHeight;   // デバイスバッファ高
-	LPDIRECT3DSURFACE9 pTmpSf;
-	m_pD3DDevice->GetDepthStencilSurface(&pTmpSf);
-	GetSurfaceWH(pTmpSf, uiDevZBufWidth, uiDevZBufHeight);
-	pTmpSf->Release();*/
-
+	//---------------------------------------
 	int nPixel = 1920;	//Z値テクスチャの解像度	1:1の比率で使用
 
 	// Z値テクスチャを作成	//Z値を書き込むテクスチャ
@@ -184,14 +192,16 @@ HRESULT CRenderer::Init(HWND hWnd, bool bWindow) {
 	UINT uiZTexWidth;
 	UINT uiZTexHeight;
 	// Z値テクスチャサーフェイスを保持
-	m_pTexZBuff->GetSurfaceLevel(0, &m_pZTexSurf);	//Z値をテクスチャに書き込むための（？）サーフェイスを取得
+	m_pTexZBuff->GetSurfaceLevel(0, &m_pZTexSurf);
 	GetSurfaceWH(m_pZTexSurf, uiZTexWidth, uiZTexHeight);
 
-	// 深度バッファサーフェイスの作成	//前後関係を正しくするために必要らしい
+	// 深度バッファサーフェイスの作成	※前後関係を正しくするために必要らしい
 	m_pD3DDevice->CreateDepthStencilSurface(uiZTexWidth, uiZTexHeight, D3DFMT_D16, D3DMULTISAMPLE_NONE, 0, FALSE, &m_pDepthBuff, NULL);
 
 
+	//---------------------------------------
 	//エフェクトの生成
+	//---------------------------------------
 	HRESULT hr = 0;	//ハンドル
 	LPD3DXBUFFER pErrMessage = nullptr;	//エラーメッセージ
 

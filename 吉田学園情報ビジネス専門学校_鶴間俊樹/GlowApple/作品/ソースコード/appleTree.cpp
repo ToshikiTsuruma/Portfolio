@@ -27,19 +27,16 @@
 // マクロ定義
 //=============================================================================
 #define NUM_COLLISION (8)			//当たり判定の数
-#define COLLISION_RADIUS (30.0f)	//当たり判定の半径
+#define COLLISION_RADIUS (20.0f)	//当たり判定の半径
 
-#define MAX_LIFE_DEFAULT (2000)			//体力の最大値
+#define MAX_LIFE_DEFAULT (2000)		//体力の最大値
 #define DANGER_LIFE ((int)(MAX_LIFE_DEFAULT * 0.35f))		//体力の危険値
 #define COLOR_LIFE_GAUGE_SAFE (D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f))	//体力バーの安全時の色
 #define COLOR_LIFE_GAUGE_DANGER (D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	//体力バーの危険時の色
 #define FOLD_PLAYER_DAMAGE (2)		//プレイヤーのダメージに乗算する量
 
-#define MAX_GROW_VALUE_START (3)	//ゲーム開始時の成長度の最大
-#define FOLD_GROW_VALUE (3)			//成長度を乗算する量
-
 #define DEAD_COLOR (D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	//死亡後の色
-#define END_TIME_CHANGE_DEAD_COLOR (FPS * 2)	//死亡後の色の変更が終了する時間
+#define TIME_FINISH_CHANGE_COLOR_DEAD (FPS * 2)	//死亡後の色の変更が終了する時間
 
 //=============================================================================
 // デフォルトコンストラクタ
@@ -74,7 +71,7 @@ CAppleTree::CAppleTree() : CObjectModel(CModel::MODELTYPE::OBJ_APPLE_TREE, false
 
 	//成長ゲージの生成
 	m_nGrowValue = 0;
-	m_nGrowValueMax = MAX_GROW_VALUE_START;
+	m_nGrowValueMax = 3;
 	m_pGaugeGrow = CGauge2D::Create(m_nGrowValueMax, false, m_nGrowValue, 0, false);
 	if (m_pGaugeGrow != nullptr) {
 		m_pGaugeGrow->CreateGaugeBG(CTexture::TEXTURE_TYPE::NONE, D3DXVECTOR3(SCREEN_WIDTH / 2.0f, 10.0f, 0.0f), SCREEN_WIDTH, 20.0f);
@@ -115,9 +112,6 @@ CAppleTree* CAppleTree::Create(D3DXVECTOR3 pos) {
 // 林檎の木の初期化処理
 //=============================================================================
 HRESULT CAppleTree::Init(void) {
-	//メニュー開いたときにも更新を続けるようにする
-	SetUpdatePriority(UPDATE_PRIORITY::MENU_UPDATE);
-
 	CModel* pModel = GetPtrModel();
 	if (pModel != nullptr) {
 		pModel->SetColorGlow(D3DXCOLOR(1.0f, 0.8f, 0.4f, 1.0f));
@@ -170,40 +164,27 @@ void CAppleTree::Uninit(void) {
 // 林檎の木の更新処理
 //=============================================================================
 void CAppleTree::Update(void) {
+	CObjectModel::Update();
+
 	//死亡時の更新
 	if (m_bDead) {
 		//死亡後のカウントを進める
 		m_nCntDead++;
 
-		//色の変更時間が終わっていたら終了
-		if (m_nCntDead > END_TIME_CHANGE_DEAD_COLOR) return;
-		//モデルの取得
-		CModel* pModel = GetPtrModel();
-		//モデル取得失敗時終了
-		if (pModel == nullptr) return;
-		//モデルの色を取得
-		D3DXCOLOR colModel = CModel::GetDefaultColor(CModel::MODELTYPE::OBJ_APPLE_TREE, 0) + m_colDeltaDeadColor * ((float)m_nCntDead / END_TIME_CHANGE_DEAD_COLOR);
-		//モデルの色を設定
-		pModel->SetMaterialDiffuse(colModel, 0);
+		return;
 	}
 
+#ifdef _DEBUG
 	CManager* pManager = CManager::GetManager();	//マネージャーの取得
 	CInput* pInput = nullptr;	//現在の入力デバイスへのポインタ
 	if (pManager != nullptr) pInput = pManager->GetInputCur();
 
 	if (pInput != nullptr) {
-#ifdef _DEBUG
+		//成長させる
 		if (pInput->GetTrigger(CInput::CODE::DEBUG_2)) AddGrow(100);
+	}
 #endif
 
-		//メニューがある場合
-		if (m_pMenuApple != nullptr) {
-			//林檎の生成
-			if (pInput->GetTrigger(CInput::CODE::SELECT) && !m_pMenuApple->GetLockChangeSelect()) CreateApple();
-		}
-	}
-
-	CObjectModel::Update();
 }
 
 //=============================================================================
@@ -211,6 +192,119 @@ void CAppleTree::Update(void) {
 //=============================================================================
 void CAppleTree::Draw(void) {
 	CObjectModel::Draw();
+}
+
+//=============================================================================
+// 林檎の生成
+//=============================================================================
+void CAppleTree::CreateApple(CGlowApple::APPLE_TYPE typeApple) {
+	//林檎の位置を取得
+	D3DXVECTOR3 posCreate = GetPos() + GetOffsetPosApple(m_nNumApple);	//木の位置 + オフセット
+
+	CGlowApple* pCreateApple = nullptr;	//生成したリンゴ
+	//林檎を生成
+	switch (typeApple)
+	{
+	case CGlowApple::APPLE_TYPE::RED:
+		pCreateApple = CAppleRed::Create(posCreate, this);
+		break;
+	case CGlowApple::APPLE_TYPE::GREEN:
+		pCreateApple = CAppleGreen::Create(posCreate, this);
+		break;
+	case CGlowApple::APPLE_TYPE::WHITE:
+		pCreateApple = CAppleWhite::Create(posCreate, this);
+		break;
+	case CGlowApple::APPLE_TYPE::BLACK:
+		pCreateApple = CAppleBlack::Create(posCreate, this);
+		break;
+	case CGlowApple::APPLE_TYPE::SILVER:
+		pCreateApple = CAppleSilver::Create(posCreate, this);
+		break;
+	case CGlowApple::APPLE_TYPE::GOLD:
+		pCreateApple = CAppleGold::Create(posCreate, this);
+		break;
+	}
+
+	//生成時にエフェクトを生成
+	CParticleEffect::PARTICLE_INFO particleInfo;	//パーティクル情報
+	particleInfo.addMove = D3DXVECTOR3(0.0f, -0.8f, 0.0f); particleInfo.colEnd = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); particleInfo.colStart = D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f);
+	particleInfo.fAddSize = -0.8f; particleInfo.fSizeStart = 40.0f; particleInfo.fSpeedMove = 10.0f; particleInfo.nLife = 60;
+	//数個重ねて生成
+	for (int nCnt = 0; nCnt < 8; nCnt++)
+	{
+		CParticleEffect::Create(particleInfo, posCreate, 1, 1, 0.1f * D3DX_PI, true);
+	}
+
+	//生成したリンゴを配列に登録
+	if (m_nNumApple >= 0 && m_nNumApple < MAX_NUM_CREATE_APPLE) {
+		m_apCreateApple[m_nNumApple] = pCreateApple;
+		m_aTypeCreateApple[m_nNumApple] = typeApple;
+	}
+	//林檎の生成数を加算
+	m_nNumApple++;
+
+	//マネージャーの取得
+	CManager* pManager = CManager::GetManager();
+	CSound* pSound = nullptr;	//サウンドへのポインタ
+	//サウンドの取得
+	if (pManager != nullptr) pSound = pManager->GetSound();
+	//生成音の再生
+	if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::CREATE_APPLE);
+
+	//メニューを閉じる
+	if (m_pMenuApple != nullptr) {
+		m_pMenuApple->Uninit();
+		m_pMenuApple = nullptr;
+	}
+
+	if (m_nNumApple < MAX_NUM_CREATE_APPLE) {
+		//使用した成長度が差し引かれる
+		m_nGrowValue -= m_nGrowValueMax;
+
+		//成長の必要量を設定
+		int nGrowValueMax = 0;	//新しい成長必要量
+		//リンゴの数によって変更
+		switch (m_nNumApple)
+		{
+		case 0:
+			nGrowValueMax = 3;
+			break;
+		case 1:
+			nGrowValueMax = 80;
+			break;
+		case 2:
+			nGrowValueMax = 120;
+			break;
+		case 3:
+			nGrowValueMax = 200;
+			break;
+		case 4:
+			nGrowValueMax = 300;
+			break;
+		case 5:
+			nGrowValueMax = 500;
+			break;
+		default:
+			nGrowValueMax = 999;
+			break;
+		}
+		//必要量の設定
+		m_nGrowValueMax = nGrowValueMax;
+
+		//成長ゲージの設定
+		if (m_pGaugeGrow != nullptr) {
+			m_pGaugeGrow->SetGaugeValue(m_nGrowValue);
+			m_pGaugeGrow->SetMaxValue(m_nGrowValueMax);
+		}
+		//差し引かれた成長量が必要量を超えていた場合、連続で成長させるために0の成長量を足す
+		AddGrow(0);
+	}
+	else {
+		//成長ゲージのの色を変更
+		if (m_pGaugeGrow != nullptr) {
+			m_pGaugeGrow->SetGaugeColor(D3DXCOLOR(1.0f, 0.5f, 0.0f, 1.0f));
+		}
+	}
 }
 
 //=============================================================================
@@ -299,6 +393,11 @@ void CAppleTree::Dead(void) {
 
 	CEffect::Create(GetPos() + D3DXVECTOR3(0.0f, 400.0f, 0.0f), CEffect::EFFECT_TYPE::DEATH, 666.0f, 666.0f, false);
 
+	//モデルの取得
+	CModel* pModel = GetPtrModel();
+	//モデルの色の変更を開始
+	if (pModel != nullptr) pModel->StartChangeMaterialDiffuse(0, DEAD_COLOR, TIME_FINISH_CHANGE_COLOR_DEAD);
+
 	//-----------------------
 	//リンゴの破棄
 	//-----------------------
@@ -313,12 +412,6 @@ void CAppleTree::Dead(void) {
 		m_apCreateApple[nCntApple]->Dead();
 		m_apCreateApple[nCntApple] = nullptr;
 	}
-
-	//-----------------------
-	// 死亡後の色との差分を設定
-	//-----------------------
-	//死亡後の色とデフォルトの色の差分を求める
-	m_colDeltaDeadColor = DEAD_COLOR - CModel::GetDefaultColor(CModel::MODELTYPE::OBJ_APPLE_TREE, 0);
 
 	//-----------------------
 	// サウンドの再生
@@ -402,93 +495,6 @@ D3DXVECTOR3 CAppleTree::GetOffsetPosApple(int nIdxApple) {
 		break;
 	}
 }
-
-//=============================================================================
-// 林檎の生成
-//=============================================================================
-void CAppleTree::CreateApple(void) {
-	//林檎の種類を取得
-	CGlowApple::APPLE_TYPE typeApple = m_pMenuApple->GetSelectAppleType();
-	//林檎の位置を取得
-	D3DXVECTOR3 posCreate = GetPos() + GetOffsetPosApple(m_nNumApple);	//木の位置 + オフセット
-
-	CGlowApple* pCreateApple = nullptr;	//生成したリンゴ
-	//林檎を生成
-	switch (typeApple)
-	{
-	case CGlowApple::APPLE_TYPE::RED:
-		pCreateApple = CAppleRed::Create(posCreate, this);
-		break;
-	case CGlowApple::APPLE_TYPE::GREEN:
-		pCreateApple = CAppleGreen::Create(posCreate, this);
-		break;
-	case CGlowApple::APPLE_TYPE::WHITE:
-		pCreateApple = CAppleWhite::Create(posCreate, this);
-		break;
-	case CGlowApple::APPLE_TYPE::BLACK:
-		pCreateApple = CAppleBlack::Create(posCreate, this);
-		break;
-	case CGlowApple::APPLE_TYPE::SILVER:
-		pCreateApple = CAppleSilver::Create(posCreate, this);
-		break;
-	case CGlowApple::APPLE_TYPE::GOLD:
-		pCreateApple = CAppleGold::Create(posCreate, this);
-		break;
-	}
-
-	//生成時にエフェクトを生成
-	CParticleEffect::PARTICLE_INFO particleInfo;	//パーティクル情報
-	particleInfo.addMove = D3DXVECTOR3(0.0f, -0.8f, 0.0f); particleInfo.colEnd = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); particleInfo.colStart = D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f);
-	particleInfo.fAddSize = -0.8f; particleInfo.fSizeStart = 40.0f; particleInfo.fSpeedMove = 10.0f; particleInfo.nLife = 60;
-	//数個重ねて生成
-	for (int nCnt = 0; nCnt < 8; nCnt++)
-	{
-		CParticleEffect::Create(particleInfo, posCreate, 1, 1, 0.1f * D3DX_PI, true);
-	}
-
-	//生成したリンゴを配列に登録
-	if (m_nNumApple >= 0 && m_nNumApple < MAX_NUM_CREATE_APPLE) {
-		m_apCreateApple[m_nNumApple] = pCreateApple;
-		m_aTypeCreateApple[m_nNumApple] = typeApple;
-	}
-	//林檎の生成数を加算
-	m_nNumApple++;
-
-	//マネージャーの取得
-	CManager* pManager = CManager::GetManager();
-	CSound* pSound = nullptr;	//サウンドへのポインタ
-	//サウンドの取得
-	if (pManager != nullptr) pSound = pManager->GetSound();
-	//生成音の再生
-	if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::CREATE_APPLE);
-
-	//メニューを閉じる
-	if (m_pMenuApple != nullptr) {
-		m_pMenuApple->Uninit();
-		m_pMenuApple = nullptr;
-	}
-
-	if (m_nNumApple < MAX_NUM_CREATE_APPLE) {
-		//使用した成長度が差し引かれる
-		m_nGrowValue -= m_nGrowValueMax;
-		//成長の必要量を増やす
-		m_nGrowValueMax *= FOLD_GROW_VALUE;
-		if (m_pGaugeGrow != nullptr) {
-			//成長ゲージの設定
-			m_pGaugeGrow->SetGaugeValue(m_nGrowValue);
-			m_pGaugeGrow->SetMaxValue(m_nGrowValueMax);
-		}
-		//差し引かれた成長量が必要量を超えていた場合、連続で成長させるために0の成長量を足す
-		AddGrow(0);
-	}
-	else {
-		//成長ゲージのの色を変更
-		if (m_pGaugeGrow != nullptr) {
-			m_pGaugeGrow->SetGaugeColor(D3DXCOLOR(1.0f, 0.5f, 0.0f, 1.0f));
-		}
-	}
-}
-
 
 //=============================================================================
 // 林檎の木の当たり判定の情報の取得

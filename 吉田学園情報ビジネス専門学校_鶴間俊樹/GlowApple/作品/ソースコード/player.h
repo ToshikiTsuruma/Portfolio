@@ -102,7 +102,7 @@ private:
 	int m_nNumShockWave;	//攻撃時の衝撃波の数
 	int m_nNumThunder;		//攻撃時の落雷の数
 
-	bool m_bEndFadeColor;	//ゲームオーバー時の色のフェード完了したかどうか
+	int m_nCntGameover;		//ゲームオーバー後のカウント
 };
 
 #endif // !_PLAYER_H_

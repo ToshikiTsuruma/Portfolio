@@ -266,10 +266,15 @@ bool CInputKeyboard::GetTrigger(CODE code) {
 			return true;
 		}
 		break;
-
 		//戻る
 	case CODE::BACK:
 		if (GetTrigger(DIK_ESCAPE)) {
+			return true;
+		}
+		break;
+		//ポーズ
+	case CODE::PAUSE:
+		if (GetTrigger(DIK_P)) {
 			return true;
 		}
 		break;
@@ -378,6 +383,11 @@ bool CInputKeyboard::GetTrigger(CODE code) {
 		break;
 	case CODE::DEBUG_2:
 		if (GetTrigger(DIK_F3)) {
+			return true;
+		}
+		break;
+	case CODE::DEBUG_3:
+		if (GetTrigger(DIK_F4)) {
 			return true;
 		}
 		break;
@@ -689,14 +699,19 @@ bool CInputGamepadX::GetTrigger(CODE code) {
 	{
 		//選択
 	case CODE::SELECT:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_A) || GetButtonTrigger(XINPUT_GAMEPAD_START)) {
+		if (GetButtonTrigger(XINPUT_GAMEPAD_A)) {
 			return true;
 		}
 		break;
-
 		//戻る
 	case CODE::BACK:
 		if (GetButtonTrigger(XINPUT_GAMEPAD_B) || GetButtonTrigger(XINPUT_GAMEPAD_BACK)) {
+			return true;
+		}
+		break;
+		//ポーズ
+	case CODE::PAUSE:
+		if (GetButtonTrigger(XINPUT_GAMEPAD_START)) {
 			return true;
 		}
 		break;

@@ -124,11 +124,14 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, bool bWindow) {
 
 	//カメラの生成
 	m_pCamera = CCamera::Create();
-	//ライトの初期設定	ビューマトリックスはカメラで設定
+
+	//------------------------------
+	//ライトの初期設定	(ビューマトリックスはカメラで設定)
+	//------------------------------
 	D3DXVECTOR3 vecLight = D3DXVECTOR3(0.0f, -1.0f, 0.4f);	//ライトのベクトル
 	D3DXMATRIX mtxLightProj;   // ライトの射影変換
 	//ライトのプロジェクションマトリックスを生成
-	D3DXMatrixPerspectiveFovLH(&mtxLightProj, D3DXToRadian(75.0f), 1.0f, 600.0f, 3000.0f);
+	D3DXMatrixPerspectiveFovLH(&mtxLightProj, D3DXToRadian(90.0f), 1.0f, 800.0f, 3600.0f);
 
 	//シェーダのライトを設定
 	m_pRenderer->SetEffectLightVector(D3DXVECTOR4(vecLight, 1.0f));

@@ -130,7 +130,6 @@ HRESULT CEffect::Init(void) {
 		m_nPatternU = 5;
 		m_nPatternV = 2;
 		SetZtestAlways(false);	//他のオブジェクトに遮られる
-		SetRotateYOnly(false);
 		break;
 	case EFFECT_TYPE::THUNDERBOLT:
 		SetTexType(CTexture::TEXTURE_TYPE::EFFECT_THUNDERBOLT);

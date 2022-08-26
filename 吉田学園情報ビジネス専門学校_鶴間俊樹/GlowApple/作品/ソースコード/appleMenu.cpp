@@ -33,7 +33,7 @@ CAppleMenu::CAppleMenu() : CSelectMenu3D()
 //=============================================================================
 // オーバーロードされたコンストラクタ
 //=============================================================================
-CAppleMenu::CAppleMenu(D3DXVECTOR3 posCenter) : CSelectMenu3D(NUM_SELECT_APPLE_MENU, posCenter, RADIUS_MODEL_DISTANCE, CModel::MODELTYPE::OBJ_MENUAPPLE, MENU_CAMERA_DISTANCE, MENU_CAMERA_HEIGHT)
+CAppleMenu::CAppleMenu(D3DXVECTOR3 posCenter) : CSelectMenu3D(NUM_SELECT_APPLE_MENU, posCenter, RADIUS_MODEL_DISTANCE, CModel::MODELTYPE::OBJ_MENUAPPLE, MENU_CAMERA_DISTANCE, MENU_CAMERA_HEIGHT, true)
 {
 	ZeroMemory(m_aTypeApple, sizeof(m_aTypeApple));
 }
@@ -54,6 +54,9 @@ CAppleMenu* CAppleMenu::Create(D3DXVECTOR3 posCenter, CAppleTree* pAppleTree) {
 	pAppleMenu = new CAppleMenu(posCenter);
 	if (pAppleMenu == nullptr) return nullptr;
 
+	//ポーズの設定
+	pAppleMenu->SetPauseLevel(AddUpdatePauseLevel());	//ポーズのレベルを上げて返り値でポーズ更新可能レベルを取得し、オブジェクトのポーズレベルとして設定
+
 	pAppleMenu->Init();
 	pAppleMenu->m_pAppleTree = pAppleTree;
 
@@ -64,8 +67,8 @@ CAppleMenu* CAppleMenu::Create(D3DXVECTOR3 posCenter, CAppleTree* pAppleTree) {
 // 林檎選択メニューの初期化処理
 //=============================================================================
 HRESULT CAppleMenu::Init(void) {
-	//背景の生成
-	CreateMenuBG(CTexture::TEXTURE_TYPE::MENU_BG, D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f), 800.0f, 550.0f);
+	//背景の設定
+	SetMenuBG(CTexture::TEXTURE_TYPE::MENU_BG, D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.0f), 800.0f, 550.0f);
 
 	//Grow UP テキストの生成
 	m_pGrowUpText = CObject2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f - 180.0f, 0.0f), CTexture::TEXTURE_TYPE::TEXT_GROWUP, 400.0f, 100.0f);
@@ -83,8 +86,8 @@ HRESULT CAppleMenu::Init(void) {
 		CObjectModelUI* pAppleUI = GetModelUI(nCntModel);
 		if (pAppleUI == nullptr) continue;
 
-		//メニュー開いたときにも更新を続けるようにする
-		pAppleUI->SetUpdatePriority(UPDATE_PRIORITY::MENU_UPDATE);
+		//メニューと同じポーズレベルを設定
+		pAppleUI->SetPauseLevel(GetPauseLevel());
 
 		//UIモデルのモデルを取得
 		CModel* pAppleModel = pAppleUI->GetPtrModel();
@@ -109,11 +112,6 @@ HRESULT CAppleMenu::Init(void) {
 
 	//メニューの回転速度設定
 	SetSpeedRotModel(0.09f);
-
-	//メニューによる更新停止
-	SetStopUpdateAll(true);
-	//メニュー関連のものは更新させる
-	SetStopUpdate(UPDATE_PRIORITY::MENU_UPDATE, false);
 
 	return S_OK;
 }
@@ -145,14 +143,26 @@ void CAppleMenu::Uninit(void) {
 
 	CSelectMenu3D::Uninit();
 
-	//メニューによる更新停止を解除
-	SetStopUpdateAll(false);
+	//ポーズのレベルを下げる
+	SubUpdatePauseLevel();
 }
 
 //=============================================================================
 // 林檎選択メニューの更新処理
 //=============================================================================
 void CAppleMenu::Update(void) {
+	CManager* pManager = CManager::GetManager();	//マネージャーの取得
+	CInput* pInput = nullptr;	//現在の入力デバイスへのポインタ
+	if (pManager != nullptr) pInput = pManager->GetInputCur();
+
+	if (pInput != nullptr) {
+		//選択を入力
+		if (m_pAppleTree != nullptr && pInput->GetTrigger(CInput::CODE::SELECT) && !GetLockChangeSelect()) {
+			//林檎の生成
+			m_pAppleTree->CreateApple(GetSelectAppleType());
+		}
+	}
+
 	CSelectMenu3D::Update();
 }
 

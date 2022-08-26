@@ -46,6 +46,7 @@ public:
 
 private:
 	static void GetSpawnRate(int nLevel, int* pRateArray);	//レベルごとの生成確率の取得
+	void SetTimeLevel(void);	//時間経過によるレベルの設定
 	void SetEnemyCircle(D3DXVECTOR3 posCenter, int nNumCircle, float fRadiusCircle, int nMinDist, int nMaxDist);	//同心円状にランダムに角度ずらして敵を配置する
 
 	int m_nLevel;		//スポナーのレベル

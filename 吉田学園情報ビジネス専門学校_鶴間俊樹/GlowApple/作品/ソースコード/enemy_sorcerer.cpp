@@ -15,14 +15,14 @@
 // マクロ定義
 //=============================================================================
 #define TEXT_FILE_NAME_LOAD_MOTION "data/MOTION/motion_enemySorcerer.txt"
-#define MOVE_SPEED (0.5f)					//移動速度
-#define ROTATE_SPEED (0.01f * D3DX_PI)		//回転速度
-#define NUM_COLLISION (5)			//当たり判定の数
-#define COLLISION_RADIUS (30.0f)	//当たり判定の半径
-#define MAX_LIFE (200)				//体力の最大値
-#define DISTANCE_ATTACK (500.0f)	//攻撃する距離
+#define MOVE_SPEED (0.6f)				//移動速度
+#define ROTATE_SPEED (0.01f * D3DX_PI)	//回転速度
+#define NUM_COLLISION (5)				//当たり判定の数
+#define COLLISION_RADIUS (30.0f)		//当たり判定の半径
+#define MAX_LIFE (200)					//体力の最大値
+#define DISTANCE_ATTACK (400.0f)		//攻撃する距離
 #define ATTACK_EXPLOSION_DAMAGE (150)	//爆発の攻撃力
-#define LIFE_GAUGE_HEIGHT (200.0f)	//敵の位置からの体力ゲージの高さ
+#define LIFE_GAUGE_HEIGHT (200.0f)		//敵の位置からの体力ゲージの高さ
 
 //=============================================================================
 // 静的メンバ変数宣言

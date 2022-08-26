@@ -51,8 +51,15 @@
 //--------------------------------
 //攻撃
 //--------------------------------
-#define ATTACK_DAMAGE_PUNCH (60)
-#define ATTACK_DAMAGE_STANP (150)
+#define ATTACK_DAMAGE_PUNCH (60)	//パンチの攻撃力
+#define ATTACK_DAMAGE_STANP (180)	//踏みつけの攻撃力
+
+//--------------------------------
+//ゲームオーバー時
+//--------------------------------
+#define FINISH_TIME_CHANGE_COLOR_GAMEOVER (120)	//ゲームオーバー後の色変更にかかる時間
+#define START_CHANGE_COLOR_CLEAR (180)	//ゲームオーバー後の透明色へ変更する開始時間
+#define FINISH_TIME_CLEAR (60)			//ゲームオーバー後の透明色への変更にかかる時間
 
 //--------------------------------
 //その他
@@ -91,7 +98,7 @@ CPlayer::CPlayer() : CObjectMotion(m_pPartsInfoArray, m_nNumParts, &m_aMotionInf
 	m_nNumShockWave = 0;
 	m_nNumThunder = 0;
 
-	m_bEndFadeColor = false;
+	m_nCntGameover = 0;
 }
 
 //=============================================================================
@@ -222,18 +229,21 @@ void CPlayer::Update(void) {
 		}
 		//ゲームオーバー時
 		if (pGame->GetGameOver()) {
-			//すでにフェード完了している場合終了
-			if (m_bEndFadeColor) return;
-			
-			//パーティクルエフェクトの生成
-			CParticleEffect::PARTICLE_INFO particleInfo;	//パーティクル情報
-			particleInfo.addMove = D3DXVECTOR3(0.0f, 0.08f, 0.0f); particleInfo.colEnd = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); particleInfo.colStart = D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f);
-			particleInfo.fAddSize = -1.0f; particleInfo.fSizeStart = 60.0f; particleInfo.fSpeedMove = 3.5f; particleInfo.nLife = 60;
-			//１回分のエフェクトを同時に重ねて表示
-			CParticleEffect::Create(particleInfo, GetPos(), 1, 1, 0.45f * D3DX_PI, true);
+			SetMotion((int)MOTION_TYPE::NEUTRAL);	//ニュートラルから動かないように
+			//モーションのアップデート
+			CObjectMotion::Update();	//モデルの更新が必要なため
 
-			//フェードアウト
-			m_bEndFadeColor = FadeModelAll(0.0f, -0.01f);
+			//すべて終わったら更新なし
+			if (m_nCntGameover >= START_CHANGE_COLOR_CLEAR + FINISH_TIME_CLEAR) return;
+
+			//カウンターの加算
+			m_nCntGameover++;
+
+			//透明の変更を開始
+			if (m_nCntGameover == START_CHANGE_COLOR_CLEAR) {
+				//プレイヤーの色を透明にする
+				StartChangeDiffuseAll(0, D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f), FINISH_TIME_CLEAR);
+			}
 			return;
 		}
 	}
@@ -334,7 +344,7 @@ void CPlayer::Update(void) {
 // プレイヤーの描画処理
 //=============================================================================
 void CPlayer::Draw(void) {
-	if (m_bEndFadeColor) return;	//フェード完了時は描画しない
+	if (m_nCntGameover >= START_CHANGE_COLOR_CLEAR + FINISH_TIME_CLEAR) return;	//フェード完了時は描画しない 影や透過の影響をなくすため
 
 	CObjectMotion::Draw();
 }
@@ -359,6 +369,16 @@ void CPlayer::GameOver(void) {
 	//移動量を重力のみにする
 	m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
 	m_nCntLockAct = 0;
+
+	//プレイヤーの色を黒くする
+	StartChangeDiffuseAll(0, D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f), FINISH_TIME_CHANGE_COLOR_GAMEOVER);
+
+	//パーティクルエフェクトの生成
+	CParticleEffect::PARTICLE_INFO particleInfo;	//パーティクル情報
+	particleInfo.addMove = D3DXVECTOR3(0.0f, 0.08f, 0.0f); particleInfo.colEnd = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); particleInfo.colStart = D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f);
+	particleInfo.fAddSize = -1.0f; particleInfo.fSizeStart = 60.0f; particleInfo.fSpeedMove = 3.5f; particleInfo.nLife = 60;
+	//エフェクトを生成
+	CParticleEffect::Create(particleInfo, GetPos(), FINISH_TIME_CHANGE_COLOR_GAMEOVER, 1, 0.45f * D3DX_PI, true);
 }
 
 //=============================================================================
@@ -873,9 +893,9 @@ void CPlayer::MotionAction(void) {
 			if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::SHOCK_STAMP);
 			//衝撃波生成
 			D3DXVECTOR3 posWave = GetPos();
-			CShockWaveEmitter::Create(m_nNumShockWave + 2, 4, posWave, 40.0f, 10.0f, 25.0f, 90.0f, -1.0f, 16, D3DX_PI * 0.02f);
+			CShockWaveEmitter::Create(m_nNumShockWave + 2, 4, posWave, 40.0f, 10.0f, 25.0f, 90.0f, -1.0f, 18, D3DX_PI * 0.02f);
 			//雷の生成
-			if(m_nNumThunder > 0) CThunderEmitter::CreateRound(m_nNumThunder + 1, 3, posWave, GetRot().y + D3DX_PI, 300.0f);
+			if(m_nNumThunder > 0) CThunderEmitter::CreateRound(m_nNumThunder + 1, 3, posWave, GetRot().y + D3DX_PI, 400.0f);
 		}
 		break;
 
