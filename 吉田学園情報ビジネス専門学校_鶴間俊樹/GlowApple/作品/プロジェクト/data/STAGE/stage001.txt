@@ -1,0 +1,147 @@
+//=============================================================================
+//
+// ステージ情報 [data/STAGE/stage001.txt]
+// Author : 鶴間俊樹
+//
+//=============================================================================
+SCRIPT
+
+//------------------------
+// 地形の情報
+//------------------------
+SET_TERRAIN
+	MODEL = data/MODEL/TERRAIN/apple_terrain.x
+	POS = 0.00 0.00 0.00
+	ROT = 0.00 0.00 0.00
+END_SET_TERRAIN
+
+//------------------------
+// オブジェクトの情報
+//------------------------
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = 127.25 -107.93 -1944.88
+	ROT = 0.00 0.00 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = 697.25 -115.93 -1929.88
+	ROT = 0.00 -1.76 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = 1344.25 -72.93 -1452.88
+	ROT = 0.00 -2.61 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = 1775.25 -89.93 -870.88
+	ROT = 0.00 -2.23 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = 2116.50 -131.68 -245.77
+	ROT = 0.00 0.16 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = 2000.54 -133.35 510.94
+	ROT = 0.00 0.00 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = 1635.54 -90.35 1190.94
+	ROT = 0.00 -0.57 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = 1140.54 -143.35 1755.94
+	ROT = 0.00 1.98 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = 476.54 -120.35 1964.94
+	ROT = 0.00 -1.76 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = -276.46 -86.35 1867.94
+	ROT = 0.00 -1.29 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = -848.46 -64.35 1478.94
+	ROT = 0.00 1.35 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = -1397.18 -43.60 1196.82
+	ROT = 0.00 0.00 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = -1617.18 -72.60 616.82
+	ROT = 0.00 1.16 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = -1857.18 -104.60 -63.18
+	ROT = 0.00 0.16 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = -1885.17 -93.24 -640.52
+	ROT = 0.00 -0.94 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = -1635.17 -90.24 -1255.52
+	ROT = -0.00 -2.10 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = -1125.17 -128.24 -1745.52
+	ROT = 0.00 1.92 0.00
+END_SET_OBJECT
+
+SET_OBJECT
+	NAME = OBJ_1
+	MODEL = data/MODEL/OBJECT/many_tree.x
+	POS = -445.17 -103.24 -1860.52
+	ROT = 0.00 1.92 0.00
+END_SET_OBJECT
+
+END_SCRIPT
