@@ -63,11 +63,12 @@ CEnemy::CEnemy(const PARTS_INFO* pPartsInfoArray, int nNumParts, const MOTION_IN
 	m_nKillScore = 0;
 
 	m_bLand = false;
+	m_pAttackTarget = nullptr;
 	m_bAttackDist = false;
 	m_bGoldEnemy = false;
 
 	//体力ゲージの生成
-	m_pGaugeLife = CGauge3D::Create(m_nMaxLife, false, m_nLife, 600, false);
+	m_pGaugeLife = CGauge3D::Create(m_nMaxLife, false, m_nLife, FPS * 10, false);
 	//ゲージの背景の設定
 	m_pGaugeLife->CreateGaugeBG(CTexture::TEXTURE_TYPE::NONE, D3DXVECTOR3(0.0f, 0.0f, 0.0f), 55.0f, 7.0f);
 	m_pGaugeLife->SetGaugeBGColor(D3DXCOLOR(0.3f, 0.3f, 0.3f, 1.0f));
@@ -141,12 +142,9 @@ void CEnemy::Update(void) {
 
 		//地形との当たり判定
 		bool bLand = false;	//接地しているかどうか
-		D3DXVECTOR3 posColTerrain, vecStart, vecEnd;	//接触位置、開始ベクトル、終了ベクトル
-		vecStart = GetPos();	//敵の位置を取得
-		vecEnd = vecStart;
-		vecEnd.y += 1.0f;	//上向きのベクトル
+		D3DXVECTOR3 posColTerrain = GetPos();
 
-		bLand = CTerrain::Collision(&posColTerrain, vecStart, vecEnd);
+		bLand = CTerrain::Collision(posColTerrain);
 		//接地時
 		if (bLand) {
 			SetPos(posColTerrain);	//位置の移動
@@ -197,25 +195,24 @@ void CEnemy::Update(void) {
 	//回転
 	//----------------------------
 	D3DXVECTOR3 rot = GetRot();	//角度の取得
-	
+
 	//目標角度と角度が不一致の場合
 	if (m_rotDestY != GetRot().y) {	//GetMotionCategory() != MOTION_CATEGORY::ATTACK && 
 
 		//目標角度へ回転させる
-		float rotY = rot.y;	//Y軸の角度
 
 		//目標角度がマイナス、角度がプラスのときに、減算した結果が-πを超えた場合
-		if (m_rotDestY - rotY < -D3DX_PI) {
+		if (m_rotDestY - rot.y < -D3DX_PI) {
 			//加算
 			rot.y += m_fRotateSpeed;
 		}
 		//目標角度がプラス、角度がマイナスのときに、減算した結果がπを超えた場合
-		else if (m_rotDestY - rotY > D3DX_PI) {
+		else if (m_rotDestY - rot.y > D3DX_PI) {
 			//減算
 			rot.y -= m_fRotateSpeed;
 		}
 		//個々の正負は関係ない場合
-		else if (m_rotDestY - rotY > 0) {
+		else if (m_rotDestY - rot.y > 0) {
 			//加算
 			rot.y += m_fRotateSpeed;
 			//目標角度超過時の調整
@@ -223,7 +220,7 @@ void CEnemy::Update(void) {
 				rot.y = m_rotDestY;
 			}
 		}
-		else if (m_rotDestY - rotY < 0) {
+		else if (m_rotDestY - rot.y < 0) {
 			//減算
 			rot.y -= m_fRotateSpeed;
 			//目標角度超過時の調整
@@ -252,13 +249,15 @@ void CEnemy::Update(void) {
 	if (m_bMove) {
 		m_move.x = sinf(rot.y + D3DX_PI) * m_fMoveSpeed;
 		m_move.z = cosf(rot.y + D3DX_PI) * m_fMoveSpeed;
+		//攻撃可能距離の場合は動かない
+		if (m_bAttackDist) {
+			m_move.x = 0.0f;
+			m_move.z = 0.0f;
+		}
 	}
 
 	//位置の設定
 	SetPos(GetPos() + m_move);
-
-	//攻撃可能な距離かどうか計算
-	AttackDistance();
 
 	//----------------------------
 	//当たり判定
@@ -270,15 +269,17 @@ void CEnemy::Update(void) {
 	vecEnd = vecStart;
 	vecEnd.y += 1.0f;	//上向きのベクトル
 
-	bLand = CTerrain::Collision(&posColTerrain, vecStart, vecEnd);
+	bLand = CTerrain::Collision(posColTerrain, vecStart, vecEnd);
 	//接地時
 	if (bLand) {
 		m_bLand = true;
 		m_move.y = -POWER_GRAVITY_GROUND;
 		SetPos(posColTerrain);	//位置の移動
 
-		//木の方へ目標角度を設定
-		SetRotTree();
+		//攻撃対象を探す	攻撃中で無く、攻撃可能距離でない場合探す
+		if (GetMotionCategory() != MOTION_CATEGORY::ATTACK && !m_bAttackDist) SearchAttackTarget();
+		//攻撃目標の方向への角度を目標角度として設定
+		SetRotToTarget();
 
 		//魔術師敵が移動モーションなしにしているので移動不可時に接地していれば移動モーション
 		if (!m_bMove && GetMotionCategory() != MOTION_CATEGORY::ATTACK) {
@@ -299,8 +300,16 @@ void CEnemy::Update(void) {
 		return;
 	}
 
-	//攻撃
-	Attack();
+	//攻撃可能な距離かどうか計算
+	AttackDistance();
+
+	//攻撃可能な角度かどうか
+	bool bAngleAttack = fabsf(m_rotDestY - GetRot().y) <= D3DX_PI * 0.2f || fabsf(m_rotDestY - GetRot().y) >= D3DX_PI * 2.0f - D3DX_PI * 0.2f;
+
+	//攻撃開始 （攻撃モーション中　攻撃距離　地上　攻撃できる角度）
+	if (GetMotionCategory() != MOTION_CATEGORY::ATTACK && m_bAttackDist && m_bLand && bAngleAttack) {
+		Attack();
+	}
 
 	//モーションの更新
 	CObjectMotion::Update();
@@ -361,7 +370,7 @@ void CEnemy::Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead) {
 	{
 	case DAMAGE_TYPE::PLAYER_PUNCH:
 	case DAMAGE_TYPE::SHOCKWAVE:
-		//攻撃エフェクトの生成
+		//ダメージエフェクトの生成
 		CEffect::Create(GetPos() + D3DXVECTOR3(0.0f, 50.0f, 0.0f), CEffect::EFFECT_TYPE::DAMAGE_PLAYER, 40.0f, 40.0f, false);
 		//ダメージ音の再生
 		if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::DAMAGE_PUNCH);
@@ -422,6 +431,8 @@ void CEnemy::Dead(void) {
 	if (pGame != nullptr) {
 		//倒したスコアの加算
 		pGame->AddGameScore(m_nKillScore);
+		//倒した敵の数の加算
+		pGame->AddNumKillEnemy(1);
 		//リンゴの木を取得
 		pAppleTree = pGame->GetAppleTree();
 	}
@@ -435,39 +446,59 @@ void CEnemy::Dead(void) {
 		pAppleTree->AddGrow(nGrowValue);
 	}
 
+	/*
 	//サウンドの取得
 	CSound* pSound = nullptr;
 	if (pManager != nullptr) pSound = pManager->GetSound();
 	//音の再生
-	//if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::EXPLOSION);
+	if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::EXPLOSION);
+	*/
 }
 
 //=============================================================================
-// 木の方向への角度に設定
+// 攻撃目標を探す
 //=============================================================================
-void CEnemy::SetRotTree(void) {
+void CEnemy::SearchAttackTarget(void) {
+	CObject* pLastTarget = m_pAttackTarget;	//最後のターゲット
+
+	//最も近い木のオブジェクトを取得
+	m_pAttackTarget = GetNearObject(GetPos(), ENEMY_ATTACK_TARGET , OBJFLAG_ENABLECOLLISION, nullptr, nullptr, nullptr);
+
+	//攻撃対象外なくなった場合停止
+	if (m_pAttackTarget == nullptr && pLastTarget != nullptr) {
+		//動きを停止させる
+		SetMotion(0);
+		m_move = D3DXVECTOR3(0.0f, -POWER_GRAVITY_GROUND, 0.0f);
+		m_bMove = false;
+	}
+}
+
+//=============================================================================
+// 攻撃目標の方向への角度に設定
+//=============================================================================
+void CEnemy::SetRotToTarget(void) {
+	if (m_pAttackTarget == nullptr) return;
+
 	//マネージャーの取得
 	CManager* pManager = CManager::GetManager();
 	if (pManager == nullptr) return;
 	//ゲームシーンの取得
 	CGameScene* pGame = pManager->GetGameScene();
 	if (pGame == nullptr) return;
-	//林檎の木の取得
-	CObject* pAppleTree = pGame->GetAppleTree();
-	if (pAppleTree == nullptr) return;
-	D3DXVECTOR3 posAppleTree = pAppleTree->GetPos();//木の位置を取得
 
-	//敵から林檎の木への角度
-	float rotTreeY = (float)atan2(posAppleTree.x - GetPos().x, posAppleTree.z - GetPos().z);
+	D3DXVECTOR3 posTarget = m_pAttackTarget->GetPos();	//攻撃対象の位置を取得
 
-	//目標角度を林檎の木の向きへ向ける
-	m_rotDestY = rotTreeY;
+	//敵から攻撃対象への角度
+	m_rotDestY = (float)atan2(posTarget.x - GetPos().x, posTarget.z - GetPos().z);
+
 	//モデルが反対なので反対向きに向ける
 	if (m_rotDestY >= 0.0f) {
 		m_rotDestY -= D3DX_PI;
+		if (m_rotDestY < D3DX_PI * -2.0f) m_rotDestY += D3DX_PI * 2.0f;
 	}
 	else if (m_rotDestY < 0.0f) {
 		m_rotDestY += D3DX_PI;
+		if (m_rotDestY > D3DX_PI * 2.0f) m_rotDestY -= D3DX_PI * 2.0f;
 	}
 }
 
@@ -475,28 +506,23 @@ void CEnemy::SetRotTree(void) {
 // 攻撃可能な距離かどうかを計算
 //=============================================================================
 void CEnemy::AttackDistance(void) {
-	//マネージャーの取得
-	CManager* pManager = CManager::GetManager();
-	if (pManager == nullptr) return;
-	//ゲームシーンの取得
-	CGameScene* pGame = pManager->GetGameScene();
-	if (pGame == nullptr) return;
-	//林檎の木の取得
-	CObject* pAppleTree = pGame->GetAppleTree();
-	if (pAppleTree == nullptr) return;
-	D3DXVECTOR3 posAppleTree = pAppleTree->GetPos();//木の位置を取得
-	float fDistTree = D3DXVec2Length(&D3DXVECTOR2(posAppleTree.x - GetPos().x, posAppleTree.z - GetPos().z));	//木と敵との距離
+	if (m_pAttackTarget == nullptr) {
+		m_bAttackDist = false;
+		return;
+	}
 
-	m_bAttackDist = fDistTree <= m_fDistAttack ? true : false;
+	D3DXVECTOR3 posTarget = m_pAttackTarget->GetPos();	//攻撃対象の位置を取得
+	float fRadiusTarget = m_pAttackTarget->GetRadius();	//攻撃対象の半径
+	float fDistTarget = D3DXVec2Length(&D3DXVECTOR2(posTarget.x - GetPos().x, posTarget.z - GetPos().z));	//攻撃対象と敵との距離
+
+	//攻撃可能かどうかの判定
+	m_bAttackDist = fDistTarget - fRadiusTarget <= m_fDistAttack;
 }
 
 //=============================================================================
 //　攻撃の処理
 //=============================================================================
 void CEnemy::Attack(void) {
-	//攻撃開始条件を満たしていない場合終了
-	if (GetMotionCategory() == MOTION_CATEGORY::ATTACK || !m_bAttackDist || !m_bLand) return;
-
 	//攻撃済みリストの初期化
 	InitObjAttacked();
 	//移動量を重力のみにする

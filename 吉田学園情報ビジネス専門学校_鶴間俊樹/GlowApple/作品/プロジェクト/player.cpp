@@ -35,10 +35,10 @@
 //移動
 //--------------------------------
 #define ADD_MOVE_SPEED (1.2f)			//加速
-#define DEC_MOVE_SPEED_GROUND (0.5f)	//地上での減速
+#define DEC_MOVE_SPEED_GROUND (0.8f)	//地上での減速
 #define DEC_MOVE_SPEED_AIR (0.05f)		//空中での減速
-#define MAX_MOVE_SPEED_WALK (6.0f)		//歩行速度
-#define MAX_MOVE_SPEED_DASH (12.0f)		//走行速度
+#define MAX_MOVE_SPEED_WALK (10.0f)		//歩行速度
+//#define MAX_MOVE_SPEED_DASH (12.0f)		//走行速度
 #define MAX_MOVE_SPEED_AIR (2.0f)		//空中速度
 #define ROTATE_SPEED (0.1f)				//回転速度
 
@@ -303,7 +303,7 @@ void CPlayer::Update(void) {
 	//----------------------------
 	//当たり判定
 	//----------------------------
-	Collision(pPosPlayer);
+	Collision(*pPosPlayer);
 
 	//----------------------------
 	//モーションの更新
@@ -744,24 +744,21 @@ void CPlayer::DecMove(void) {
 //=============================================================================
 // 当たり判定
 //=============================================================================
-void CPlayer::Collision(D3DXVECTOR3* pPos) {
+void CPlayer::Collision(D3DXVECTOR3& pos) {
 	//壁との当たり判定
-	CWallCylinder::Collision(pPos, m_lastPos, COLLISION_RADIUS);
+	CWallCylinder::Collision(&pos, m_lastPos, COLLISION_RADIUS);
 
 	//地面との当たり判定
 	bool bLand = false;	//接地しているかどうか
-	D3DXVECTOR3 posColTerrain, vecStart, vecEnd;	//接触位置、開始ベクトル、終了ベクトル
-	vecStart = *pPos;	//プレイヤーの位置を取得
-	vecEnd = vecStart;
-	vecEnd.y += 1.0f;	//上向きのベクトル
+	D3DXVECTOR3 posColTerrain = pos;	//接触位置、開始ベクトル、終了ベクトル
 
-	bLand = CTerrain::Collision(&posColTerrain, vecStart, vecEnd);
+	bLand = CTerrain::Collision(posColTerrain);
 
 	//接地時
 	if (bLand) {
 		m_move.y = -POWER_GRAVITY_GROUND;
 
-		*pPos = posColTerrain;	//位置の移動
+		pos = posColTerrain;	//位置の移動
 		//着地
 		if (!m_bLand) {
 			m_bLand = true;
@@ -901,7 +898,7 @@ void CPlayer::MotionAction(void) {
 
 			//衝撃波生成
 			D3DXVECTOR3 posWave = GetPos() + D3DXVECTOR3(0.0f, -5.0f, 0.0f);
-			CShockWaveEmitter* pSWEmitter = CShockWaveEmitter::Create(m_nNumShockWave + 2, 3, posWave, 40.0f, 0.0f, 25.0f, 110.0f, -1.0f, 18, D3DX_PI * 0.02f);
+			CShockWaveEmitter* pSWEmitter = CShockWaveEmitter::Create(m_nNumShockWave + 2, 4, posWave, 40.0f, 0.0f, 30.0f, 110.0f, -1.0f, 15, D3DX_PI * 0.02f);
 			//生成数ごとに足す色の設定
 			if (pSWEmitter != nullptr) pSWEmitter->SetColAddCreate(D3DXCOLOR(0.0f, -0.05f, -0.15f, 0.0f));
 
@@ -941,7 +938,7 @@ void CPlayer::AttackCollision(int nIdxModel, const int nNumCol, float fRadiusCol
 	for (int nCntCol = 0; nCntCol < nNumCol; nCntCol++)
 	{
 		//攻撃
-		CObjectMotion::Attack(OBJTYPE_ENEMY | OBJTYPE_APPLE_TREE, pPosColArray[nCntCol], fRadiusCol, nDamage, DAMAGE_TYPE::PLAYER_PUNCH, &nNumKillEnemy);	//敵
+		CObjectMotion::Attack(OBJTYPE_ENEMY | OBJTYPE_APPLETREE | OBJTYPE_SCAPEGOAT, pPosColArray[nCntCol], fRadiusCol, nDamage, DAMAGE_TYPE::PLAYER_PUNCH, &nNumKillEnemy);	//敵
 	}
 
 	//攻撃の先端にパーティクルの生成

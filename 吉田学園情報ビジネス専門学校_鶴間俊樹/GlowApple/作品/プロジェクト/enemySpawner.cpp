@@ -245,9 +245,9 @@ void CEnemySpawner::GetSpawnRate(int nLevel, int* pRateArray) {
 		break;
 
 	case 4:
-		pRateArray[(int)ENEMYTYPE::NORMAL] = 10;
-		pRateArray[(int)ENEMYTYPE::HUMAN] = 10;
-		pRateArray[(int)ENEMYTYPE::SORCERER] = 80;
+		pRateArray[(int)ENEMYTYPE::NORMAL] = 20;
+		pRateArray[(int)ENEMYTYPE::HUMAN] = 5;
+		pRateArray[(int)ENEMYTYPE::SORCERER] = 75;
 		break;
 
 	default:

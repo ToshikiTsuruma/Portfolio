@@ -10,6 +10,7 @@
 #include "input.h"
 
 #include "scene.h"
+#include "gameScene.h"
 #include "player.h"
 
 //=============================================================================
@@ -65,7 +66,7 @@ CCamera* CCamera::Create() {
 // カメラの初期化処理
 //=============================================================================
 HRESULT CCamera::Init(void) {
-	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_pos = D3DXVECTOR3(0.0f, APPLETREE_POS_Y + 250.0f, 0.0f);
 	m_rot.x = D3DX_PI * -0.15f;
 	m_rot.y = D3DX_PI * 0.0f;
 
@@ -183,9 +184,7 @@ void CCamera::SetCamera(void) {
 	//シェーダのライトの位置を更新
 	//------------------------------------
 	D3DXMATRIX mtxLightView;   // ライトビュー変換
-	D3DXVECTOR3 posLight;
-	//posLight = m_posV + D3DXVECTOR3(0.0f, 1600.0f, -800.0f);
-	posLight = D3DXVECTOR3(0.0f, 2200.0f, -1800.0f);
+	D3DXVECTOR3 posLight = D3DXVECTOR3(0.0f, 4800.0f, -1920.0f);	//ライトの位置
 	D3DXVECTOR3 vecLight = D3DXVECTOR3(0.0f, -1.0f, 0.4f);	//ライトのベクトル
 	//ライトのビューマトリックスを生成
 	D3DXMatrixLookAtLH(&mtxLightView, &posLight, &D3DXVECTOR3(posLight + vecLight), &D3DXVECTOR3(0, 1, 0));

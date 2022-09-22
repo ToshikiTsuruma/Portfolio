@@ -123,12 +123,41 @@ void CParticleEffect::EmitCircle(PARTICLE_INFO particleInfo, D3DXVECTOR3 pos, in
 	{
 		D3DXVECTOR3 moveParticle;	//パーティクルの移動量
 		//XZ平面の放射の角度を決める
-		float fRotEmit = ((float)nCnt / (float)nNumCreate) * D3DX_PI * 2;
+		float fRotEmit = (nCnt / (float)nNumCreate) * D3DX_PI * 2;
 		//パーティクルの移動量のを決める
 		moveParticle = D3DXVECTOR3(sinf(fRotEmit) * particleInfo.fSpeedMove * sinf(fAngleEmit),
 		cosf(fAngleEmit) * particleInfo.fSpeedMove,
 		cosf(fRotEmit) * particleInfo.fSpeedMove * sinf(fAngleEmit));
 		//パーティクルの生成
 		CParticle::Create(pos, particleInfo.nLife, particleInfo.fSizeStart, particleInfo.fAddSize, moveParticle, particleInfo.addMove, particleInfo.colStart, particleInfo.colEnd);
+	}
+}
+
+//=============================================================================
+// 球状にパーティクルを放射する
+//=============================================================================
+void CParticleEffect::EmitSphere(PARTICLE_INFO particleInfo, D3DXVECTOR3 pos, int nNumCreateXZ, int nNumCreateY, float fAddSpeed) {
+	//パーティクル生成分ループ
+	for (int nCntXZ = 0; nCntXZ < nNumCreateXZ; nCntXZ++)
+	{
+		//XZ平面の放射の角度を決める
+		float fRotEmitXZ = (nCntXZ / (float)nNumCreateXZ) * D3DX_PI * 2;
+
+		for (int nCntY = 0; nCntY < nNumCreateY; nCntY++)
+		{
+			//Y方向の放射の角度を決める
+			float fRotEmitY = (nCntY / (float)(nNumCreateY - 1)) * D3DX_PI;
+
+			D3DXVECTOR3 moveParticle;	//パーティクルの移動量
+			//パーティクルの移動量のを決める
+			moveParticle = D3DXVECTOR3(sinf(fRotEmitXZ) * sinf(fRotEmitY), cosf(fRotEmitY), cosf(fRotEmitXZ) * sinf(fRotEmitY)) * particleInfo.fSpeedMove;
+
+			D3DXVECTOR3 addMove;	//加速量
+			D3DXVec3Normalize(&addMove, &moveParticle);
+			addMove *= fAddSpeed;
+
+			//パーティクルの生成
+			CParticle::Create(pos, particleInfo.nLife, particleInfo.fSizeStart, particleInfo.fAddSize, moveParticle, particleInfo.addMove + addMove, particleInfo.colStart, particleInfo.colEnd);
+		}
 	}
 }

@@ -79,7 +79,7 @@ private:
 	void StartAttack(void);	//攻撃開始
 	void Move(CInput* pInput, float fRotCameraY);	//移動
 	void DecMove(void);	//移動量の減少
-	void Collision(D3DXVECTOR3* pPos);	//当たり判定
+	void Collision(D3DXVECTOR3& pos);	//当たり判定
 	void EndMotion(void);		//モーション終了時
 	void MotionAction(void);	//モーション中の処理
 	void AttackCollision(int nIdxModel, const int nNumCol, float fRadiusCol, D3DXVECTOR3 posOffsetStart, D3DXVECTOR3 posOffsetAdd, int nDamage);	//攻撃の当たり判定

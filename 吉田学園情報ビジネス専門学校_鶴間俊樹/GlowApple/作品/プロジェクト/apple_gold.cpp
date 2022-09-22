@@ -14,8 +14,8 @@
 // ƒ}ƒNƒ’è‹`
 //=============================================================================
 #define SPAN_BULLET (30)	//’e‚Ì¶¬ŠÔŠu
-#define BULLET_MOVE_SPEED (20.0f)	//’e‚ÌˆÚ“®‘¬“x
-#define	MAX_DISTANCE_BULLET (1000.0f)	//’e‚ª”­ŽË‰Â”\‚ÈÅ‘å‚Ì‹——£
+#define BULLET_MOVE_SPEED (30.0f)	//’e‚ÌˆÚ“®‘¬“x
+#define	MAX_DISTANCE_BULLET (1500.0f)	//’e‚ª”­ŽË‰Â”\‚ÈÅ‘å‚Ì‹——£
 #define	BULLET_DAMAGE (5)	//’e‚Ìƒ_ƒ[ƒW
 
 //=============================================================================
@@ -119,7 +119,7 @@ void CAppleGold::ShootBullet(void) {
 	float fDistEnemy;		//“G‚Ö‚Ì‹——£
 
 	//ˆê”Ô‹ß‚¢“G‚ÌˆÊ’u‚ðŽæ“¾
-	bSuccessGetPos = GetNearObject(posApple, OBJTYPE_ENEMY, &posEnemy, &fDistEnemy, nullptr);
+	bSuccessGetPos = GetNearObject(posApple, OBJTYPE_ENEMY, OBJFLAG_ENABLECOLLISION, &posEnemy, &fDistEnemy, nullptr) != nullptr;
 
 	//ˆÊ’u‚ÌŽæ“¾Ž¸”s‚µ‚½ê‡¶¬‚µ‚È‚¢
 	if (!bSuccessGetPos || fDistEnemy > MAX_DISTANCE_BULLET) return;

@@ -13,7 +13,9 @@ data/MODEL/OBJECT/apple.x
 data/MODEL/OBJECT/tree_apple.x	
 data/MODEL/OBJECT/bullet_apple.x	
 data/MODEL/OBJECT/menu_apple.x	
-data/MODEL/OBJECT/many_tree.x	
+data/MODEL/OBJECT/tree.x	
+data/MODEL/OBJECT/scapegoat.x	
+data/MODEL/OBJECT/seedling.x	
 data/MODEL/OBJECT/fountain.x	
 data/MODEL/OBJECT/rock.x	
 

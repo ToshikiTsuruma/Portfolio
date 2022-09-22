@@ -200,8 +200,11 @@
     <ClCompile Include="player.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="repulsiveWave.cpp" />
+    <ClCompile Include="scapegoat.cpp" />
+    <ClCompile Include="scapegoatCreater.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="score.cpp" />
+    <ClCompile Include="seedling.cpp" />
     <ClCompile Include="selectMenu.cpp" />
     <ClCompile Include="selectMenu2D.cpp" />
     <ClCompile Include="selectMenu3D.cpp" />
@@ -262,8 +265,11 @@
     <ClInclude Include="player.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="repulsiveWave.h" />
+    <ClInclude Include="scapegoat.h" />
+    <ClInclude Include="scapegoatCreater.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="score.h" />
+    <ClInclude Include="seedling.h" />
     <ClInclude Include="selectMenu.h" />
     <ClInclude Include="selectMenu2D.h" />
     <ClInclude Include="selectMenu3D.h" />

@@ -26,7 +26,8 @@ public:
 	void Uninit(void);	//終了処理
 	void Update(void);	//更新処理
 	void Draw(void);	//描画処理
-	static bool Collision(D3DXVECTOR3* posCollision, D3DXVECTOR3 vecStart, D3DXVECTOR3 vecEnd);	//衝突判定
+	static bool Collision(D3DXVECTOR3& posCollision, D3DXVECTOR3 vecStart, D3DXVECTOR3 vecEnd);	//衝突判定
+	static bool Collision(D3DXVECTOR3& posCollision);	//上向きベクトルの衝突判定
 
 private:
 

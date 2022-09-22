@@ -70,7 +70,7 @@ HRESULT CThunder::Init(void) {
 	vecEnd = vecStart;
 	vecEnd.y += -1.0f;	//下向きのベクトル
 
-	bLand = CTerrain::Collision(&posColTerrain, vecStart, vecEnd);
+	bLand = CTerrain::Collision(posColTerrain, vecStart, vecEnd);
 	//接地時
 	if (bLand) {
 		SetPos(posColTerrain + D3DXVECTOR3(0.0f, (THUNDER_HEIGHT * 0.7f) / 2.0f, 0.0f));	//位置の移動 ビルボードの中心がposなので下が地面に来るように調整する
@@ -100,7 +100,7 @@ void CThunder::Uninit(void) {
 //=============================================================================
 void CThunder::Update(void) {
 	//攻撃の当たり判定
-	AttackCollision(OBJTYPE_ENEMY | OBJTYPE_APPLE_TREE);
+	AttackCollision(OBJTYPE_ENEMY | OBJTYPE_APPLETREE | OBJTYPE_SCAPEGOAT);
 
 	CEffect::Update();
 }

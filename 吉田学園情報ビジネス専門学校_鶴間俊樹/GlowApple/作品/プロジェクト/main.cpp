@@ -59,12 +59,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// 指定したクライアント領域を確保するために必要なウィンドウ座標を計算
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
 
+	RECT rectDesk;        // デスクトップ領域
+	//デスクトップのサイズを取得
+	SystemParametersInfo(SPI_GETWORKAREA, 0, &rectDesk, 0);
+	int nWndRectLeft = (rectDesk.right - SCREEN_WIDTH) / 2;		//ウィンドウの左端の位置
+	int nWndRectTop = (rectDesk.bottom - SCREEN_HEIGHT) / 2;	//ウィンドウの上端の位置
+
 	// ウィンドウの作成
 	hWnd = CreateWindow(CLASS_NAME,
 		WINDOW_NAME,
 		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
+
+		//画面中央にウィンドウを生成
+		nWndRectLeft,	//元はCW_USEDEFAULT
+		nWndRectTop,	//元はCW_USEDEFAULT
+
 		(rect.right - rect.left),
 		(rect.bottom - rect.top),
 		NULL,
@@ -93,6 +102,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// ウインドウの表示
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
+
+#ifdef NDEBUG
+	// マウス移動範囲の設定
+	//RECT rectMouse = { nWndRectLeft + 10, nWndRectTop + 10, nWndRectLeft + SCREEN_WIDTH, nWndRectTop + SCREEN_HEIGHT };	//ちょっとズレがあったので調整
+	//ClipCursor(&rectMouse);
+	//マウス非表示
+	ShowCursor(FALSE);
+#endif // NDEBUG
 
 	// メッセージループ
 	while (1)

@@ -369,6 +369,12 @@ bool CInputKeyboard::GetTrigger(CODE code) {
 			return true;
 		}
 		break;
+		//インタラクト
+	case CODE::INTERACT:
+		if (GetTrigger(DIK_E)) {
+			return true;
+		}
+		break;
 
 #ifdef _DEBUG
 	case CODE::DEBUG_0:
@@ -771,6 +777,12 @@ bool CInputGamepadX::GetTrigger(CODE code) {
 		//攻撃
 	case CODE::ATTACK_2:
 		if (GetButtonTrigger(XINPUT_GAMEPAD_L)) {
+			return true;
+		}
+		break;
+		//インタラクト
+	case CODE::INTERACT:
+		if (GetButtonTrigger(XINPUT_GAMEPAD_X)) {
 			return true;
 		}
 		break;

@@ -14,8 +14,8 @@
 #define ROTATE_SPEED (0.03f * D3DX_PI)		//‰ñ“]‘¬“x
 #define NUM_COLLISION (10)			//“–‚½‚è”»’è‚Ì”
 #define COLLISION_RADIUS (15.0f)	//“–‚½‚è”»’è‚Ì”¼Œa
-#define MAX_LIFE (80)				//‘Ì—Í‚ÌÅ‘å’l
-#define DISTANCE_ATTACK (70.0f)		//UŒ‚‚·‚é‹——£
+#define MAX_LIFE (70)				//‘Ì—Í‚ÌÅ‘å’l
+#define DISTANCE_ATTACK (60.0f)		//UŒ‚‚·‚é‹——£
 #define ATTACK_DAMAGE (40)	//UŒ‚—Í
 #define LIFE_GAUGE_HEIGHT (100.0f)	//“G‚ÌˆÊ’u‚©‚ç‚Ì‘Ì—ÍƒQ[ƒW‚Ì‚‚³
 
@@ -248,7 +248,7 @@ void CEnemyHuman::MotionAct(void) {
 			for (int nCntAttack = 0; nCntAttack < nNumCollision; nCntAttack++)
 			{
 				//UŒ‚
-				CObjectMotion::Attack(OBJTYPE_APPLE_TREE, aPosCol[nCntAttack], 10.0f, ATTACK_DAMAGE, DAMAGE_TYPE::ENEMY_PUNCH, nullptr);
+				CObjectMotion::Attack(ENEMY_ATTACK_TARGET, aPosCol[nCntAttack], 10.0f, ATTACK_DAMAGE, DAMAGE_TYPE::ENEMY_PUNCH, nullptr);
 			}
 		}
 		break;	//_UŒ‚

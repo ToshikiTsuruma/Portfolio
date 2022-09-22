@@ -12,6 +12,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
+#define APPLETREE_POS_Y (430.0f)
 
 //*****************************************************************************
 // 前方宣言
@@ -25,6 +26,7 @@ class CEnemySpawner;
 class CScore;
 class CObject2D;
 class CGameScoreManager;
+class CScapegoatCreater;
 
 //*****************************************************************************
 // ゲームシーンクラス
@@ -48,6 +50,7 @@ public:
 	CTimer* GetTimer(void) { return m_pTimer; }	//タイマーの取得
 	CEnemySpawner* GetEnemySpawner(void) { return m_pEnemySpawner; }	//敵のスポナーを取得
 	void AddGameScore(int nScore);	//ゲームのスコアを加算
+	void AddNumKillEnemy(int nNum);	//ゲーム中に敵を倒した数の加算
 
 private:
 	void UpdateGame(void);			//ゲーム中の更新
@@ -65,10 +68,11 @@ private:
 	CScore* m_pScore;				//スコアへのポインタ
 	CObject2D* m_pScoreFrame;		//スコアの枠
 	CGameScoreManager* m_pGameScoreManager;	//ゲームのスコアのマネージャー
-	int m_nGameScore;	//ゲーム終了時のスコア
+	int m_nGameScore;				//ゲーム終了時のスコア
 	CPauseMenu* m_pMenuPause;		//ポーズメニュー
 	CSelectMenu2D* m_pMenuGameEnd;	//ゲーム終了時の選択メニュー
 	CEnemySpawner* m_pEnemySpawner;	//敵のスポナー
+	CScapegoatCreater* m_pScapegoatCreater;	//生贄生成クラス
 
 	int m_nCntGameClear;	//ゲームクリア後のカウント
 };

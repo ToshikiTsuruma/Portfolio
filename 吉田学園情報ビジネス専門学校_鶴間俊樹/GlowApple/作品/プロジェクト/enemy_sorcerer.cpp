@@ -245,16 +245,10 @@ void CEnemySorcerer::MotionAct(void) {
 	//サウンドの取得
 	CSound* pSound = pManager->GetSound();
 	if (pSound == nullptr) return;
-	//ゲームシーンの取得
-	CGameScene* pGame = pManager->GetGameScene();
-	if (pGame == nullptr) return;
-	//林檎の木の取得
-	CObject* pAppleTree = pGame->GetAppleTree();
-	if (pAppleTree == nullptr) return;
-	D3DXVECTOR3 posAppleTree = pAppleTree->GetPos();//木の位置を取得
+	//攻撃対象のオブジェクトの取得
+	CObject* pObjTarget = GetAttackTarget();
 
-	D3DXVECTOR3 posFireBoll = posAppleTree;
-	posFireBoll.y += 650.0f;	//木の上
+	D3DXVECTOR3 posTarget;	//攻撃対象の位置
 
 	switch ((MOTION_TYPE)GetMotionType())
 	{
@@ -262,14 +256,19 @@ void CEnemySorcerer::MotionAct(void) {
 	case MOTION_TYPE::ATTACK:
 
 		if (GetCurKey() == 0 && !GetTransMotion()) {
-			if (GetCurMotionCnt() == 0) {
+			//最初のタイミング
+			if (GetCurMotionCnt() == 0 && pObjTarget != nullptr) {				
+				posTarget = pObjTarget->GetPos();//攻撃対象の位置を取得
+				posTarget.y += 650.0f;	//ターゲットの上
 				//火の玉生成
-				m_pFireBoll = CEffect::Create(posFireBoll, CEffect::EFFECT_TYPE::FIRE_BOLL, 50.0f, 50.0f, true);
+				m_pFireBoll = CEffect::Create(posTarget, CEffect::EFFECT_TYPE::FIRE_BOLL, 50.0f, 50.0f, true);
 				//落下速度を設定
 				if (m_pFireBoll != nullptr) m_pFireBoll->SetMove(D3DXVECTOR3(0.0f, -0.5f, 0.0f));
 			}
+
 			//焼く音を再生
 			if (GetCurMotionCnt() == 10) pSound->PlaySound(CSound::SOUND_LABEL::DAMAGE_FIRE);
+
 			//火の玉膨張
 			if (m_pFireBoll != nullptr) m_pFireBoll->AddSize(D3DXVECTOR3(0.5f, 0.5f, 0.5f));
 		}
@@ -282,7 +281,7 @@ void CEnemySorcerer::MotionAct(void) {
 			//サイズの膨張
 			if (m_pFireBoll != nullptr) m_pFireBoll->AddSize(D3DXVECTOR3(2.0f, 2.0f, 0.0f));
 			//じわじわダメージを与える
-			pAppleTree->Damage(1, DAMAGE_TYPE::FIRE, nullptr);			
+			if(pObjTarget != nullptr) pObjTarget->Damage(1, DAMAGE_TYPE::FIRE, nullptr);
 		}
 		//爆発
 		if (GetCurKey() == 3 && GetCurMotionCnt() == 0) {
@@ -296,7 +295,7 @@ void CEnemySorcerer::MotionAct(void) {
 				}
 			}
 			//爆発ダメージ
-			pAppleTree->Damage(ATTACK_EXPLOSION_DAMAGE, DAMAGE_TYPE::EXPLOSION, nullptr);
+			if (pObjTarget != nullptr) pObjTarget->Damage(ATTACK_EXPLOSION_DAMAGE, DAMAGE_TYPE::EXPLOSION, nullptr);
 			//爆発音
 			pSound->PlaySound(CSound::SOUND_LABEL::EXPLOSION);
 		}

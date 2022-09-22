@@ -41,6 +41,7 @@ public:
 		ATTACK_1,
 		ATTACK_2,
 		DASH,
+		INTERACT,
 
 #ifdef _DEBUG
 		//デバッグ用

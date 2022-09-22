@@ -29,11 +29,10 @@
 #define NUM_COLLISION (8)			//当たり判定の数
 #define COLLISION_RADIUS (20.0f)	//当たり判定の半径
 
-#define MAX_LIFE_DEFAULT (2000)		//体力の最大値
-#define DANGER_LIFE ((int)(MAX_LIFE_DEFAULT * 0.35f))		//体力の危険値
+#define DANGER_LIFE ((int)(MAX_LIFE_APPLETREE * 0.35f))		//体力の危険値
 #define COLOR_LIFE_GAUGE_SAFE (D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f))	//体力バーの安全時の色
 #define COLOR_LIFE_GAUGE_DANGER (D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	//体力バーの危険時の色
-#define FOLD_PLAYER_DAMAGE (2)		//プレイヤーのダメージに乗算する量
+//#define FOLD_PLAYER_DAMAGE (2)		//プレイヤーのダメージに乗算する量
 
 #define DEAD_COLOR (D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	//死亡後の色
 #define TIME_FINISH_CHANGE_COLOR_DEAD (FPS * 2)	//死亡後の色の変更が終了する時間
@@ -51,12 +50,12 @@ CAppleTree::CAppleTree() : CObjectModel(CModel::MODELTYPE::OBJ_APPLE_TREE, false
 	}
 
 	m_pMenuApple = nullptr;
-	m_nMaxLife = MAX_LIFE_DEFAULT;
-	m_nLife = MAX_LIFE_DEFAULT;
+	m_nMaxLife = MAX_LIFE_APPLETREE;
+	m_nLife = MAX_LIFE_APPLETREE;
 	m_bDead = false;
 
 	//体力ゲージの生成
-	m_pGaugeLife = CGauge2D::Create(MAX_LIFE_DEFAULT, false, MAX_LIFE_DEFAULT, 0, true);
+	m_pGaugeLife = CGauge2D::Create(MAX_LIFE_APPLETREE, false, MAX_LIFE_APPLETREE, 0, true);
 	if (m_pGaugeLife != nullptr) {
 		m_pGaugeLife->CreateGaugeBG(CTexture::TEXTURE_TYPE::NONE, D3DXVECTOR3(150.0f + 20.0f, SCREEN_HEIGHT - 30.0f, 0.0f), 200.0f, 20.0f);
 		m_pGaugeLife->SetGaugeBGColor(D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f));
@@ -82,7 +81,7 @@ CAppleTree::CAppleTree() : CObjectModel(CModel::MODELTYPE::OBJ_APPLE_TREE, false
 		m_pGaugeGrow->CreateGaugeFrame(CTexture::TEXTURE_TYPE::GROW_GAUGE_FRAME, D3DXVECTOR3(SCREEN_WIDTH / 2.0f, 10.0f, 0.0f), SCREEN_WIDTH, 20.0f);
 	}
 
-	SetObjType(OBJTYPE_APPLE_TREE);
+	SetObjType(OBJTYPE_APPLETREE);
 	SetEnableCollision(true);
 }
 
@@ -339,7 +338,7 @@ void CAppleTree::Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead) {
 		//ダメージ音の再生
 		if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::DAMAGE_PUNCH);
 		//ダメージ量を倍にする
-		nDamage *= FOLD_PLAYER_DAMAGE;
+		//nDamage *= FOLD_PLAYER_DAMAGE;
 		break;
 	case DAMAGE_TYPE::ENEMY_PUNCH:
 		//攻撃エフェクトの生成
@@ -357,7 +356,7 @@ void CAppleTree::Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead) {
 		//ダメージ音の再生
 		if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::DAMAGE_THUNDER);
 		//ダメージ量を倍にする
-		nDamage *= FOLD_PLAYER_DAMAGE;
+		//nDamage *= FOLD_PLAYER_DAMAGE;
 		break;
 	}
 

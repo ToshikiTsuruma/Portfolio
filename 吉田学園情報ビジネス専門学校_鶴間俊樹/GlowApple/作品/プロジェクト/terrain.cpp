@@ -80,7 +80,7 @@ void CTerrain::Draw(void) {
 //=============================================================================
 // 地形との衝突判定
 //=============================================================================
-bool CTerrain::Collision(D3DXVECTOR3* pPosCollision, D3DXVECTOR3 vecStart, D3DXVECTOR3 vecEnd) {
+bool CTerrain::Collision(D3DXVECTOR3& posCollision, D3DXVECTOR3 vecStart, D3DXVECTOR3 vecEnd) {
 	CObject* pObject;	//オブジェクトへのポインタ
 	pObject = GetObjectTopAll();	//全オブジェクトのリストの先頭を取得
 
@@ -195,11 +195,24 @@ bool CTerrain::Collision(D3DXVECTOR3* pPosCollision, D3DXVECTOR3 vecStart, D3DXV
 		//地形との衝突位置をワールド座標に変換
 		D3DXVec3TransformCoord(&posCol, &posCol, &mtxWorldTerrain);
 		//衝突したオブジェクトの位置を設定
-		*pPosCollision = posCol;
+		posCollision = posCol;
 		return true;
 	
 		pObject = pObjNext;	//リストの次のオブジェクトを代入
 	}
 
 	return false;
+}
+
+//=============================================================================
+// 上向きベクトルの地形との衝突判定
+//=============================================================================
+bool CTerrain::Collision(D3DXVECTOR3& posCollision) {
+	D3DXVECTOR3 vecStart, vecEnd;	//接触位置、開始ベクトル、終了ベクトル
+	vecStart = posCollision;
+	vecEnd = vecStart;
+	vecEnd.y += 1.0f;	//上向きのベクトル
+
+	//地形との当たり判定
+	return CTerrain::Collision(posCollision, vecStart, vecEnd);
 }

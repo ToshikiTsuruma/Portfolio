@@ -27,15 +27,23 @@ class CObject
 public:
 	//オブジェクトの種類 (当たり判定や全消去で必要な場合のもの)
 	typedef enum {
-		OBJTYPE_NONE		= 0x000,	//無し
-		OBJTYPE_TERRAIN		= 0x001,	//地形
-		OBJTYPE_WALL		= 0x002,	//壁	
-		OBJTYPE_PLAYER		= 0x004,	//プレイヤー
-		OBJTYPE_ENEMY		= 0x008,	//敵
-		OBJTYPE_ITEM		= 0x010,	//アイテム
-		OBJTYPE_APPLE_TREE	= 0x020,	//林檎の木
-		OBJTYPE_APPLE		= 0x040,	//林檎
+		OBJTYPE_NONE		= 0b00000000,	//無し
+		OBJTYPE_TERRAIN		= 0b00000001,	//地形
+		OBJTYPE_WALL		= 0b00000010,	//壁	
+		OBJTYPE_PLAYER		= 0b00000100,	//プレイヤー
+		OBJTYPE_ENEMY		= 0b00001000,	//敵
+		OBJTYPE_ITEM		= 0b00010000,	//アイテム
+		OBJTYPE_APPLETREE	= 0b00100000,	//林檎の木
+		OBJTYPE_APPLE		= 0b01000000,	//林檎
+		OBJTYPE_SCAPEGOAT	= 0b10000000,	//生贄
+		OBJTYPE_SEEDLING   = 0b100000000,	//苗木
 	} OBJTYPE;
+
+	//オブジェクトのフラグ
+	typedef enum {
+		OBJFLAG_NONE = 0b00000000,	//無し
+		OBJFLAG_ENABLECOLLISION = 0b00000001,	//当たり判定が有効である
+	} OBJFLAG;
 
 	//更新順（更新停止でも必要な場合は定義）
 	enum class UPDATE_PRIORITY {
@@ -79,20 +87,23 @@ public:
 	virtual void Update(void) = 0;	//更新処理
 	virtual void Draw(void) = 0;	//描画処理
 
-	virtual void SetPos(D3DXVECTOR3 pos);	//位置座標の設定
-	virtual D3DXVECTOR3 GetPos(void);		//位置座標の取得
-	virtual D3DXVECTOR3 GetLastPos(void);	//最後の位置座標の取得
-	virtual D3DXVECTOR3 GetRot(void);		//角度の取得
-	virtual void SetMove(D3DXVECTOR3 move);	//移動量の設定
-	virtual D3DXVECTOR3 GetMove(void);		//移動量の取得
-	virtual float GetRadius(void);			//当たり判定の半径の取得
+	static void ReleasePtrAll(CObject* pReleaseObj);	//すべてのオブジェクトにReleasePtrを行う
+	virtual void ReleasePtr(CObject* pReleaseObj) {}	//このオブジェクトが保持している、破棄される予定のオブジェクトのポインタをnullにする
+
+	virtual void SetPos(D3DXVECTOR3 pos) {}	//位置座標の設定
+	virtual D3DXVECTOR3 GetPos(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }		//位置座標の取得
+	virtual D3DXVECTOR3 GetLastPos(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }	//最後の位置座標の取得
+	virtual D3DXVECTOR3 GetRot(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }		//角度の取得
+	virtual void SetMove(D3DXVECTOR3 move) {}	//移動量の設定
+	virtual D3DXVECTOR3 GetMove(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }		//移動量の取得
+	virtual float GetRadius(void) { return 0.0f; }		//当たり判定の半径の取得
 						
-	virtual int GetNumCollisionParts(void);	//当たり判定があるパーツの数の取得
-	virtual void GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECTOR3** const ppPosCol, float* const pRadiusCol);	//当たり判定の情報の取得
-	virtual void UpdateMtxWorldAll(void);			//オブジェクトの全モデルのワールドマトリックスの更新
-	virtual void Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead);	//ダメージ
+	virtual int GetNumCollisionParts(void) { return 1; }	//当たり判定があるパーツの数の取得(基本は１つとする)
+	virtual void GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECTOR3** const ppPosCol, float* const pRadiusCol) {}	//当たり判定の情報の取得
+	virtual void UpdateMtxWorldAll(void) {}			//オブジェクトの全モデルのワールドマトリックスの更新
+	virtual void Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead) {}	//ダメージ
 	virtual void Dead(void) {}						//死亡処理
-	virtual bool GetItem(int nTypeItem);	//アイテム取得時の処理
+	virtual bool GetItem(int nTypeItem) { return false; }	//アイテム取得時の処理
 	virtual void SetRatioWidth(float fRatio) {}		//幅の割合の設定
 	virtual void SetRatioHeight(float fRatio) {}	//高さの割合の設定
 	virtual void SetColor(D3DXCOLOR col) {};	//色の設定
@@ -111,7 +122,7 @@ public:
 	void SetPauseLevel(int nLevel) { m_nPauseLevel = nLevel; }	//ポーズレベルの設定
 	int GetPauseLevel(void) { return m_nPauseLevel; }			//ポーズレベルの取得
 
-	static bool GetNearObject(const D3DXVECTOR3 pos, const OBJTYPE type, D3DXVECTOR3* pPosNearObj, float* pfDistNearObj, D3DXVECTOR3* pVecNearObj);	//ある位置からオブジェクトへの最も近い距離を求める
+	static CObject* GetNearObject(const D3DXVECTOR3 pos, int nObjType, int nObjFlag, D3DXVECTOR3* pPosNearObj, float* pfDistNearObj, D3DXVECTOR3* pVecNearObj);	//ある位置からオブジェクトへの最も近い距離を求める
 
 	bool GetDeath(void);	//死亡フラグの取得
 	void SetObjType(OBJTYPE objType);	//オブジェクトの種類の設定

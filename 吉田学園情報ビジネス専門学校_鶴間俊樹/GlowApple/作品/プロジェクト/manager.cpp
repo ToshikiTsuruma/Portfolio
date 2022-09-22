@@ -32,6 +32,7 @@ CManager::CManager() {
 	m_pInputCur = nullptr;
 	m_pInputKeyboard = nullptr;
 	m_pInputGamepadX = nullptr;
+	m_bEnableXInput = false;
 	m_pCamera = nullptr;
 	m_pSound = nullptr;
 	m_pFade = nullptr;
@@ -91,9 +92,11 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, bool bWindow) {
 		//現在の入力デバイスの設定		
 		if (m_pInputGamepadX->GetConnectGamepad()) {	//ゲームパッドが接続されている場合
 			m_pInputCur = m_pInputGamepadX;	//ゲームパッド操作
+			m_bEnableXInput = true;
 		}
 		else {	//ゲームパッドが接続されていない場合
 			m_pInputCur = m_pInputKeyboard;	//キーボード操作
+			m_bEnableXInput = false;
 		}
 	}
 
@@ -130,7 +133,7 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, bool bWindow) {
 	D3DXVECTOR3 vecLight = D3DXVECTOR3(0.0f, -1.0f, 0.4f);	//ライトのベクトル
 	D3DXMATRIX mtxLightProj;   // ライトの射影変換
 	//ライトのプロジェクションマトリックスを生成
-	D3DXMatrixPerspectiveFovLH(&mtxLightProj, D3DXToRadian(90.0f), 1.0f, 800.0f, 3600.0f);
+	D3DXMatrixPerspectiveFovLH(&mtxLightProj, D3DXToRadian(45.0f), 1.0f, 600.0f, 5400.0f);
 
 	//シェーダのライトを設定
 	m_pRenderer->SetEffectLightVector(D3DXVECTOR4(vecLight, 1.0f));
@@ -224,9 +227,11 @@ void CManager::Update(void) {
 		//ゲームパッドが接続されている場合
 		if (m_pInputGamepadX->GetConnectGamepad()) {
 			m_pInputCur = m_pInputGamepadX;
+			m_bEnableXInput = true;
 		}
 		else {
 			m_pInputCur = m_pInputKeyboard;
+			m_bEnableXInput = false;
 		}
 	}
 

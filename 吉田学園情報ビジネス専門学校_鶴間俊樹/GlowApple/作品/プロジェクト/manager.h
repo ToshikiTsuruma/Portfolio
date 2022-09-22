@@ -45,7 +45,8 @@ public:
 	void ChangeScene(int nTypeScene);	//シーンの変更
 
 	CRenderer* GetRenderer(void) { return m_pRenderer; }	//レンダラーの取得
-	CInput* GetInputCur(void) { return m_pInputCur; }	//現在の入力デバイスの取得
+	CInput* GetInputCur(void) { return m_pInputCur; }		//現在の入力デバイスの取得
+	bool GetEnableXInput(void) { return m_bEnableXInput; }	//現在の入力デバイスがXinputかどうかの取得
 	CCamera* GetCamera(void) { return m_pCamera; }	//カメラの取得
 	CSound* GetSound(void) { return m_pSound; }	//サウンドの取得
 	CFade* GetFade(void) { return m_pFade; }	//フェードの取得
@@ -59,6 +60,7 @@ private:
 
 	CRenderer* m_pRenderer;				//レンダラーへのポインタ
 	CInput* m_pInputCur;				//現在の入力デバイスへのポインタ
+	bool m_bEnableXInput;				//Xinput有効
 	CInputKeyboard* m_pInputKeyboard;	//キーボードへのポインタ
 	CInputGamepadX* m_pInputGamepadX;	//ゲームパッドへのポインタ(Xinput)
 	CCamera* m_pCamera;		//カメラへのポインタ

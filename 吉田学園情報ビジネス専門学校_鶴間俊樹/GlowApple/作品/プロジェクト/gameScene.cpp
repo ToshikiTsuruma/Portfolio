@@ -31,6 +31,7 @@
 #include "enemySpawner.h"
 #include "effect.h"
 #include "shockWaveEmitter.h"
+#include "terrain.h"
 
 #include "apple_red.h"
 #include "apple_green.h"
@@ -38,6 +39,10 @@
 #include "apple_black.h"
 #include "apple_silver.h"
 #include "apple_gold.h"
+
+#include "seedling.h"
+#include "scapegoatCreater.h"
+
 
 //=============================================================================
 // マクロ定義
@@ -99,17 +104,17 @@ void CGameScene::Init(void) {
 	CObject::SetUpdatePauseLevel(0);
 
 	//ステージの生成
-	if(m_pStage == nullptr) m_pStage = new CStage;
-	if(m_pStage != nullptr) m_pStage->CreateStage(TEXT_FILE_NAME_STAGE_GAME);
+	if (m_pStage == nullptr) m_pStage = new CStage;
+	if (m_pStage != nullptr) m_pStage->CreateStage(TEXT_FILE_NAME_STAGE_GAME);
 
 	//ゴールドラッシュ無効
 	CEnemy::SetGoldRush(false);
 
 	//林檎の木の生成
-	m_pAppleTree = CAppleTree::Create(D3DXVECTOR3(0.0f, -190.0f, 0.0f));
+	m_pAppleTree = CAppleTree::Create(D3DXVECTOR3(0.0f, APPLETREE_POS_Y, 0.0f));
 
 	//円柱の壁の生成
-	CWallCylinder::Create(D3DXVECTOR3(0.0f, 60.0f, 0.0f), 1600.0f, 40.0f, CTexture::TEXTURE_TYPE::NONE, true);
+	CWallCylinder::Create(D3DXVECTOR3(0.0f, APPLETREE_POS_Y + 50.0f, 0.0f), 1600.0f, 40.0f, CTexture::TEXTURE_TYPE::NONE, true);
 
 	//プレイヤーの生成
 	CPlayer* pPlayer = CPlayer::Create(D3DXVECTOR3(0.0f, -300.0f, -1000.0f));
@@ -131,10 +136,20 @@ void CGameScene::Init(void) {
 	//ゲームスコアマネージャーの生成
 	m_pGameScoreManager = CGameScoreManager::Create(D3DXVECTOR3(SCREEN_WIDTH - 100.0f, 150.0f, 0.0f), 80.0f);
 
+	//生贄生成クラスの生成
+	m_pScapegoatCreater = CScapegoatCreater::Create();
+
 	//最初の敵の配置
 	CEnemyNormal::Create(D3DXVECTOR3(900.0f, -200.0f, 300.0f));
 	CEnemyNormal::Create(D3DXVECTOR3(-800.0f, -200.0f, 500.0f));
 	CEnemyNormal::Create(D3DXVECTOR3(-600.0f, -200.0f, -700.0f));
+
+	//苗木の配置
+	CSeedling::Create(D3DXVECTOR3(-400.0f, 0.0f, -600.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+	CSeedling::Create(D3DXVECTOR3(400.0f, 0.0f, -800.0f), D3DXVECTOR3(0.0f, D3DX_PI * -0.2f, 0.0f));
+	CSeedling::Create(D3DXVECTOR3(500.0f, 0.0f, 400.0f), D3DXVECTOR3(0.0f, D3DX_PI * -0.6f, 0.0f));
+	CSeedling::Create(D3DXVECTOR3(-800.0f, 0.0f, -100.0f), D3DXVECTOR3(0.0f, D3DX_PI * 0.4f, 0.0f));
+	CSeedling::Create(D3DXVECTOR3(-600.0f, 0.0f, 700.0f), D3DXVECTOR3(0.0f, D3DX_PI * 0.8f, 0.0f));
 
 	//敵のスポナーの生成
 	m_pEnemySpawner = CEnemySpawner::Create(900, 1800.0f, 500, 1500);
@@ -309,14 +324,16 @@ void CGameScene::UpdateGameClear(void) {
 			aTypeApple[nCnt] = m_pAppleTree->GetCreateAppleType(nCnt);
 		}
 		//木とリンゴの破棄
-		CObject::ReleaseObjtype((CObject::OBJTYPE)(CObject::OBJTYPE_APPLE_TREE));
+		CObject::ReleaseObjtype((CObject::OBJTYPE)(CObject::OBJTYPE_APPLETREE));
 
 		//木を生成
 		for (int nCntTree = 0; nCntTree < nNumCreateApple; nCntTree++)
 		{
 			//木の配置
-			D3DXVECTOR3 posTree = D3DXVECTOR3(sinf(D3DX_PI * 2 * (nCntTree / (float)nNumCreateApple) + D3DX_PI) * 700.0f, -80.0f, cosf(D3DX_PI * 2 * (nCntTree / (float)nNumCreateApple) + D3DX_PI) * 700.0f);
-			
+			D3DXVECTOR3 posTree = D3DXVECTOR3(sinf(D3DX_PI * 2 * (nCntTree / (float)nNumCreateApple) + D3DX_PI) * 700.0f, 0.0f, cosf(D3DX_PI * 2 * (nCntTree / (float)nNumCreateApple) + D3DX_PI) * 700.0f);
+			//地形との当たり判定
+			CTerrain::Collision(posTree);
+
 			//木の生成
 			CObjectModel* pTree = CObjectModel::Create(CModel::MODELTYPE::OBJ_APPLE_TREE, posTree, D3DXVECTOR3(0.0f, 0.0f, 0.0f), false);
 			
@@ -459,7 +476,7 @@ void CGameScene::UpdateGameClear(void) {
 	}
 	if (m_nCntGameClear == 900) {
 		//カメラの動きの固定を解除
-		pCamera->SetLockControll(false);
+		pCamera->SetLockControll(false);	//タイトルまでの遷移の間少しだけ動かせる様になってしまっていたけどこれはこれであり
 		//タイトルへフェード
 		pFade->SetFade(CScene::SCENE_TYPE::TITLE, 0.01f, 60);
 	}
@@ -542,7 +559,7 @@ void CGameScene::GameClear(void) {
 	//敵消滅音を再生
 	if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::ENDGAME);
 	//衝撃波
-	CShockWaveEmitter* pSWEmitter = CShockWaveEmitter::Create(5, 6, D3DXVECTOR3(0.0f, -190.0f, 0.0f), 60.0f, 10.0f, 15.0f, 400.0f, -2.0f, 120, D3DX_PI * 0.01f);
+	CShockWaveEmitter* pSWEmitter = CShockWaveEmitter::Create(5, 6, D3DXVECTOR3(0.0f, APPLETREE_POS_Y, 0.0f), 60.0f, 10.0f, 15.0f, 400.0f, -2.0f, FPS * 5, D3DX_PI * 0.01f);
 	//生成ごとに色を変更
 	if (pSWEmitter != nullptr) {
 		pSWEmitter->SetColAddCreate(D3DXCOLOR(D3DXCOLOR(0.0f, -0.1f, -0.2f, 0.0f)));
@@ -557,6 +574,12 @@ void CGameScene::GameClear(void) {
 	if (m_pEnemySpawner != nullptr) {
 		m_pEnemySpawner->Uninit();
 		m_pEnemySpawner = nullptr;
+	}
+
+	//生贄生成クラスの破棄
+	if (m_pScapegoatCreater != nullptr) {
+		m_pScapegoatCreater->Uninit();
+		m_pScapegoatCreater = nullptr;
 	}
 
 	//オブジェクトのポーズが無いように設定（念のため）
@@ -610,6 +633,12 @@ void CGameScene::GameOver(void) {
 		m_pGameScoreManager = nullptr;
 	}
 
+	//生贄生成クラスの破棄
+	if (m_pScapegoatCreater != nullptr) {
+		m_pScapegoatCreater->Uninit();
+		m_pScapegoatCreater = nullptr;
+	}
+
 	//オブジェクトのポーズが無いように設定（念のため）
 	CObject::SetUpdatePauseLevel(0);
 }
@@ -633,7 +662,7 @@ void CGameScene::CreateMenuEndGame(void) {
 	m_pMenuGameEnd->SetSelectUI(0, D3DXVECTOR3(SCREEN_WIDTH / 2.0f - 130.0f, 600.0f, 0.0f), 220.0f, 40.0f, CTexture::TEXTURE_TYPE::TEXT_QUIT);
 	m_pMenuGameEnd->SetSelectUI(1, D3DXVECTOR3(SCREEN_WIDTH / 2.0f + 130.0f, 600.0f, 0.0f), 220.0f, 40.0f, CTexture::TEXTURE_TYPE::TEXT_RETRY);
 	//選択肢アイコンの生成
-	m_pMenuGameEnd->CreateSelectIcon(D3DXVECTOR3(-80.0f, 0.0f, 0.0f), 50.0f, 50.0f, CTexture::TEXTURE_TYPE::SELECT_ICON);
+	m_pMenuGameEnd->CreateSelectIcon(D3DXVECTOR3(-80.0f, 0.0f, 0.0f), 40.0f, 40.0f, CTexture::TEXTURE_TYPE::SELECT_ICON);
 	m_pMenuGameEnd->SetIconPosOffset(1, D3DXVECTOR3(-105.0f, 0.0f, 0.0f));
 }
 
@@ -652,4 +681,14 @@ void CGameScene::AddGameScore(int nScore) {
 
 	//スコアの加算
 	m_pScore->AddScore(nAddScore);
+}
+
+//=============================================================================
+// ゲーム中に敵を倒した数の加算
+//=============================================================================
+void CGameScene::AddNumKillEnemy(int nNum) {
+	//生贄生成クラスの敵のキル数を加算
+	if (m_pScapegoatCreater != nullptr) {
+		m_pScapegoatCreater->AddNumKillEnemy(nNum);
+	}
 }

@@ -99,6 +99,23 @@ CObject* CObject::GetObjectNextAll(CObject* pObject) {
 }
 
 //=============================================================================
+// すべてのオブジェクトにReleasePtrを行う
+//=============================================================================
+void CObject::ReleasePtrAll(CObject* pReleaseObj) {
+	CObject* pObject = m_pTopAll;	//全オブジェクトのポインタを先頭から順に代入
+	while (pObject != nullptr)
+	{
+		CObject* pObjectNext = pObject->m_pNextAll;
+
+		//ReleasePtrを行う
+		pObject->ReleasePtr(pReleaseObj);
+
+		//次のオブジェクトを代入
+		pObject = pObjectNext;
+	}
+}
+
+//=============================================================================
 // 全オブジェクトの解放処理
 //=============================================================================
 //※破棄したオブジェクトを別のクラスでポインタを保持していた場合エラーが起きるため注意
@@ -167,18 +184,21 @@ void CObject::UpdateAll(void) {
 	}
 
 	//死亡フラグが立ったオブジェクトを破棄
-	CObject* pObjectAll = m_pTopAll;	//全オブジェクトのポインタを先頭から順に代入
-	while (pObjectAll != nullptr)
+	CObject* pObjectDeath = m_pTopAll;	//全オブジェクトのポインタを先頭から順に代入
+	while (pObjectDeath != nullptr)
 	{
-		CObject* pObjectNext = pObjectAll->m_pNextAll;
+		CObject* pObjectNext = pObjectDeath->m_pNextAll;
 		//死亡していた場合破棄
-		if (pObjectAll->m_bDeath) {
+		if (pObjectDeath->m_bDeath) {
 			//オブジェクトリストクラスのリストのノードに破棄したオブジェクトが含まれている場合、そのノードを破棄する
-			CObjectList::ReleaseDeleteNode(pObjectAll);
+			CObjectList::ReleaseDeleteNode(pObjectDeath);
+			//すべてのオブジェクトがReleasePtrを行う
+			ReleasePtrAll(pObjectDeath);
 			//オブジェクトの破棄
-			delete pObjectAll;	
+			delete pObjectDeath;	
 		}
-		pObjectAll = pObjectNext;
+
+		pObjectDeath = pObjectNext;
 	}
 }
 
@@ -237,8 +257,9 @@ void CObject::DeadObjtype(OBJTYPE objtype) {
 //=============================================================================
 // ある位置からオブジェクトへの最も近い距離を求める
 //=============================================================================
-bool CObject::GetNearObject(const D3DXVECTOR3 pos, const OBJTYPE type, D3DXVECTOR3* pPosNearObj, float* pfDistNearObj, D3DXVECTOR3* pVecNearObj) {
+CObject* CObject::GetNearObject(const D3DXVECTOR3 pos, int nObjType, int nObjFlag, D3DXVECTOR3* pPosNearObj, float* pfDistNearObj, D3DXVECTOR3* pVecNearObj) {
 	bool bSuccessGetPos = false;	//最も近いオブジェクトが求められたかどうか
+	CObject* pObjNear = nullptr;	//最も近いオブジェクト
 
 	//最も近いオブジェクトの情報
 	D3DXVECTOR3 posNearObj;	//最も近いオブジェクトの位置
@@ -252,15 +273,23 @@ bool CObject::GetNearObject(const D3DXVECTOR3 pos, const OBJTYPE type, D3DXVECTO
 
 		//オブジェクトタイプの確認
 		bool bMatchType = false;
-		if (pObject->GetObjType() & type) bMatchType = true;
+		if (pObject->GetObjType() & nObjType) bMatchType = true;
 
 		bool bDeath = pObject->GetDeath();
-		bool bEnableCollision = pObject->GetEnableCollision();
 
 		//次のループに飛ばす
-		if (!bMatchType || bDeath || !bEnableCollision) {
+		if (!bMatchType || bDeath) {
 			pObject = pObjNext;	//リストの次のオブジェクトを代入
 			continue;
+		}
+
+		//当たり判定が有効かどうかの判定
+		if (nObjFlag & OBJFLAG_ENABLECOLLISION) {
+			//有効でない場合次のループに飛ばす
+			if (!pObject->GetEnableCollision()) {
+				pObject = pObjNext;	//リストの次のオブジェクトを代入
+				continue;
+			}
 		}
 
 		//---------------------------
@@ -269,6 +298,7 @@ bool CObject::GetNearObject(const D3DXVECTOR3 pos, const OBJTYPE type, D3DXVECTO
 		if (!bSuccessGetPos) {
 			bSuccessGetPos = true;	//取得成功
 			//情報の設定
+			pObjNear = pObject;
 			posNearObj = pObject->GetPos();	//位置
 			fDistNearObj = D3DXVec3Length(&D3DXVECTOR3(posNearObj - pos));	//距離
 			D3DXVec3Normalize(&vecNearObj, &D3DXVECTOR3(posNearObj - pos));	//正規化ベクトル
@@ -277,13 +307,14 @@ bool CObject::GetNearObject(const D3DXVECTOR3 pos, const OBJTYPE type, D3DXVECTO
 		//---------------------------
 		//位置の取得
 		//---------------------------
-		D3DXVECTOR3 posObject = pObject->GetPos();	//敵の位置
+		D3DXVECTOR3 posObject = pObject->GetPos();	//オブジェクトの位置
 
 		D3DXVECTOR3 vecObject = D3DXVECTOR3(posObject - pos);	//ある位置からオブジェクトへのベクトル
 		float fDistObj = D3DXVec3Length(&vecObject);	//ある位置とオブジェクトの距離
 		//距離の更新
 		if (fDistNearObj > fDistObj) {
 			//最も近いオブジェクトの情報
+			pObjNear = pObject;
 			posNearObj = posObject;		//位置
 			fDistNearObj = fDistObj;	//距離
 			D3DXVec3Normalize(&vecNearObj, &vecObject);	//正規化ベクトル
@@ -293,14 +324,14 @@ bool CObject::GetNearObject(const D3DXVECTOR3 pos, const OBJTYPE type, D3DXVECTO
 	}
 
 	//取得失敗時
-	if (!bSuccessGetPos) return false;
+	if (!bSuccessGetPos) return nullptr;
 
 	//取得成功時、情報の設定
 	if (pPosNearObj != nullptr) *pPosNearObj = posNearObj;
 	if (pfDistNearObj != nullptr) *pfDistNearObj = fDistNearObj;
 	if (pVecNearObj != nullptr) *pVecNearObj = vecNearObj;
 
-	return true;
+	return pObjNear;
 }
 
 //=============================================================================
@@ -397,25 +428,3 @@ void CObject::SetEnableCollision(bool bEnable) {
 bool CObject::GetEnableCollision(void) {
 	return m_bEnableCollision;
 }
-
-//=============================================================================
-//仮想関数
-//=============================================================================
-void CObject::SetPos(D3DXVECTOR3 pos) {}		//位置座標の設定
-D3DXVECTOR3 CObject::GetPos(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }		//位置座標の取得
-
-D3DXVECTOR3 CObject::GetLastPos(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }	//最後の位置座標の取得
-
-D3DXVECTOR3 CObject::GetRot(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); };	//角度の取得
-
-void CObject::SetMove(D3DXVECTOR3 move) {}	//移動量の設定
-D3DXVECTOR3 CObject::GetMove(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f);}		//移動量の取得
-
-float CObject::GetRadius(void) { return 0.0f; }			//当たり判定の半径の取得
-
-int CObject::GetNumCollisionParts(void) { return 1; }	//当たり判定があるパーツの数の取得 基本は１つとする
-void CObject::GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECTOR3** const ppPosCol, float* const pRadiusCol) {}	//当たり判定の情報の取得
-void CObject::UpdateMtxWorldAll(void) {}			//オブジェクトの全モデルのワールドマトリックスの更新
-
-void CObject::Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead) {}	//ダメージ
-bool CObject::GetItem(int nTypeItem) { return false; }	//アイテム取得時の処理

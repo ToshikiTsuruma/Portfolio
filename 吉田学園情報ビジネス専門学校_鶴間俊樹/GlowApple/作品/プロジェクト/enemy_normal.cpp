@@ -15,7 +15,7 @@
 #define NUM_COLLISION (1)			//“–‚½‚è”»’è‚Ì”
 #define COLLISION_RADIUS (25.0f)	//“–‚½‚è”»’è‚Ì”¼Œa
 #define MAX_LIFE (20)				//‘Ì—Í‚ÌÅ‘å’l
-#define DISTANCE_ATTACK (50.0f)		//UŒ‚‚·‚é‹——£
+#define DISTANCE_ATTACK (40.0f)		//UŒ‚‚·‚é‹——£
 #define ATTACK_DAMAGE (20)	//UŒ‚—Í
 #define LIFE_GAUGE_HEIGHT (80.0f)	//“G‚ÌˆÊ’u‚©‚ç‚Ì‘Ì—ÍƒQ[ƒW‚Ì‚‚³
 
@@ -248,7 +248,7 @@ void CEnemyNormal::MotionAct(void) {
 			for (int nCntAttack = 0; nCntAttack < nNumCollision; nCntAttack++)
 			{
 				//UŒ‚
-				CObjectMotion::Attack(OBJTYPE_APPLE_TREE, aPosCol[nCntAttack], 10.0f, ATTACK_DAMAGE, DAMAGE_TYPE::ENEMY_PUNCH, nullptr);
+				CObjectMotion::Attack(ENEMY_ATTACK_TARGET, aPosCol[nCntAttack], 10.0f, ATTACK_DAMAGE, DAMAGE_TYPE::ENEMY_PUNCH, nullptr);
 			}
 		}
 		break;	//_UŒ‚

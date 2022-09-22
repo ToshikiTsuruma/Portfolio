@@ -41,6 +41,7 @@ public:
 	virtual ~CParticleEffect();	//デストラクタ
 	static CParticleEffect* Create(PARTICLE_INFO particleInfo, D3DXVECTOR3 pos, int nLife, int nSpanCreate, float fAngleEmit, bool bRandomAngle);	//生成処理
 	static void EmitCircle(PARTICLE_INFO particleInfo, D3DXVECTOR3 pos, int nNumCreate, float fAngleEmit);	//円状にパーティクルを放射する
+	static void EmitSphere(PARTICLE_INFO particleInfo, D3DXVECTOR3 pos, int nNumCreateXZ, int nNumCreateY, float fAddSpeed);	//球状にパーティクルを放射する
 	HRESULT Init(void);	//初期化処理
 	void Uninit(void);	//終了処理
 	void Update(void);	//更新処理
