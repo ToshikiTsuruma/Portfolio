@@ -14,6 +14,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
+#define APPLETREE_POS_Y (430.0f)
 #define MAX_LIFE_APPLETREE (2000)		//体力の最大値
 #define MAX_NUM_CREATE_APPLE (6)	//生成可能な林檎の最大数
 
@@ -37,16 +38,18 @@ public:
 	void Uninit(void);	//終了処理
 	void Update(void);	//更新処理
 	void Draw(void);	//描画処理
+	void Heal(int nHeal);		//体力を回復する
 	void Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead);		//ダメージ
 	void Dead(void);		//死亡時処理
 
-	void CreateApple(CGlowApple::APPLE_TYPE typeApple);	//林檎の生成
+	static CGlowApple* CreateApple(CGlowApple::APPLE_TYPE typeApple, D3DXVECTOR3 posCreate, CAppleTree* pParentTree);	//林檎の生成
+	void YieldApple(CGlowApple::APPLE_TYPE typeApple);	//林檎が実をつける
 	static D3DXVECTOR3 GetOffsetPosApple(int nIdxApple);	//林檎生成位置の取得
 	void SetMaxLife(int nMaxLife);	//体力の最大値の設定
 	void AddMaxLife(int nAddLife);	//体力の最大値の増加
-	void HealLife(int nHeal);		//体力を回復する
 	void AddGrow(int nAddValue);	//成長度を増やす
 	CGlowApple::APPLE_TYPE GetCreateAppleType(int nIdx);	//リンゴの種類の取得
+	int GetNumApple(CGlowApple::APPLE_TYPE type);	//リンゴの数を取得
 
 	void GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECTOR3** const ppPosColArray, float* const pRadiusCol);	//当たり判定の情報の取得
 

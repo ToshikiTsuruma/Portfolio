@@ -16,6 +16,7 @@
 //*****************************************************************************
 //前方宣言
 //*****************************************************************************
+class CObjectList;
 
 //*****************************************************************************
 // 弾クラス
@@ -32,6 +33,7 @@ public:
 	void Update(void);	//更新処理
 	void Draw(void);	//描画処理
 	void SetParticleInfo(int nLife, float fSize, float fAddSize, D3DXCOLOR colStart, D3DXCOLOR colEnd);	//パーティクル情報を設定
+	void SetNumParticle(int nNum) { m_nNumParticle = nNum; }	//補完のパーティクルの数の設定
 
 private:
 	bool AttackCollision(void);	//攻撃対象への当たり判定
@@ -41,6 +43,7 @@ private:
 	int m_nObjtypeAttack;	//攻撃対象のオブジェクトタイプ
 	float m_fRadiusCol;	//当たり判定の半径
 	int m_nDamage;	//弾のダメージ
+	CObjectList* m_pListAttacked;	//攻撃済みのオブジェクトのリスト
 
 	//軌道パーティクルの情報
 	bool m_bCreateParticle;	//パーティクル生成するかどうか
@@ -49,8 +52,9 @@ private:
 	float m_fAddSizeParticle;	//パーティクルのサイズ加算量
 	D3DXCOLOR m_colStartParticle;	//パーティクルの開始色
 	D3DXCOLOR m_colEndParticle;		//パーティクルの終了色
-
+	//パーティクルの補完
 	bool m_bCreateParticleFirst;	//パーティクルの初回の生成が終わったかどうか
+	int m_nNumParticle;				//追加されるパーティクルの数
 	D3DXVECTOR3 m_posLastParticle;	//前回のパーティクル生成位置
 };
 

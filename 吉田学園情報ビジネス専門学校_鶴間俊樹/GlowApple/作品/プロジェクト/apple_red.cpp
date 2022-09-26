@@ -40,8 +40,10 @@ CAppleRed::~CAppleRed()
 // Ô—ÑŒç‚Ì¶¬ˆ—
 //=============================================================================
 CAppleRed* CAppleRed::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
-	CAppleRed* pAppleRed;
-	pAppleRed = new CAppleRed(pTree);
+	//ƒ|ƒCƒ“ƒ^‚ªƒŠƒ“ƒS‚Ì–Ø‚Å‚Í‚È‚¢ê‡null
+	pTree = dynamic_cast<CAppleTree*>(pTree);
+
+	CAppleRed* pAppleRed = new CAppleRed(pTree);
 	if (pAppleRed == nullptr) return nullptr;
 
 	pAppleRed->SetPos(pos);
@@ -51,7 +53,7 @@ CAppleRed* CAppleRed::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
 	CAppleTree* pAppleTree = pAppleRed->GetAppleTree();
 	if (pAppleTree != nullptr) {
 		pAppleTree->AddMaxLife(ADD_TREE_LIFE);
-		pAppleTree->HealLife(ADD_TREE_LIFE);
+		pAppleTree->Heal(ADD_TREE_LIFE);
 	}
 
 	return pAppleRed;

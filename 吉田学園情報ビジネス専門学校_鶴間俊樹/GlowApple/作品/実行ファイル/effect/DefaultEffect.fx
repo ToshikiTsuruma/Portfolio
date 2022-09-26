@@ -76,10 +76,10 @@ struct VS_OUTPUT
 {
 	float4 Pos : POSITION;	//位置
 	float4 Diffuse : COLOR0;//色
-	float3 Fog : COLOR1;	//フォグの影響度
 	float4 TexUV : TEXCOORD0;	//テクスチャ座標
+	float4 PosWVP : TEXCOORD1;	//変換後の位置
 
-	float4 ZCalcTex : TEXCOORD1;   	// Z値算出用テクスチャ
+	float4 ZCalcTex : TEXCOORD2;   	// Z値算出用テクスチャ
 	float4 ColShadow : COLOR2;		//影ができる場合の色
 };
 
@@ -97,11 +97,10 @@ VS_OUTPUT RenderSceneVSDefault(
 	Out.Pos = mul(Out.Pos, g_mView);
 	Out.Pos = mul(Out.Pos, g_mProj);
 
+	Out.PosWVP = Out.Pos;
+
 	//色
 	Out.Diffuse = g_matDiffuse;
-
-	//フォグを計算
-	Out.Fog = 1.0 - saturate(g_fogRange.x + g_fogRange.y * Out.Pos.w);
 
 	//テクスチャ座標
 	Out.TexUV = vTexUV;
@@ -135,6 +134,8 @@ VS_OUTPUT RenderSceneVSLight(
 	Out.Pos = mul(Out.Pos, g_mView);
 	Out.Pos = mul(Out.Pos, g_mProj);
 
+	Out.PosWVP = Out.Pos;
+
 	//頂点の法線をワールド変換して正規化
 	float3 nor = normalize(mul((float3)vNor, (float3x3)g_mWorld));	//回転のみ
 	float3 light = normalize((float3)g_Light);	//頂点からライトへのベクトル
@@ -164,9 +165,6 @@ VS_OUTPUT RenderSceneVSLight(
 
 	//輪郭を光らせる
 	Out.Diffuse.xyz += (pow(1.0 - saturate(dot(vecView, nor)), 3) + 0.1) * (g_colGlow.xyz - Out.Diffuse.xyz);
-
-	//フォグを計算
-	Out.Fog = 1.0 - saturate(g_fogRange.x + g_fogRange.y * Out.Pos.w);
 
 	//テクスチャ座標
 	Out.TexUV = vTexUV;
@@ -228,7 +226,7 @@ PS_OUTPUT RenderScenePSDefault3D(VS_OUTPUT In)
 	Out.RGB.xyz += g_matEmissive.xyz;
 
 	//フォグを加算
-	if (g_bEnableFog) Out.RGB.xyz += (g_fogColor - Out.RGB) * In.Fog;
+	if (g_bEnableFog) Out.RGB.xyz += (g_fogColor - Out.RGB) * (1.0 - saturate(g_fogRange.x + g_fogRange.y * In.PosWVP.w));
 
 	return Out;
 }
@@ -285,7 +283,7 @@ PS_OUTPUT RenderScenePSLight3D(VS_OUTPUT In)
 	//-----------------------------
 	//フォグを加算
 	//-----------------------------
-	if (g_bEnableFog) Out.RGB.xyz += (g_fogColor - Out.RGB) * In.Fog;
+	if (g_bEnableFog) Out.RGB.xyz += (g_fogColor - Out.RGB) * (1.0 - saturate(g_fogRange.x + g_fogRange.y * In.PosWVP.w));
 
 	return Out;
 }
@@ -303,7 +301,7 @@ PS_OUTPUT RenderScenePSTex3D(VS_OUTPUT In)
 	Out.RGB.xyz += g_matEmissive.xyz;
 
 	//フォグを加算
-	if (g_bEnableFog) Out.RGB.xyz += (g_fogColor - Out.RGB) * In.Fog;
+	if (g_bEnableFog) Out.RGB.xyz += (g_fogColor - Out.RGB) * (1.0 - saturate(g_fogRange.x + g_fogRange.y * In.PosWVP.w));
 
 	return Out;
 }
@@ -360,7 +358,7 @@ PS_OUTPUT RenderScenePSLightTex3D(VS_OUTPUT In)
 	//-----------------------------
 	//フォグを加算
 	//-----------------------------
-	if (g_bEnableFog) Out.RGB.xyz += (g_fogColor - Out.RGB) * In.Fog;
+	if (g_bEnableFog) Out.RGB.xyz += (g_fogColor - Out.RGB) * (1.0 - saturate(g_fogRange.x + g_fogRange.y * In.PosWVP.w));
 
 	return Out;
 }

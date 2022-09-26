@@ -49,6 +49,7 @@ public:
 	void SetVtxDecl3D(void) { if (m_pD3DDevice != nullptr) m_pD3DDevice->SetVertexDeclaration(m_pVtxDecl3D); }	//頂点定義の設定
 	void BeginPassEffect(DWORD dwPassFlag);	//エフェクトのパスを開始
 	void EndPassEffect(void);			//エフェクトのパスを終了
+	void SetBackBuffColor(D3DXCOLOR col) { m_colBackBuff = col; }	//バックバッファの色の設定
 	bool GetDrawZTex(void) { return m_bDrawZTex; }	//Zテクスチャに描画中かどうか
 	LPDIRECT3DTEXTURE9 GetZBuffTex(void) { return m_pTexZBuff; }	//Zバッファのテクスチャを取得
 
@@ -84,10 +85,11 @@ private:
 
 	LPDIRECT3D9	m_pD3D;					// Direct3Dオブジェクト
 	LPDIRECT3DDEVICE9 m_pD3DDevice;		// Deviceオブジェクト(描画に必要)
-	LPD3DXEFFECT m_pEffect;	//エフェクト
+	LPD3DXEFFECT m_pEffect;				//エフェクト
 	LPDIRECT3DVERTEXDECLARATION9 m_pVtxDecl2D;	//2Dポリゴンの頂点定義
 	LPDIRECT3DVERTEXDECLARATION9 m_pVtxDecl3D;	//3Dポリゴンの頂点定義
 
+	D3DXCOLOR m_colBackBuff;	//バックバッファの色
 	bool m_bDrawZTex;	//Zテクスチャに描画中かどうか
 	LPDIRECT3DSURFACE9 m_pDefaultSurf;		//もとのサーフェイス
 	LPDIRECT3DSURFACE9 m_pDefaultDepthSurf;	//もとのステンシルバッファ

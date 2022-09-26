@@ -161,13 +161,14 @@ void CBillboard::Draw(void) {
 	if (pRenderer->GetDrawZTex()) return;
 
 	D3DXMATRIX mtxRot, mtxTrans;	//計算用マトリックス
-	D3DXVECTOR3 rotCamera = pCamera->GetRot();
+	D3DXVECTOR3 rotCamera = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	if(pCamera != nullptr) rotCamera = pCamera->GetRot();
 
 	//ワールドマトリックスの初期化
 	D3DXMatrixIdentity(&m_mtxWorld);
 
 	//Y回転のみ反映させる場合
-	if (m_bRotateYOnly && pCamera != nullptr) {
+	if (m_bRotateYOnly) {
 		//向きを反映
 		D3DXMatrixRotationYawPitchRoll(&mtxRot, rotCamera.y, 0.0f, 0.0f);
 		D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);

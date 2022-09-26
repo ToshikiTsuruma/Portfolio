@@ -85,7 +85,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	CManager* const pManager = CManager::GetManager();	//マネージャーのインスタンスの取得
 	//初期化処理（ウィドウを生成してから行う）（DirectX本体の生成を行っている）
 	if (pManager != nullptr) {
-		if (FAILED(pManager->Init(hInstance, hWnd, true))) {
+		bool bWindow = false;
+#if _DEBUG
+		bWindow = true;
+#endif
+
+		if (FAILED(pManager->Init(hInstance, hWnd, bWindow))) {
 			return -1;
 		}
 	}

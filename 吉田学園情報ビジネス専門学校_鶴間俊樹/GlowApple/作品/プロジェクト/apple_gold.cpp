@@ -50,8 +50,10 @@ CAppleGold::~CAppleGold()
 // 金林檎の生成処理
 //=============================================================================
 CAppleGold* CAppleGold::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
-	CAppleGold* pAppleGold;
-	pAppleGold = new CAppleGold(pTree);
+	//ポインタがリンゴの木ではない場合null
+	pTree = dynamic_cast<CAppleTree*>(pTree);
+
+	CAppleGold* pAppleGold = new CAppleGold(pTree);
 	if (pAppleGold == nullptr) return nullptr;
 
 	pAppleGold->SetPos(pos);
@@ -137,7 +139,8 @@ void CAppleGold::ShootBullet(void) {
 	CBullet* pBullet = CBullet::Create(CModel::MODELTYPE::OBJ_APPLE_BULLET, posApple, moveBullet, 120, OBJTYPE_ENEMY, 15.0f, BULLET_DAMAGE);
 	//弾の初期設定
 	if (pBullet != nullptr) {
-		pBullet->SetParticleInfo(12, 25.0f, -1.5f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f));
+		pBullet->SetParticleInfo(10, 25.0f, -2.0f, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f));	//軌道のパーティクルの設定
+		pBullet->SetNumParticle(3);	//補完用のパーティクルの数を設定
 	}
 	//マネージャーの取得
 	CManager* pManager = CManager::GetManager();

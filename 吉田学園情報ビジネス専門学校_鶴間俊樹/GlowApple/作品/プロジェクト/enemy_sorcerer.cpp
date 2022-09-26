@@ -7,9 +7,10 @@
 #include "enemy_sorcerer.h"
 #include "effect.h"
 #include "manager.h"
+#include "sound.h"
 #include "gameScene.h"
 #include "appleTree.h"
-#include "sound.h"
+#include "particleEffect.h"
 
 //=============================================================================
 // マクロ定義
@@ -288,6 +289,14 @@ void CEnemySorcerer::MotionAct(void) {
 			if (m_pFireBoll != nullptr) {
 				//爆発エフェクト
 				CEffect::Create(m_pFireBoll->GetPos(), CEffect::EFFECT_TYPE::EXPLOSION, 300.0f, 300.0f, false);
+
+				//パーティクルエフェクト
+				CParticleEffect::PARTICLE_INFO particleInfo;
+				particleInfo.addMove = D3DXVECTOR3(0.0f, -1.0f, 0.0f); particleInfo.colEnd = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f); particleInfo.colStart = D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f);
+				particleInfo.fAddSize = -4.0f; particleInfo.fSizeStart = 120.0f; particleInfo.fSpeedMove = 10.0f; particleInfo.nLife = 30;
+				//球状にパーティクルを生成
+				CParticleEffect::EmitSphere(particleInfo, m_pFireBoll->GetPos() + D3DXVECTOR3(0.0f, 70.0f, 0.0f), 12, 12, -0.0f);
+
 				//火の玉の破棄
 				if (m_pFireBoll != nullptr) {
 					m_pFireBoll->Uninit();

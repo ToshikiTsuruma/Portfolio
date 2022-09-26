@@ -72,8 +72,6 @@ public:
 	float GetRadius(void);			//“–‚½‚è”»’è‚Ì”¼Œa‚Ìæ“¾
 	void AddMoveSpeed(float fAddSpeed) { m_fAddMoveSpeed = fAddSpeed; }		//ˆÚ“®‘¬“x‚ğ‰ÁZ
 	void AddAttackDamage(int nAddDamage) { m_nAddDamage += nAddDamage; }	//’Ç‰Áƒ_ƒ[ƒW‚ğ‰ÁZ
-	void AddNumShockwave(int nAddNum) { m_nNumShockWave += nAddNum; }		//¶¬‚·‚éÕŒ‚”g‚Ì”‚ğ‰ÁZ
-	void AddNumThunder(int nAddNum) { m_nNumThunder += nAddNum; }			//¶¬‚·‚é——‹‚Ì”‚ğ‰ÁZ
 
 private:
 	void StartAttack(void);	//UŒ‚ŠJn
@@ -99,8 +97,6 @@ private:
 	bool m_bValidAttack;	//UŒ‚‚ª—LŒø‚©‚Ç‚¤‚©
 	int m_nNumKillEnemy;	//“G‚ğ“|‚µ‚½”
 	int m_nCntLockAct;		//UŒ‚‚â‰ñ”ğŒã‚Ìd’¼ƒJƒEƒ“ƒg
-	int m_nNumShockWave;	//UŒ‚‚ÌÕŒ‚”g‚Ì”
-	int m_nNumThunder;		//UŒ‚‚Ì——‹‚Ì”
 
 	int m_nCntGameover;		//ƒQ[ƒ€ƒI[ƒo[Œã‚ÌƒJƒEƒ“ƒg
 };

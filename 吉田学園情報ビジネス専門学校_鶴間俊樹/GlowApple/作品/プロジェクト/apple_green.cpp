@@ -13,7 +13,8 @@
 //=============================================================================
 // マクロ定義
 //=============================================================================
-#define HEAL_VALUE (50)	//回復量
+#define HEAL_APPLETREE (50)	//リンゴの木の回復量
+#define HEAL_SCAPEGOAT (20)	//生贄の回復量
 #define HEAL_SPAN (FPS * 6)	//回復のスパン
 
 //=============================================================================
@@ -44,8 +45,10 @@ CAppleGreen::~CAppleGreen()
 // 緑林檎の生成処理
 //=============================================================================
 CAppleGreen* CAppleGreen::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
-	CAppleGreen* pAppleGreen;
-	pAppleGreen = new CAppleGreen(pTree);
+	//ポインタがリンゴの木ではない場合null
+	pTree = dynamic_cast<CAppleTree*>(pTree);
+
+	CAppleGreen* pAppleGreen = new CAppleGreen(pTree);
 	if (pAppleGreen == nullptr) return nullptr;
 
 	pAppleGreen->SetPos(pos);
@@ -90,12 +93,18 @@ void CAppleGreen::Update(void) {
 	//カウントが達していて、木が存在している場合
 	if (m_nCntHeal >= HEAL_SPAN && pAppleTree != nullptr) {
 		//林檎の木を回復する
-		pAppleTree->HealLife(HEAL_VALUE);
+		pAppleTree->Heal(HEAL_APPLETREE);
+		//生贄の回復
+		HealScapegoat();
 
 		//林檎の位置から回復のエフェクトを出す
 		D3DXVECTOR3 posEffect = GetPos();
 		posEffect.y -= 15.0f;	//位置の調整
 		CEffect::Create(posEffect, CEffect::EFFECT_TYPE::HEAL_APPLE, 80.0f, 80.0f, false);
+		//木の位置から回復エフェクトを出す
+		posEffect = pAppleTree->GetPos();
+		posEffect.y += 150.0f;	//位置の調整
+		CEffect::Create(posEffect, CEffect::EFFECT_TYPE::HEAL_APPLE, 300.0f, 300.0f, false);
 
 		//マネージャーの取得
 		CManager* pManager = CManager::GetManager();
@@ -119,4 +128,36 @@ void CAppleGreen::Update(void) {
 //=============================================================================
 void CAppleGreen::Draw(void) {
 	CGlowApple::Draw();
+}
+
+//=============================================================================
+// 生贄の回復
+//=============================================================================
+void CAppleGreen::HealScapegoat(void) {
+	CObject* pObject = GetObjectTopAll();	//全オブジェクトのリストの先頭を取得
+
+	while (pObject != nullptr) {
+		CObject* pObjNext = GetObjectNextAll(pObject);	//リストの次のオブジェクトのポインタを取得
+
+		//オブジェクトタイプの確認
+		bool bMatchType = false;
+		if (pObject->GetObjType() & OBJTYPE_SCAPEGOAT) bMatchType = true;
+		//死亡状態の取得
+		bool bDeath = pObject->GetDeath();
+
+		//次のループに飛ばす
+		if (!bMatchType || bDeath) {
+			pObject = pObjNext;	//リストの次のオブジェクトを代入
+			continue;	
+		}
+		//生贄の回復
+		pObject->Heal(HEAL_SCAPEGOAT);
+
+		//回復エフェクトの生成
+		D3DXVECTOR3 posEffect = pObject->GetPos();
+		posEffect.y += 150.0f;
+		CEffect::Create(posEffect, CEffect::EFFECT_TYPE::HEAL_APPLE, 150.0f, 150.0f, false);
+
+		pObject = pObjNext;	//リストの次のオブジェクトを代入
+	}
 }

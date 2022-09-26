@@ -101,6 +101,7 @@ public:
 	virtual int GetNumCollisionParts(void) { return 1; }	//当たり判定があるパーツの数の取得(基本は１つとする)
 	virtual void GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECTOR3** const ppPosCol, float* const pRadiusCol) {}	//当たり判定の情報の取得
 	virtual void UpdateMtxWorldAll(void) {}			//オブジェクトの全モデルのワールドマトリックスの更新
+	virtual void Heal(int nHeal) {}	//回復
 	virtual void Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead) {}	//ダメージ
 	virtual void Dead(void) {}						//死亡処理
 	virtual bool GetItem(int nTypeItem) { return false; }	//アイテム取得時の処理
@@ -113,8 +114,8 @@ public:
 	static void DrawAll(void);		//全オブジェクトの描画処理
 	static CObject* GetObjectTopAll(void);	//全オブジェクトのリストのTopを取得
 	static CObject* GetObjectNextAll(CObject* pObject);	//全オブジェクトのリストのNextを取得
-	static void ReleaseObjtype(OBJTYPE objtype);	//指定したタイプのオブジェクトの解放処理
-	static void DeadObjtype(OBJTYPE objtype);		//指定したタイプの死亡処理
+	static void ReleaseObjtype(int nObjtype);	//指定したタイプのオブジェクトの解放処理
+	static void DeadObjtype(int nObjtype);		//指定したタイプの死亡処理
 
 	static void SetUpdatePauseLevel(int nLevel) { m_nUpdatePauseLevel = nLevel; }	//更新可能なポーズレベル設定
 	static int AddUpdatePauseLevel(void) { return ++m_nUpdatePauseLevel; }			//更新可能なポーズレベル加算

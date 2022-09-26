@@ -525,10 +525,10 @@ bool CInputGamepadX::GetTriggerPress(TRIGGER_TYPE type) {
 	if (!m_bConnect) return false;	//ê⁄ë±Ç≥ÇÍÇƒÇ¢Ç»Ç¢èÍçáfalseÇï‘Ç∑
 	switch (type)
 	{
-	case TRIGGER_TYPE::MOVE_RIGHT:
+	case TRIGGER_TYPE::RIGHT:
 		return m_state.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD;
 		break;
-	case TRIGGER_TYPE::MOVE_LEFT:
+	case TRIGGER_TYPE::LEFT:
 		return m_state.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD;
 		break;
 	default:
@@ -544,10 +544,10 @@ bool CInputGamepadX::GetTriggerTrigger(TRIGGER_TYPE type) {
 	if (!m_bConnect) return false;	//ê⁄ë±Ç≥ÇÍÇƒÇ¢Ç»Ç¢èÍçáfalseÇï‘Ç∑
 	switch (type)
 	{
-	case TRIGGER_TYPE::MOVE_RIGHT:
+	case TRIGGER_TYPE::RIGHT:
 		return !(m_stateLast.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) && (m_state.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
 		break;
-	case TRIGGER_TYPE::MOVE_LEFT:
+	case TRIGGER_TYPE::LEFT:
 		return !(m_stateLast.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) && (m_state.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
 		break;
 	default:
@@ -653,7 +653,7 @@ bool CInputGamepadX::GetPress(CODE code) {
 
 		//É_ÉbÉVÉÖ
 	case CODE::DASH:
-		if (GetTriggerPress(TRIGGER_TYPE::MOVE_LEFT)) {
+		if (GetTriggerPress(TRIGGER_TYPE::LEFT)) {
 			return true;
 		}
 		break;
@@ -688,7 +688,7 @@ bool CInputGamepadX::GetPress(CODE code) {
 		break;
 		//çUåÇ
 	case CODE::ATTACK_2:
-		if (GetButtonPress(XINPUT_GAMEPAD_L)) {
+		if (GetTriggerPress(TRIGGER_TYPE::RIGHT)) {
 			return true;
 		}
 		break;
@@ -776,7 +776,7 @@ bool CInputGamepadX::GetTrigger(CODE code) {
 		break;
 		//çUåÇ
 	case CODE::ATTACK_2:
-		if (GetButtonTrigger(XINPUT_GAMEPAD_L)) {
+		if (GetTriggerTrigger(TRIGGER_TYPE::RIGHT)) {
 			return true;
 		}
 		break;

@@ -25,6 +25,7 @@ data/TEXTURE/UI/icon_none.png
 data/TEXTURE/UI/icon_apple.png
 data/TEXTURE/UI/icon_hp.png
 data/TEXTURE/UI/silhouette_tree.png
+data/TEXTURE/UI/moon.png
 data/TEXTURE/UI/icon_interact_keyboard.png
 data/TEXTURE/UI/icon_interact_gamepad.png
 data/TEXTURE/UI/icon_nix_sign.png

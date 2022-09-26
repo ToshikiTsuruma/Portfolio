@@ -31,7 +31,7 @@ CScapegoatCreater::CScapegoatCreater()
 	m_pNumUseEnemyUI = nullptr;
 	m_pInteractUI = nullptr;
 	m_pNixSignUI = nullptr;
-	m_pTextEnergy = CObject2D::Create(D3DXVECTOR3(SCREEN_WIDTH - 150.0f, SCREEN_HEIGHT - 30.0f + 10.0f, 0.0f), CTexture::TEXTURE_TYPE::TEXT_ENERGY, 80.0f, 20.0f);
+	m_pTextEnergy = CObject2D::Create(D3DXVECTOR3(SCREEN_WIDTH - 130.0f, SCREEN_HEIGHT - 30.0f + 10.0f, 0.0f), CTexture::TEXTURE_TYPE::TEXT_ENERGY, 80.0f, 20.0f);
 }
 
 //=============================================================================
@@ -88,6 +88,11 @@ void CScapegoatCreater::Uninit(void) {
 	if (m_pNixSignUI != nullptr) {
 		m_pNixSignUI->Uninit();
 		m_pNixSignUI = nullptr;
+	}
+	//エネルギーテキストの破棄
+	if (m_pTextEnergy != nullptr) {
+		m_pTextEnergy->Uninit();
+		m_pTextEnergy = nullptr;
 	}
 
 	//オブジェクトの破棄
@@ -198,6 +203,11 @@ void CScapegoatCreater::Update(void) {
 			//残りの素材量の更新
 			m_nNumKillEnemy -= nNumNeedEnemy;
 			if (m_pNumKillEnemyUI != nullptr) m_pNumKillEnemyUI->SetScore(m_nNumKillEnemy);
+			//インタラクト表示ビルボードの破棄	生成時に位置を設定しているため、生成時に近くに苗木があった場合位置が更新されないため
+			if (m_pInteractUI != nullptr) {
+				m_pInteractUI->Uninit();
+				m_pInteractUI = nullptr;
+			}
 			//生贄の生成
 			pNearSeedling->CreateScapegoat();
 			pNearSeedling = nullptr;	//生贄生成時に破棄されるため

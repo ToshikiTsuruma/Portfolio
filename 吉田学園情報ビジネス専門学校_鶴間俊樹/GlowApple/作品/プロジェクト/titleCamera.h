@@ -1,13 +1,13 @@
 //=============================================================================
 //
-// 緑林檎処理 [apple_green.h]
+// タイトルカメラ処理 [titleCamera.h]
 // Author : 鶴間俊樹
 //
 //=============================================================================
-#ifndef _APPLE_GREEN_H_
-#define _APPLE_GREEN_H_
+#ifndef _TITLECAMERA_H_
+#define _TITLECAMERA_H_
 
-#include "glowApple.h"
+#include "camera.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -18,25 +18,20 @@
 //*****************************************************************************
 
 //*****************************************************************************
-// 緑林檎クラス
+// タイトルカメラクラス
 //*****************************************************************************
-class CAppleGreen : public CGlowApple
+class CTitleCamera : public CCamera
 {
 public:
-	CAppleGreen();		//デフォルトコンストラクタ
-	CAppleGreen(CAppleTree* pTree);		//オーバーロードされたコンストラクタ
-	virtual ~CAppleGreen();		//デストラクタ
-	static CAppleGreen* Create(D3DXVECTOR3 pos, CAppleTree* pTree);	//生成処理
+	CTitleCamera();		//デフォルトコンストラクタ
+	~CTitleCamera();	//デストラクタ
+	static CTitleCamera* Create(void);	//生成処理
 	HRESULT Init(void);	//初期化処理
 	void Uninit(void);	//終了処理
 	void Update(void);	//更新処理
-	void Draw(void);	//描画処理
 
 private:
-	void HealScapegoat(void);	//生贄の回復
-
-	int m_nCntHeal;	//回復までのカウンター
 
 };
 
-#endif // !_APPLE_GREEN_H_
+#endif // !_TITLECAMERA_H_

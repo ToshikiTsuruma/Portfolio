@@ -31,20 +31,27 @@ public:
 	virtual void Update(void);	//更新処理
 	virtual void Draw(void);	//描画処理
 
+	void SetPos(D3DXVECTOR3 pos) { m_pos = pos; }		//位置座標の設定
+	D3DXVECTOR3 GetPos(void) { return m_pos; }			//位置座標の取得
+	void SetMove(D3DXVECTOR3 move) { m_move = move; }	//移動速度の設定
+	void SetRot(D3DXVECTOR3 rot) { m_rot = rot; }		//角度の設定
+	D3DXVECTOR3 GetRot(void) { return m_rot; }			//角度の取得
+	void SetRotSpeed(D3DXVECTOR3 rotSpeed) { m_rotSpeed = rotSpeed; }	//移動速度の設定
+
 	CModel::MODELTYPE GetModelType(void);	//モデルの種類の取得
-	CModel* GetPtrModel(void);		//モデルのポインタの取得
-	void SetPos(D3DXVECTOR3 pos);	//位置座標の設定
-	D3DXVECTOR3 GetPos(void);		//位置座標の取得
-	void SetRot(D3DXVECTOR3 rot);	//角度の設定
-	D3DXVECTOR3 GetRot(void);		//角度の取得
+	CModel* GetPtrModel(void) { return m_pModel; }		//モデルのポインタの取得
+	void SetModelColor(D3DXCOLOR col, int nIdx);		//モデルの色の設定
+	void SetModelGlowColor(D3DXCOLOR col);	//モデルの発光色の設定
 
 private:
 	void Move(void);	//移動
 	void Rotate(void);	//回転
 
 	CModel* m_pModel;	//モデルへのポインタ
-	D3DXVECTOR3 m_pos;
-	D3DXVECTOR3 m_rot;
+	D3DXVECTOR3 m_pos;	//位置
+	D3DXVECTOR3 m_move;	//移動速度
+	D3DXVECTOR3 m_rot;	//角度
+	D3DXVECTOR3 m_rotSpeed;	//回転速度
 	D3DXMATRIX m_mtxWorld;//ワールドマトリックス
 };
 

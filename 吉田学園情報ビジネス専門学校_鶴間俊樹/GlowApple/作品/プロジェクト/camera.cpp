@@ -16,8 +16,6 @@
 //=============================================================================
 // マクロ定義
 //=============================================================================
-#define MAX_DRAW_DISTANCE (5000.0f)		//描画可能な最大の距離
-#define DEFAULT_CAMERA_DISTANCE (1500.0f)	//視点と注視点の距離
 #define CAMERA_ROTATE_SPEED_YAW (0.008f)	//カメラの回転速度(Y軸)
 #define CAMERA_ROTATE_SPEED_PITCH (0.006f)	//カメラの回転速度(X軸)
 #define MAX_ROTATE_PITCH (-0.05f)	//カメラのX軸回転の最大
@@ -26,7 +24,25 @@
 //=============================================================================
 // デフォルトコンストラクタ
 //=============================================================================
-CCamera::CCamera()
+CCamera::CCamera() : m_fMaxDrawDist(1000.0f)
+{
+	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_posV = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_posR = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_fDist = 0.0f;
+	m_vecU = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	D3DXMatrixIdentity(&m_mtxProjection);
+	D3DXMatrixIdentity(&m_mtxView);
+	ZeroMemory(&m_viewport, sizeof(D3DVIEWPORT9));
+
+	m_bLockControll = false;
+}
+
+//=============================================================================
+// オーバーロードされたコンストラクタ
+//=============================================================================
+CCamera::CCamera(float fMaxDrawDist) : m_fMaxDrawDist(fMaxDrawDist)
 {
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -50,36 +66,17 @@ CCamera::~CCamera()
 }
 
 //=============================================================================
-//生成処理
-//=============================================================================
-CCamera* CCamera::Create() {
-	CCamera* pCamera;
-	pCamera = new CCamera;
-	if (pCamera == nullptr) return nullptr;
-
-	pCamera->Init();
-
-	return pCamera;
-}
-
-//=============================================================================
 // カメラの初期化処理
 //=============================================================================
 HRESULT CCamera::Init(void) {
-	m_pos = D3DXVECTOR3(0.0f, APPLETREE_POS_Y + 250.0f, 0.0f);
-	m_rot.x = D3DX_PI * -0.15f;
-	m_rot.y = D3DX_PI * 0.0f;
-
-	LPDIRECT3DDEVICE9 pDevice = nullptr;	//デバイスへのポインタ
 	//マネージャーの取得
 	CManager* pManager = CManager::GetManager();	
 	//レンダラーの取得
 	CRenderer* pRenderer = nullptr;			
 	if (pManager != nullptr) pRenderer = pManager->GetRenderer();
 	//デバイスの取得
+	LPDIRECT3DDEVICE9 pDevice = nullptr;
 	if (pRenderer != nullptr) pDevice = pRenderer->GetDevice();
-	//デバイスがnullの場合終了
-	if (pDevice == nullptr) return S_OK;
 
 	//ビューポートの設定
 	m_viewport.X = (DWORD)0;
@@ -89,14 +86,14 @@ HRESULT CCamera::Init(void) {
 	m_viewport.MinZ = 0.0f;
 	m_viewport.MaxZ = 1.0f;
 	//ビューポートの設定
-	pDevice->SetViewport(&m_viewport);
+	if (pDevice != nullptr) pDevice->SetViewport(&m_viewport);
 
 	//プロジェクションマトリックスを作成
 	D3DXMatrixPerspectiveFovLH(&m_mtxProjection,
 		D3DXToRadian(45.0f),						//画角 360度
 		(float)SCREEN_WIDTH / (float)SCREEN_HEIGHT,	//画面比率
 		10.0f,										//手前の位置
-		MAX_DRAW_DISTANCE);							//奥の位置
+		m_fMaxDrawDist);							//奥の位置
 
 	//プロジェクションマトリックスの設定
 	pRenderer->SetEffectMatrixProj(m_mtxProjection);
@@ -106,9 +103,6 @@ HRESULT CCamera::Init(void) {
 
 	//ビューマトリックスの設定
 	SetCamera();
-
-	//距離の設定
-	SetDistance(DEFAULT_CAMERA_DISTANCE);
 
 	return S_OK;
 }
@@ -145,28 +139,6 @@ void CCamera::SetCamera(void) {
 	LPDIRECT3DDEVICE9 pDevice = pRenderer->GetDevice();
 	if (pDevice == nullptr) return;
 
-
-	//------------------------------------
-	//プレイヤーとの位置の間を取得
-	//------------------------------------
-	CScene* pScene = pManager->GetScene();
-	CPlayer* pPlayer = nullptr;
-	if (pScene != nullptr) pPlayer = pScene->GetPlayer();
-
-	D3DXVECTOR3 posPlayer = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	if (pPlayer != nullptr) posPlayer = pPlayer->GetPos();
-
-	D3DXVECTOR3 posCamera = m_pos + (posPlayer - m_pos) / 2.0f;
-	posCamera.y = m_pos.y;
-
-	//------------------------------------
-	//視点と注視点の設定
-	//------------------------------------
-	m_posR = posCamera;
-	m_posV = D3DXVECTOR3(posCamera.x + sinf(m_rot.y) * m_fDist * cosf(m_rot.x + D3DX_PI),
-		posCamera.y + sinf(m_rot.x + D3DX_PI) * m_fDist,
-		posCamera.z + cosf(m_rot.y) * m_fDist * cosf(m_rot.x + D3DX_PI));	//視点が中心の場合から変更したときに移動がないようにX回転にPIを足している
-
 	//------------------------------------
 	//ビューマトリックスの作成
 	//------------------------------------
@@ -178,18 +150,6 @@ void CCamera::SetCamera(void) {
 	pDevice->SetTransform(D3DTS_VIEW, &m_mtxView);	//ビルボードのために残す
 	//シェーダにビューマトリックスを設定
 	pRenderer->SetEffectMatrixView(m_mtxView);
-
-
-	//------------------------------------
-	//シェーダのライトの位置を更新
-	//------------------------------------
-	D3DXMATRIX mtxLightView;   // ライトビュー変換
-	D3DXVECTOR3 posLight = D3DXVECTOR3(0.0f, 4800.0f, -1920.0f);	//ライトの位置
-	D3DXVECTOR3 vecLight = D3DXVECTOR3(0.0f, -1.0f, 0.4f);	//ライトのベクトル
-	//ライトのビューマトリックスを生成
-	D3DXMatrixLookAtLH(&mtxLightView, &posLight, &D3DXVECTOR3(posLight + vecLight), &D3DXVECTOR3(0, 1, 0));
-	pRenderer->SetEffectLightMatrixView(mtxLightView);
-
 }
 
 //=============================================================================

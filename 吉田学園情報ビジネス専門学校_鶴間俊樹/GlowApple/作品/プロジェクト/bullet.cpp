@@ -9,6 +9,7 @@
 #include "manager.h"
 #include "sound.h"
 #include "effect.h"
+#include "objectList.h"
 
 //=============================================================================
 // マクロ定義
@@ -29,6 +30,9 @@ CBullet::CBullet()
 CBullet::CBullet(CModel::MODELTYPE typeModel) : CObjectModel(typeModel, false)
 {
 	m_bCreateParticleFirst = false;
+	//オブジェクトリストの生成
+	m_pListAttacked = new CObjectList;
+	m_nNumParticle = 0;
 }
 
 //=============================================================================
@@ -36,7 +40,8 @@ CBullet::CBullet(CModel::MODELTYPE typeModel) : CObjectModel(typeModel, false)
 //=============================================================================
 CBullet::~CBullet()
 {
-
+	//オブジェクトリストの破棄
+	if (m_pListAttacked != nullptr) delete m_pListAttacked;
 }
 
 //=============================================================================
@@ -96,26 +101,31 @@ void CBullet::Update(void) {
 
 	//当たり判定
 	bool bHit = AttackCollision();
-	//当たっている場合
-	if (bHit) {
-		//終了処理
-		Uninit();
-		return;
-	}
+	////当たっている場合
+	//if (bHit) {
+	//	//終了処理
+	//	Uninit();
+	//	return;
+	//}
 
 	//パーティクル生成
 	if (m_bCreateParticle) {
-		D3DXVECTOR3 posParticle = GetPos();
+		D3DXVECTOR3 posBullet = GetPos();
 
 		//補完用パーティクルの生成
 		if (m_bCreateParticleFirst) {
-			D3DXVECTOR3 posParticle2 = (m_posLastParticle - posParticle) / 2.0f + posParticle;	//補完パーティクルの位置
-			CParticle::Create(posParticle2, m_nLifeParticle, m_fSizeParticle + (m_fAddSizeParticle / 2.0f), m_fAddSizeParticle, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), m_colStartParticle, m_colEndParticle);
+			for (int nCnt = 0; nCnt < m_nNumParticle; nCnt++)
+			{
+				float fRatio = (nCnt + 1) / (float)(m_nNumParticle + 1);	//前回と今回のエフェクトの差分の割合
+				D3DXVECTOR3 posParticle = posBullet + (m_posLastParticle - posBullet) * fRatio;	//補完パーティクルの位置
+				//パーティクルの生成
+				CParticle::Create(posParticle, m_nLifeParticle, m_fSizeParticle + (m_fAddSizeParticle * fRatio), m_fAddSizeParticle, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), m_colStartParticle, m_colEndParticle);
+			}
 		}
 
-		CParticle::Create(posParticle, m_nLifeParticle, m_fSizeParticle, m_fAddSizeParticle, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), m_colStartParticle, m_colEndParticle);
+		CParticle::Create(posBullet, m_nLifeParticle, m_fSizeParticle, m_fAddSizeParticle, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), m_colStartParticle, m_colEndParticle);
 		//今回の生成位置を保存
-		m_posLastParticle = posParticle;
+		m_posLastParticle = posBullet;
 		m_bCreateParticleFirst = true;
 	}
 
@@ -166,8 +176,16 @@ bool CBullet::AttackCollision(void) {
 		D3DXVECTOR2 vecObj = D3DXVECTOR2(pObject->GetPos().x - posBullet.x, pObject->GetPos().z - posBullet.z);	//攻撃位置とオブジェクトのベクトル
 		float fDistObj = D3DXVec2Length(&vecObj);	//攻撃位置とオブジェクトの距離
 
+		//すでに攻撃が当たっている場合
+		bool bAttacked = false;	//すでに攻撃されているかどうか
+
+		if (m_pListAttacked != nullptr) {
+			//リストにすでに追加されている場合
+			bAttacked = m_pListAttacked->MatchObject(pObject);
+		}
+
 		//次のループに飛ばす
-		if (!bMatchType || bDeath || !bEnableCollision || fDistObj > MAX_ATTACK_DISTANCE) {
+		if (!bMatchType || bDeath || !bEnableCollision || fDistObj > MAX_ATTACK_DISTANCE || bAttacked) {
 			pObject = pObjNext;	//リストの次のオブジェクトを代入
 			continue;	
 		}
@@ -234,9 +252,11 @@ bool CBullet::AttackCollision(void) {
 			CEffect::Create(posHit, CEffect::EFFECT_TYPE::DAMAGE_BULLET, 30.0f, 30.0f, false);
 			//ダメージ音の再生
 			if (pSound != nullptr) pSound->CSound::PlaySound(CSound::SOUND_LABEL::DAMAGE_BULLET);
-		
-			//終了
-			return true;
+
+			//オブジェクトが死亡していない場合攻撃済みリストに追加
+			if (!pObject->GetDeath()) {
+				if (m_pListAttacked != nullptr) m_pListAttacked->AppendNode(pObject);
+			}
 		}
 
 		pObject = pObjNext;	//リストの次のオブジェクトを代入

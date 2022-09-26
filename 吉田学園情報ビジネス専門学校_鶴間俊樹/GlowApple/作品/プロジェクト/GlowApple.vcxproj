@@ -175,6 +175,7 @@
     <ClCompile Include="enemy_sorcerer.cpp" />
     <ClCompile Include="fade.cpp" />
     <ClCompile Include="font.cpp" />
+    <ClCompile Include="gameCamera.cpp" />
     <ClCompile Include="gameScene.cpp" />
     <ClCompile Include="gameScoreManager.cpp" />
     <ClCompile Include="gauge.cpp" />
@@ -217,6 +218,7 @@
     <ClCompile Include="thunder.cpp" />
     <ClCompile Include="thunderEmitter.cpp" />
     <ClCompile Include="timer.cpp" />
+    <ClCompile Include="titleCamera.cpp" />
     <ClCompile Include="titleScene.cpp" />
     <ClCompile Include="wallCylinder.cpp" />
   </ItemGroup>
@@ -240,6 +242,7 @@
     <ClInclude Include="enemy_sorcerer.h" />
     <ClInclude Include="fade.h" />
     <ClInclude Include="font.h" />
+    <ClInclude Include="gameCamera.h" />
     <ClInclude Include="gameScene.h" />
     <ClInclude Include="gameScoreManager.h" />
     <ClInclude Include="gauge.h" />
@@ -282,6 +285,7 @@
     <ClInclude Include="thunder.h" />
     <ClInclude Include="thunderEmitter.h" />
     <ClInclude Include="timer.h" />
+    <ClInclude Include="titleCamera.h" />
     <ClInclude Include="titleScene.h" />
     <ClInclude Include="wallCylinder.h" />
   </ItemGroup>

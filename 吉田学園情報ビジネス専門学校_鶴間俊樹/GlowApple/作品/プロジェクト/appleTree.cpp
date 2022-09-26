@@ -32,7 +32,6 @@
 #define DANGER_LIFE ((int)(MAX_LIFE_APPLETREE * 0.35f))		//体力の危険値
 #define COLOR_LIFE_GAUGE_SAFE (D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f))	//体力バーの安全時の色
 #define COLOR_LIFE_GAUGE_DANGER (D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	//体力バーの危険時の色
-//#define FOLD_PLAYER_DAMAGE (2)		//プレイヤーのダメージに乗算する量
 
 #define DEAD_COLOR (D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	//死亡後の色
 #define TIME_FINISH_CHANGE_COLOR_DEAD (FPS * 2)	//死亡後の色の変更が終了する時間
@@ -46,7 +45,7 @@ CAppleTree::CAppleTree() : CObjectModel(CModel::MODELTYPE::OBJ_APPLE_TREE, false
 	for (int nCnt = 0; nCnt < MAX_NUM_CREATE_APPLE; nCnt++)
 	{
 		m_apCreateApple[nCnt] = nullptr;
-		m_aTypeCreateApple[nCnt] = CGlowApple::APPLE_TYPE::RED;
+		m_aTypeCreateApple[nCnt] = (CGlowApple::APPLE_TYPE) -1;
 	}
 
 	m_pMenuApple = nullptr;
@@ -196,33 +195,43 @@ void CAppleTree::Draw(void) {
 //=============================================================================
 // 林檎の生成
 //=============================================================================
-void CAppleTree::CreateApple(CGlowApple::APPLE_TYPE typeApple) {
-	//林檎の位置を取得
-	D3DXVECTOR3 posCreate = GetPos() + GetOffsetPosApple(m_nNumApple);	//木の位置 + オフセット
-
+CGlowApple* CAppleTree::CreateApple(CGlowApple::APPLE_TYPE typeApple, D3DXVECTOR3 posCreate, CAppleTree* pParentTree) {
 	CGlowApple* pCreateApple = nullptr;	//生成したリンゴ
-	//林檎を生成
+
 	switch (typeApple)
 	{
 	case CGlowApple::APPLE_TYPE::RED:
-		pCreateApple = CAppleRed::Create(posCreate, this);
+		pCreateApple = CAppleRed::Create(posCreate, pParentTree);
 		break;
 	case CGlowApple::APPLE_TYPE::GREEN:
-		pCreateApple = CAppleGreen::Create(posCreate, this);
+		pCreateApple = CAppleGreen::Create(posCreate, pParentTree);
 		break;
 	case CGlowApple::APPLE_TYPE::WHITE:
-		pCreateApple = CAppleWhite::Create(posCreate, this);
+		pCreateApple = CAppleWhite::Create(posCreate, pParentTree);
 		break;
 	case CGlowApple::APPLE_TYPE::BLACK:
-		pCreateApple = CAppleBlack::Create(posCreate, this);
+		pCreateApple = CAppleBlack::Create(posCreate, pParentTree);
 		break;
 	case CGlowApple::APPLE_TYPE::SILVER:
-		pCreateApple = CAppleSilver::Create(posCreate, this);
+		pCreateApple = CAppleSilver::Create(posCreate, pParentTree);
 		break;
 	case CGlowApple::APPLE_TYPE::GOLD:
-		pCreateApple = CAppleGold::Create(posCreate, this);
+		pCreateApple = CAppleGold::Create(posCreate, pParentTree);
 		break;
 	}
+
+	return pCreateApple;
+}
+
+//=============================================================================
+// 林檎の生成
+//=============================================================================
+void CAppleTree::YieldApple(CGlowApple::APPLE_TYPE typeApple) {
+	//林檎の位置を取得
+	D3DXVECTOR3 posCreate = GetPos() + GetOffsetPosApple(m_nNumApple);	//木の位置 + オフセット
+
+	//リンゴの生成
+	CGlowApple* pCreateApple = CreateApple(typeApple, posCreate, this);
 
 	//生成時にエフェクトを生成
 	CParticleEffect::PARTICLE_INFO particleInfo;	//パーティクル情報
@@ -303,6 +312,19 @@ void CAppleTree::CreateApple(CGlowApple::APPLE_TYPE typeApple) {
 		if (m_pGaugeGrow != nullptr) {
 			m_pGaugeGrow->SetGaugeColor(D3DXCOLOR(1.0f, 0.5f, 0.0f, 1.0f));
 		}
+	}
+}
+
+//=============================================================================
+// 体力を回復する
+//=============================================================================
+void CAppleTree::Heal(int nHeal) {
+	m_nLife += nHeal;
+	if (m_nLife > m_nMaxLife) m_nLife = m_nMaxLife;
+
+	if (m_pGaugeLife != nullptr) {
+		//体力ゲージの設定
+		m_pGaugeLife->SetGaugeValue(m_nLife);
 	}
 }
 
@@ -392,6 +414,21 @@ void CAppleTree::Dead(void) {
 
 	CEffect::Create(GetPos() + D3DXVECTOR3(0.0f, 400.0f, 0.0f), CEffect::EFFECT_TYPE::DEATH, 666.0f, 666.0f, false);
 
+	//マネージャーの取得
+	CManager* pManager = CManager::GetManager();
+	CSound* pSound = nullptr;
+	CGameScene* pGame = nullptr;
+
+	//サウンドの取得
+	if (pManager != nullptr) pSound = pManager->GetSound();
+	//ゲームの取得
+	if (pManager != nullptr) pGame = pManager->GetGameScene();
+
+	//死亡音の再生
+	if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::DEAD_TREE);
+	//ゲームオーバー設定
+	if (pGame != nullptr) pGame->GameOver();
+
 	//モデルの取得
 	CModel* pModel = GetPtrModel();
 	//モデルの色の変更を開始
@@ -412,24 +449,8 @@ void CAppleTree::Dead(void) {
 		m_apCreateApple[nCntApple] = nullptr;
 	}
 
-	//-----------------------
-	// サウンドの再生
-	//-----------------------
-	//マネージャーの取得
-	CManager* pManager = CManager::GetManager();
-
-	CSound* pSound = nullptr;
-	CGameScene* pGame = nullptr;
-
-	//サウンドの取得
-	if (pManager != nullptr) pSound = pManager->GetSound();
-	//ゲームの取得
-	if (pManager != nullptr) pGame = pManager->GetGameScene();
-
-	//死亡音の再生
-	if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::DEAD_TREE);
-	//ゲームオーバー設定
-	if (pGame != nullptr) pGame->GameOver();
+	//生贄を死亡
+	CObject::DeadObjtype(OBJTYPE_SCAPEGOAT);
 }
 
 //=============================================================================
@@ -539,19 +560,6 @@ void CAppleTree::AddMaxLife(int nAddLife) {
 }
 
 //=============================================================================
-// 体力を回復する
-//=============================================================================
-void CAppleTree::HealLife(int nHeal) {
-	m_nLife += nHeal;
-	if (m_nLife > m_nMaxLife) m_nLife = m_nMaxLife;
-
-	if (m_pGaugeLife != nullptr) {
-		//体力ゲージの設定
-		m_pGaugeLife->SetGaugeValue(m_nLife);
-	}
-}
-
-//=============================================================================
 // 成長度を増やす
 //=============================================================================
 void CAppleTree::AddGrow(int nAddValue) {
@@ -584,7 +592,19 @@ void CAppleTree::AddGrow(int nAddValue) {
 // リンゴの種類の取得
 //=============================================================================
 CGlowApple::APPLE_TYPE CAppleTree::GetCreateAppleType(int nIdx) {
-	if (nIdx < 0 || nIdx >= MAX_NUM_CREATE_APPLE) return CGlowApple::APPLE_TYPE::RED;
+	if (nIdx < 0 || nIdx >= MAX_NUM_CREATE_APPLE) return (CGlowApple::APPLE_TYPE) -1;
 
 	return m_aTypeCreateApple[nIdx];
+}
+
+//=============================================================================
+// リンゴの数を取得
+//=============================================================================
+int CAppleTree::GetNumApple(CGlowApple::APPLE_TYPE type) {
+	int nNumApple = 0;
+	for (int nCntApple = 0; nCntApple < MAX_NUM_CREATE_APPLE; nCntApple++)
+	{
+		if(m_aTypeCreateApple[nCntApple] == type) nNumApple++;
+	}
+	return nNumApple;
 }

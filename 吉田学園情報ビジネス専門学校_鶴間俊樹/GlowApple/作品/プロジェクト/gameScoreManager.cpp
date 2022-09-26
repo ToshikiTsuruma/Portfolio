@@ -183,7 +183,7 @@ void CGameScoreManager::AddKillCombo(void) {
 		break;
 	case 50:
 		//コンボの最大有効時間を減少
-		m_nTimeComboMax = 2 * FPS;
+		m_nTimeComboMax = (float)(2.5f * FPS);
 		//スコアの倍率の増加
 		m_fScoreRate = 5.0f;
 		//倍率表示を変更

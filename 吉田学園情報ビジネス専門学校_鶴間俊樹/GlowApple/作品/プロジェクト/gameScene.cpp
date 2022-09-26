@@ -7,9 +7,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "gameScene.h"
 #include "manager.h"
+#include "renderer.h"
 #include "input.h"
 #include "sound.h"
-#include "camera.h"
+#include "gameCamera.h"
 #include "fade.h"
 
 #include "timer.h"
@@ -49,6 +50,9 @@
 //=============================================================================
 #define GAME_TIME (300)
 #define TEXT_FILE_NAME_HISCORE "data/TEXT/save_hiscore.txt"
+#define TEXT_FILE_NAME_APPLETYPE "data/TEXT/save_appletype.txt"
+#define FOG_COLOR (D3DXCOLOR(0.1f, 0.0f, 0.2f, 1.0f))	//フォグの色
+#define FOG_COLOR_GAMECLEAR (D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	//フォグの色
 
 //=============================================================================
 // 静的メンバ変数宣言
@@ -83,18 +87,55 @@ CGameScene::~CGameScene()
 void CGameScene::Init(void) {
 	//マネージャーの取得
 	CManager* pManager = CManager::GetManager();
-	if (pManager == nullptr) return;
-	//カメラの取得
-	CCamera* pCamera = pManager->GetCamera();
-	if (pCamera == nullptr) return;
+	//レンダラーの取得
+	CRenderer* pRenderer = nullptr;
+	if (pManager != nullptr) pRenderer = pManager->GetRenderer();
 	//サウンドの取得
-	CSound* pSound = pManager->GetSound();
+	CSound* pSound = nullptr;
+	if (pManager != nullptr) pSound = pManager->GetSound();
 
-	//カメラの初期設定
-	pCamera->Init();
-	pCamera->AddRot(D3DXVECTOR3(0.0f, -0.3f, 0.0f));
+	//カメラの設定
+	if (pManager != nullptr) pManager->SetCamera(CGameCamera::Create());
 
+	//------------------------------
+	//ライトの初期設定
+	//------------------------------
+	D3DXMATRIX mtxLightProj;   // ライトの射影変換
+	//ライトのプロジェクションマトリックスを生成
+	D3DXMatrixPerspectiveFovLH(&mtxLightProj, D3DXToRadian(45.0f), 1.0f, 800.0f, 5500.0f);
+
+	D3DXMATRIX mtxLightView;   // ライトビュー変換
+	D3DXVECTOR3 posLight = D3DXVECTOR3(0.0f, 4800.0f, -1920.0f);	//ライトの位置
+	D3DXVECTOR3 vecLight;	//ライトのベクトル
+	D3DXVec3Normalize(&vecLight, &posLight);
+	vecLight *= -1;
+	//ライトのビューマトリックスを生成
+	D3DXMatrixLookAtLH(&mtxLightView, &posLight, &D3DXVECTOR3(posLight + vecLight), &D3DXVECTOR3(0, 1, 0));
+	//シェーダのライトを設定
+	if (pRenderer != nullptr) {
+		pRenderer->SetEffectLightMatrixView(mtxLightView);
+		pRenderer->SetEffectLightVector(D3DXVECTOR4(vecLight, 1.0f));
+		pRenderer->SetEffectLightMatrixProj(mtxLightProj);
+	}
+
+	//月のビルボード生成
+	CBillboard* pMoon = CBillboard::Create(D3DXVECTOR3(-800.0f, 1500.0f, -2000.0f), CTexture::TEXTURE_TYPE::MOON, 200.0f, 200.0f);
+	if (pMoon != nullptr) pMoon->SetDrawPriority(CObject::DRAW_PRIORITY::BG);
+
+	//------------------------------
+	//フォグの初期設定
+	//------------------------------
+	if (pRenderer != nullptr) {
+		pRenderer->SetEffectFogEnable(true);
+		pRenderer->SetEffectFogColor(FOG_COLOR);
+		pRenderer->SetEffectFogRange(800.0f, 4500.0f);
+		//バックバッファをフォグの色に合わせる
+		pRenderer->SetBackBuffColor(FOG_COLOR);
+	}
+
+	//------------------------------
 	//モーション情報のロード
+	//------------------------------
 	CPlayer::LoadMotionInfo();
 	CEnemyNormal::LoadMotionInfo();
 	CEnemyHuman::LoadMotionInfo();
@@ -146,7 +187,8 @@ void CGameScene::Init(void) {
 
 	//苗木の配置
 	CSeedling::Create(D3DXVECTOR3(-400.0f, 0.0f, -600.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-	CSeedling::Create(D3DXVECTOR3(400.0f, 0.0f, -800.0f), D3DXVECTOR3(0.0f, D3DX_PI * -0.2f, 0.0f));
+	CSeedling::Create(D3DXVECTOR3(400.0f, 0.0f, -300.0f), D3DXVECTOR3(0.0f, D3DX_PI * -0.4f, 0.0f));
+	CSeedling::Create(D3DXVECTOR3(200.0f, 0.0f, -700.0f), D3DXVECTOR3(0.0f, D3DX_PI * -0.2f, 0.0f));
 	CSeedling::Create(D3DXVECTOR3(500.0f, 0.0f, 400.0f), D3DXVECTOR3(0.0f, D3DX_PI * -0.6f, 0.0f));
 	CSeedling::Create(D3DXVECTOR3(-800.0f, 0.0f, -100.0f), D3DXVECTOR3(0.0f, D3DX_PI * 0.4f, 0.0f));
 	CSeedling::Create(D3DXVECTOR3(-600.0f, 0.0f, 700.0f), D3DXVECTOR3(0.0f, D3DX_PI * 0.8f, 0.0f));
@@ -290,20 +332,24 @@ void CGameScene::UpdateGame(void) {
 // ゲームクリア時の更新
 //=============================================================================
 void CGameScene::UpdateGameClear(void) {
-	CManager* pManager = CManager::GetManager();	//マネージャーの取得
+	//マネージャーの取得
+	CManager* pManager = CManager::GetManager();	
 	if (pManager == nullptr) return;
 	//現在の入力デバイスの取得
 	CInput* pInput = pManager->GetInputCur();
 	if (pInput == nullptr) return;
 	//カメラの取得
-	CCamera* pCamera = pManager->GetCamera();	//カメラへのポインタ
+	CCamera* pCamera = pManager->GetCamera();
 	if (pCamera == nullptr) return;
 	//フェードの取得
-	CFade* pFade = pManager->GetFade();		//フェードへのポインタ
+	CFade* pFade = pManager->GetFade();
 	if (pFade == nullptr) return;
 	//サウンドの取得
-	CSound* pSound = pManager->GetSound();	//サウンドへのポインタ
+	CSound* pSound = pManager->GetSound();
 	if (pSound == nullptr) return;
+	//レンダラーの取得
+	CRenderer* pRenderer = pManager->GetRenderer();
+	if (pRenderer == nullptr) return;
 
 
 	if (m_nCntGameClear == 60) {
@@ -324,7 +370,8 @@ void CGameScene::UpdateGameClear(void) {
 			aTypeApple[nCnt] = m_pAppleTree->GetCreateAppleType(nCnt);
 		}
 		//木とリンゴの破棄
-		CObject::ReleaseObjtype((CObject::OBJTYPE)(CObject::OBJTYPE_APPLETREE));
+		CObject::ReleaseObjtype(CObject::OBJTYPE_APPLETREE | CObject::OBJTYPE_SCAPEGOAT | CObject::OBJTYPE_SEEDLING);
+		m_pAppleTree = nullptr;
 
 		//木を生成
 		for (int nCntTree = 0; nCntTree < nNumCreateApple; nCntTree++)
@@ -349,29 +396,8 @@ void CGameScene::UpdateGameClear(void) {
 			for (int nCntApple = 0; nCntApple < MAX_NUM_CREATE_APPLE; nCntApple++)
 			{
 				D3DXVECTOR3 posApple = posTree + CAppleTree::GetOffsetPosApple(nCntApple);
-
-				//林檎を生成
-				switch (aTypeApple[nCntTree])
-				{
-				case CGlowApple::APPLE_TYPE::RED:
-					CAppleRed::Create(posApple, nullptr);
-					break;
-				case CGlowApple::APPLE_TYPE::GREEN:
-					CAppleGreen::Create(posApple, nullptr);
-					break;
-				case CGlowApple::APPLE_TYPE::WHITE:
-					CAppleWhite::Create(posApple, nullptr);
-					break;
-				case CGlowApple::APPLE_TYPE::BLACK:
-					CAppleBlack::Create(posApple, nullptr);
-					break;
-				case CGlowApple::APPLE_TYPE::SILVER:
-					CAppleSilver::Create(posApple, nullptr);
-					break;
-				case CGlowApple::APPLE_TYPE::GOLD:
-					 CAppleGold::Create(posApple, nullptr);
-					break;
-				}
+				//リンゴの生成
+				CAppleTree::CreateApple(aTypeApple[nCntApple], posApple, nullptr);
 			}
 		}
 
@@ -419,6 +445,16 @@ void CGameScene::UpdateGameClear(void) {
 			pPlayer->SetPos(D3DXVECTOR3(0.0f, -800.0f, 0.0f));	//いい感じになったので埋もれさせる
 			pPlayer->SetRot(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 		}
+
+		//------------------------------
+		//フォグの設定
+		//------------------------------
+		if (pRenderer != nullptr) {
+			pRenderer->SetEffectFogColor(FOG_COLOR_GAMECLEAR);
+			pRenderer->SetEffectFogRange(1000.0f, 4500.0f);
+			//バックバッファをフォグの色に合わせる
+			pRenderer->SetBackBuffColor(FOG_COLOR_GAMECLEAR);
+		}
 	}
 
 	if (m_nCntGameClear == 540) {
@@ -453,12 +489,15 @@ void CGameScene::UpdateGameClear(void) {
 		if (nHighScore < m_nGameScore) {
 			//スコアの置き換え
 			nHighScore = m_nGameScore;
+
 			//ファイルを開く
 			pFile = fopen(TEXT_FILE_NAME_HISCORE, "w");
-			//ハイスコアを保存
-			fprintf(pFile, "%d", nHighScore);
-			//ファイルを閉じる
-			fclose(pFile);
+			if (pFile != nullptr) {
+				//ハイスコアを保存
+				fprintf(pFile, "%d", nHighScore);
+				//ファイルを閉じる
+				fclose(pFile);
+			}
 
 			//ハイスコア更新のテキストを表示
 			CObject2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f + 350.0f, 500.0f, 0.0f), CTexture::TEXTURE_TYPE::UPDATE_HISCORE, 200.0f, 100.0f);
@@ -475,8 +514,6 @@ void CGameScene::UpdateGameClear(void) {
 
 	}
 	if (m_nCntGameClear == 900) {
-		//カメラの動きの固定を解除
-		pCamera->SetLockControll(false);	//タイトルまでの遷移の間少しだけ動かせる様になってしまっていたけどこれはこれであり
 		//タイトルへフェード
 		pFade->SetFade(CScene::SCENE_TYPE::TITLE, 0.01f, 60);
 	}
@@ -554,7 +591,14 @@ void CGameScene::GameClear(void) {
 		pPlayer->GameClear();
 	}
 
+	//------------------------
+	//リンゴの種類のセーブ
+	//------------------------
+	SaveAppleType();
+
+	//------------------------
 	//敵をすべて死亡させる
+	//------------------------
 	CObject::DeadObjtype(CObject::OBJTYPE_ENEMY);
 	//敵消滅音を再生
 	if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::ENDGAME);
@@ -565,17 +609,18 @@ void CGameScene::GameClear(void) {
 		pSWEmitter->SetColAddCreate(D3DXCOLOR(D3DXCOLOR(0.0f, -0.1f, -0.2f, 0.0f)));
 	}
 
+	//------------------------
+	//オブジェクトの破棄
+	//------------------------
 	//タイマーを破棄
 	if (m_pTimer != nullptr) {
 		m_pTimer->SetStop(true);
 	}
-
 	//敵のスポナーの破棄
 	if (m_pEnemySpawner != nullptr) {
 		m_pEnemySpawner->Uninit();
 		m_pEnemySpawner = nullptr;
 	}
-
 	//生贄生成クラスの破棄
 	if (m_pScapegoatCreater != nullptr) {
 		m_pScapegoatCreater->Uninit();
@@ -602,13 +647,15 @@ void CGameScene::GameOver(void) {
 	//ゲームオーバー音を再生
 	if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::GAMEOVER);
 
-
 	//プレイヤーの取得
 	CPlayer* pPlayer = GetPlayer();
 	if (pPlayer != nullptr) {
 		//プレイヤーのゲームオーバー時の処理
 		pPlayer->GameOver();
 	}
+
+	//リンゴの種類のセーブ
+	SaveAppleType();
 
 	//ゲームオーバーテキストの表示
 	CObject2D::Create(D3DXVECTOR3(SCREEN_WIDTH / 2.0f, 300.0f, 0.0f), CTexture::TEXTURE_TYPE::TEXT_GAMEOVER, 600.0f, 150.0f);
@@ -691,4 +738,23 @@ void CGameScene::AddNumKillEnemy(int nNum) {
 	if (m_pScapegoatCreater != nullptr) {
 		m_pScapegoatCreater->AddNumKillEnemy(nNum);
 	}
+}
+
+//=============================================================================
+// ゲーム終了時のリンゴの種類の保存
+//=============================================================================
+void CGameScene::SaveAppleType(void) {
+	//ファイルを開く
+	FILE* pFile = fopen(TEXT_FILE_NAME_APPLETYPE, "w");
+	if (pFile == nullptr) return;
+
+	//リンゴの種類を保存
+	for (int nCnt = 0; nCnt < MAX_NUM_CREATE_APPLE; nCnt++)
+	{
+		if (m_pAppleTree == nullptr) break;
+		int nTypeApple = (int)m_pAppleTree->GetCreateAppleType(nCnt);
+		fprintf(pFile, "%d\n", nTypeApple);
+	}
+	//ファイルを閉じる
+	fclose(pFile);
 }

@@ -6,9 +6,13 @@
 //=============================================================================
 #include "scapegoat.h"
 #include "manager.h"
+#include "gameScene.h"
 #include "sound.h"
 #include "effect.h"
 #include "gauge3D.h"
+#include "appleTree.h"
+#include "shockWaveEmitter.h"
+#include "thunderEmitter.h"
 
 //=============================================================================
 // マクロ定義
@@ -17,6 +21,8 @@
 
 #define NUM_COLLISION (8)			//当たり判定の数
 #define COLLISION_RADIUS (20.0f)	//当たり判定の半径
+
+#define SPAN_ATTACK (FPS * 6)	//攻撃スパン
 
 //=============================================================================
 // 静的メンバ変数宣言
@@ -31,6 +37,7 @@ CScapegoat::CScapegoat() : CObjectModel(CModel::MODELTYPE::OBJ_SCAPEGOAT, false)
 	SetEnableCollision(true);		//当たり判定有効
 
 	m_nLife = DEFAULT_MAX_LIFE;
+	m_nCntAttack = 0;
 
 	//体力ゲージの生成
 	m_pGaugeLife = CGauge3D::Create(DEFAULT_MAX_LIFE, false, m_nLife, FPS * 20, false);
@@ -79,6 +86,8 @@ HRESULT CScapegoat::Init(void) {
 		pModel->SetColorGlow(D3DXCOLOR(1.0f, 0.8f, 0.4f, 1.0f));
 	}
 
+	m_nCntAttack = SPAN_ATTACK;
+
 	CObjectModel::Init();
 
 	return S_OK;
@@ -88,6 +97,12 @@ HRESULT CScapegoat::Init(void) {
 // 生贄の終了処理
 //=============================================================================
 void CScapegoat::Uninit(void) {
+	//体力ゲージの破棄
+	if (m_pGaugeLife != nullptr) {
+		m_pGaugeLife->Uninit();
+		m_pGaugeLife = nullptr;
+	}
+
 	CObjectModel::Uninit();
 }
 
@@ -95,6 +110,38 @@ void CScapegoat::Uninit(void) {
 // 生贄の更新処理
 //=============================================================================
 void CScapegoat::Update(void) {
+	if (m_nCntAttack >= SPAN_ATTACK) {
+		m_nCntAttack = 0;
+
+		//マネージャーの取得
+		CManager* pManager = CManager::GetManager();
+		CGameScene* pGameScene = nullptr;
+		if (pManager != nullptr) pGameScene = pManager->GetGameScene();
+		CAppleTree* pAppleTree = nullptr;
+		if (pGameScene != nullptr) pAppleTree = pGameScene->GetAppleTree();
+
+		int nNumShockwave = 0;
+		int nNumThunder = 0;
+		if (pAppleTree != nullptr) {
+			nNumShockwave = pAppleTree->CAppleTree::GetNumApple(CGlowApple::APPLE_TYPE::WHITE);
+			nNumThunder = pAppleTree->CAppleTree::GetNumApple(CGlowApple::APPLE_TYPE::SILVER);
+		}
+
+		//衝撃波の生成
+		CShockWaveEmitter* pSWEmitter = CShockWaveEmitter::Create(nNumShockwave + 1, 4, GetPos(), 30.0f, 0.0f, 10.0f, 50.0f, -1.0f, 15, D3DX_PI * 0.05f);
+		if (pSWEmitter != nullptr) pSWEmitter->SetColAddCreate(D3DXCOLOR(-0.15f, -0.15f, 0.0f, 0.0f));
+		//雷の生成
+		if(nNumThunder > 0) CThunderEmitter::CreateRound(nNumThunder, 6, GetPos(), GetRot().y + D3DX_PI, 0.0f);
+
+		//サウンドの取得
+		CSound *pSound = nullptr;
+		if (pManager != nullptr) pSound = pManager->GetSound();
+		if (pSound != nullptr) pSound->PlaySound(CSound::SOUND_LABEL::SWISH_PUNCH);
+	}
+	else {
+		m_nCntAttack++;
+	}
+
 	CObjectModel::Update();
 }
 
@@ -103,6 +150,19 @@ void CScapegoat::Update(void) {
 //=============================================================================
 void CScapegoat::Draw(void) {
 	CObjectModel::Draw();
+}
+
+//=============================================================================
+// 体力を回復する
+//=============================================================================
+void CScapegoat::Heal(int nHeal) {
+	m_nLife += nHeal;
+	if (m_nLife > DEFAULT_MAX_LIFE) m_nLife = DEFAULT_MAX_LIFE;
+
+	if (m_pGaugeLife != nullptr) {
+		//体力ゲージの設定
+		m_pGaugeLife->SetGaugeValue(m_nLife);
+	}
 }
 
 //=============================================================================

@@ -15,8 +15,6 @@
 //=============================================================================
 #define DEFAULT_EFFECT_FILE_NAME "effect/DefaultEffect.fx"	//読み込むエフェクトファイルの名前
 #define DEFAULT_EFFECT_TECHNIQUE_NAME "RenderScene"	//エフェクトファイルのTechniqueの名前
-//#define FOG_COLOR (D3DXCOLOR(0.0f, 0.7f, 1.0f, 1.0f))	//フォグの色
-#define FOG_COLOR (D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	//フォグの色
 
 //=============================================================================
 // 静的メンバ変数宣言
@@ -44,6 +42,7 @@ CRenderer::CRenderer()
 	m_pD3D = nullptr;
 	m_pD3DDevice = nullptr;
 	m_pEffect = nullptr;
+	m_colBackBuff = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	m_bDrawZTex = false;
 }
 
@@ -235,11 +234,6 @@ HRESULT CRenderer::Init(HWND hWnd, bool bWindow) {
 	CreateVtxDecl2D();
 	CreateVtxDecl3D();
 
-	//フォグの初期設定
-	SetEffectFogEnable(true);
-	SetEffectFogColor(FOG_COLOR);
-	SetEffectFogRange(2000.0f, 4500.0f);
-
 #ifdef _DEBUG
 	// デバッグ情報表示用フォントの生成
 	D3DXCreateFont(m_pD3DDevice, 18, 0, FW_REGULAR, 0, FALSE, SHIFTJIS_CHARSET,
@@ -324,7 +318,6 @@ void CRenderer::Draw(void) {
 	if (pManager == nullptr) return;
 	//カメラの取得
 	CCamera* pCamera = pManager->GetCamera();
-	if (pCamera == nullptr) return;
 	//フェードの取得
 	CFade* pFade = pManager->GetFade();
 
@@ -332,22 +325,28 @@ void CRenderer::Draw(void) {
 	if (SUCCEEDED(m_pD3DDevice->BeginScene()))
 	{
 		//カメラのセット
-		if (pCamera != nullptr) pCamera->SetCamera();
+		if (pCamera != nullptr) {
+			pCamera->SetCamera();
 
-		//----------------------------------
-		//Z値バッファの描画
-		//----------------------------------
-		//サーフェイスとステンシルの設定
-		m_pD3DDevice->SetRenderTarget(0, m_pZTexSurf);
-		m_pD3DDevice->SetDepthStencilSurface(m_pDepthBuff);
-		// バックバッファ＆Ｚバッファのクリア
-		m_pD3DDevice->Clear(0, nullptr, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 0);
+			//----------------------------------
+			//Z値バッファの描画
+			//----------------------------------
+			//サーフェイスとステンシルの設定
+			m_pD3DDevice->SetRenderTarget(0, m_pZTexSurf);
+			m_pD3DDevice->SetDepthStencilSurface(m_pDepthBuff);
+			// バックバッファ＆Ｚバッファのクリア
+			m_pD3DDevice->Clear(0, nullptr, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 0);
 
-		//Z値バッファ描画中
-		m_bDrawZTex = true;
+			//Z値バッファ描画中
+			m_bDrawZTex = true;
 
-		//各オブジェクトの描画処理
-		CObject::DrawAll();
+			//各オブジェクトの描画処理
+			CObject::DrawAll();
+
+			//スペキュラー用のカメラの視点の位置を設定
+			D3DXVECTOR4 posV = pCamera->GetPosV();
+			SetEffectPosView(posV);
+		}
 
 		//----------------------------------
 		//通常の描画
@@ -355,11 +354,8 @@ void CRenderer::Draw(void) {
 		//サーフェイスとステンシルの設定
 		m_pD3DDevice->SetRenderTarget(0, m_pDefaultSurf);
 		m_pD3DDevice->SetDepthStencilSurface(m_pDefaultDepthSurf);
-		//スペキュラー用のカメラの視点の位置を設定
-		D3DXVECTOR4 posV = pCamera->GetPosV();
-		SetEffectPosView(posV);
 		// バックバッファ＆Ｚバッファのクリア
-		m_pD3DDevice->Clear(0, nullptr, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), FOG_COLOR, 1.0f, 0);	//フォグと同じ色にするといい感じ
+		m_pD3DDevice->Clear(0, nullptr, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), m_colBackBuff, 1.0f, 0);	//フォグと同じ色にするといい感じ
 
 		//Z値バッファ描画中ではない
 		m_bDrawZTex = false;

@@ -44,8 +44,10 @@ CAppleBlack::~CAppleBlack()
 // •—ÑŒç‚Ì¶¬ˆ—
 //=============================================================================
 CAppleBlack* CAppleBlack::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
-	CAppleBlack* pAppleBlack;
-	pAppleBlack = new CAppleBlack(pTree);
+	//ƒ|ƒCƒ“ƒ^‚ªƒŠƒ“ƒS‚Ì–Ø‚Å‚Í‚È‚¢ê‡null
+	pTree = dynamic_cast<CAppleTree*>(pTree);
+
+	CAppleBlack* pAppleBlack = new CAppleBlack(pTree);
 	if (pAppleBlack == nullptr) return nullptr;
 
 	pAppleBlack->SetPos(pos);

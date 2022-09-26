@@ -135,7 +135,7 @@ void CObject::ReleaseAll(void) {
 // 指定したタイプのオブジェクトの解放処理
 //=============================================================================
 //※破棄したオブジェクトを別のクラスでポインタを保持していた場合エラーが起きるため注意
-void CObject::ReleaseObjtype(OBJTYPE objtype) {
+void CObject::ReleaseObjtype(int nObjtype) {
 	CObject* pObject = m_pTopAll;	//全オブジェクトのポインタを先頭から順に代入
 	while (pObject != nullptr)
 	{
@@ -143,7 +143,7 @@ void CObject::ReleaseObjtype(OBJTYPE objtype) {
 		CObject* pObjectNext = pObject->m_pNextAll;
 
 		//オブジェクトタイプが一致しない場合
-		if (!(pObject->m_objType & objtype)) {
+		if (!(pObject->m_objType & nObjtype)) {
 			//次のオブジェクトを代入
 			pObject = pObjectNext;
 			//ループを飛ばす
@@ -233,14 +233,14 @@ void CObject::DrawAll(void) {
 //=============================================================================
 // 指定したタイプの死亡処理
 //=============================================================================
-void CObject::DeadObjtype(OBJTYPE objtype) {
+void CObject::DeadObjtype(int nObjtype) {
 	CObject* pObject = m_pTopAll;	//全オブジェクトのポインタを先頭から順に代入
 	while (pObject != nullptr)
 	{
 		CObject* pObjectNext = pObject->m_pNextAll;
 
 		//オブジェクトタイプが一致しない場合
-		if (!(pObject->m_objType & objtype)) {
+		if (!(pObject->m_objType & nObjtype)) {
 			//次のオブジェクトを代入
 			pObject = pObjectNext;
 			//ループを飛ばす

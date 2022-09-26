@@ -28,7 +28,9 @@ CObjectModel::CObjectModel(CModel::MODELTYPE typeModel, bool bOutLine)
 {
 	m_pModel = CModel::Create(typeModel, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), nullptr, bOutLine);
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_rotSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 }
 
 //=============================================================================
@@ -85,9 +87,9 @@ void CObjectModel::Update(void) {
 	}
 
 	//移動処理
-	//Move();
+	Move();
 	//回転処理
-	//Rotate();
+	Rotate();
 }
 
 //=============================================================================
@@ -126,102 +128,34 @@ void CObjectModel::Draw(void) {
 // 移動
 //=============================================================================
 void CObjectModel::Move(void) {
-	CManager* pManager = CManager::GetManager();	//マネージャーの取得
-	CInput* pInput = nullptr;	//入力デバイスへのポインタ
-
-	//現在の入力デバイスの取得
-	if (pManager != nullptr) pInput = pManager->GetInputCur();
-	//nullの場合終了
-	if (pInput == nullptr) return;
-
-	//--------------------
-	//入力処理
-	//--------------------
-	float fMoveSpeed = 1.0f;
-	if (pInput->GetPress(CInput::CODE::DASH)) {
-		fMoveSpeed *= 5;
-	}
-
-	//位置の取得
-	D3DXVECTOR3 pos = m_pos;
-
-	if (pInput->GetPress(CInput::CODE::MOVE_UP)) {
-		//前移動
-		pos.z += fMoveSpeed;
-	}
-	if (pInput->GetPress(CInput::CODE::MOVE_DOWN)) {
-		//後ろ移動
-		pos.z -= fMoveSpeed;
-	}
-	if (pInput->GetPress(CInput::CODE::MOVE_LEFT)) {
-		//左移動
-		pos.x -= fMoveSpeed;
-	}
-	if (pInput->GetPress(CInput::CODE::MOVE_RIGHT)) {
-		//右移動
-		pos.x += fMoveSpeed;
-	}
-	if (pInput->GetPress(CInput::CODE::MOVE_RISE)) {
-		//上昇
-		pos.y += fMoveSpeed;
-	}
-	if (pInput->GetPress(CInput::CODE::MOVE_FALL)) {
-		//下降
-		pos.y -= fMoveSpeed;
-	}
-
 	//位置の移動
-	m_pos = pos;
+	m_pos += m_move;
 }
 
 //=============================================================================
 // 回転
 //=============================================================================
 void CObjectModel::Rotate(void) {
-	CManager* pManager = CManager::GetManager();	//マネージャーの取得
-	CInput* pInput = nullptr;	//入力デバイスへのポインタ
+	m_rot += m_rotSpeed;
 
-	//現在の入力デバイスの取得
-	if (pManager != nullptr) pInput = pManager->GetInputCur();
-	//nullの場合終了
-	if (pInput == nullptr) return;
-	//シフトが押されている場合終了（カメラの視点移動中のため）
-	if (pInput->GetPress(CInput::CODE::DASH)) return;
-
-	//--------------------
-	//入力処理
-	//--------------------
-	D3DXVECTOR3 rot = m_rot;
-	float fRotateSpeed = 0.01f * D3DX_PI;
-
-	//X軸回転
-	if (pInput->GetPress(CInput::CODE::ROTATE_UP)) {
-		rot.x += fRotateSpeed;
-		if (rot.x > D3DX_PI) {
-			rot.x = -D3DX_PI * 2 + rot.x;
-		}
+	if (m_rot.x > D3DX_PI) {
+		m_rot.x += -D3DX_PI * 2;
 	}
-	if (pInput->GetPress(CInput::CODE::ROTATE_DOWN)) {
-		rot.x -= fRotateSpeed;
-		if (rot.x < -D3DX_PI) {
-			rot.x = D3DX_PI * 2 + rot.x;
-		}
+	if (m_rot.x < -D3DX_PI) {
+		m_rot.x += D3DX_PI * 2;
 	}
-	//Y軸回転
-	if (pInput->GetPress(CInput::CODE::ROTATE_LEFT)) {
-		rot.y -= fRotateSpeed;
-		if (rot.y < -D3DX_PI) {
-			rot.y = D3DX_PI * 2 + rot.y;
-		}
+	if (m_rot.y < -D3DX_PI) {
+		m_rot.y += D3DX_PI * 2;
 	}
-	if (pInput->GetPress(CInput::CODE::ROTATE_RIGHT)) {
-		rot.y += fRotateSpeed;
-		if (rot.y > D3DX_PI) {
-			rot.y = -D3DX_PI * 2 + rot.y;
-		}
+	if (m_rot.y > D3DX_PI) {
+		m_rot.y += -D3DX_PI * 2;
 	}
-
-	m_rot = rot;
+	if (m_rot.z < -D3DX_PI) {
+		m_rot.z += D3DX_PI * 2;
+	}
+	if (m_rot.z > D3DX_PI) {
+		m_rot.z += -D3DX_PI * 2;
+	}
 }
 
 //=============================================================================
@@ -233,36 +167,17 @@ CModel::MODELTYPE CObjectModel::GetModelType(void) {
 }
 
 //=============================================================================
-// モデルのポインタの取得
+// モデルの色の設定
 //=============================================================================
-CModel* CObjectModel::GetPtrModel(void) {
-	return m_pModel;
+void CObjectModel::SetModelColor(D3DXCOLOR col, int nIdx) {
+	if (m_pModel == nullptr) return;
+	m_pModel->SetMaterialDiffuse(col, nIdx);
 }
 
 //=============================================================================
-// モデルオブジェクトの位置情報の設定
+// モデルの発光色の設定
 //=============================================================================
-void CObjectModel::SetPos(D3DXVECTOR3 pos) {	
-	m_pos = pos;
-}
-
-//=============================================================================
-// モデルオブジェクトの位置情報の取得
-//=============================================================================
-D3DXVECTOR3 CObjectModel::GetPos(void) {
-	return m_pos;
-}
-
-//=============================================================================
-// モデルオブジェクトの角度の設定
-//=============================================================================
-void CObjectModel::SetRot(D3DXVECTOR3 rot) { 
-	m_rot = rot;
-}
-
-//=============================================================================
-// モデルオブジェクトの角度の取得
-//=============================================================================
-D3DXVECTOR3 CObjectModel::GetRot(void) {
-	return m_rot;
+void CObjectModel::SetModelGlowColor(D3DXCOLOR col) {
+	if (m_pModel == nullptr) return;
+	m_pModel->SetColorGlow(col);
 }

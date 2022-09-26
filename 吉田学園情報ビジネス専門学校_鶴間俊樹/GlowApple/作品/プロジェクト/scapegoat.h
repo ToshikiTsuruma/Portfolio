@@ -33,6 +33,7 @@ public:
 	void Update(void);		//更新処理
 	void Draw(void);		//描画処理
 
+	void Heal(int nHeal);		//体力を回復する
 	void Damage(int nDamage, DAMAGE_TYPE typeDamage, bool* pDead);		//ダメージ
 	void Dead(void);		//死亡時処理
 	void GetCollisionInfo(int nIdxColParts, int* const pNumCol, D3DXVECTOR3** const ppPosColArray, float* const pRadiusCol);	//当たり判定の情報の取得
@@ -40,6 +41,7 @@ public:
 private:
 	int m_nLife;	//体力
 	CGauge3D* m_pGaugeLife;	//体力ゲージ
+	int m_nCntAttack;	//	攻撃発生カウンタ
 };
 
 #endif // !_SCAPEGOAT_H_

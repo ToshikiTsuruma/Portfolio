@@ -159,7 +159,7 @@ void CAppleMenu::Update(void) {
 		//‘I‘ð‚ð“ü—Í
 		if (m_pAppleTree != nullptr && pInput->GetTrigger(CInput::CODE::SELECT) && !GetLockChangeSelect()) {
 			//—ÑŒç‚Ì¶¬
-			m_pAppleTree->CreateApple(GetSelectAppleType());
+			m_pAppleTree->YieldApple(GetSelectAppleType());
 		}
 	}
 

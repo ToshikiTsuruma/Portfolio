@@ -96,8 +96,8 @@ class CInputGamepadX : public CInput
 public:
 	//ÉgÉäÉKÅ[ÇÃç∂âE
 	enum class TRIGGER_TYPE {
-		MOVE_RIGHT = 0,
-		MOVE_LEFT,
+		RIGHT = 0,
+		LEFT,
 		ENUM_MAX
 	};
 

@@ -19,6 +19,7 @@
 #include "particleEffect.h"
 #include "object2D.h"
 #include "billboard.h"
+#include "appleTree.h"
 
 #include "shockWaveEmitter.h"
 #include "thunderEmitter.h"
@@ -95,8 +96,6 @@ CPlayer::CPlayer() : CObjectMotion(m_pPartsInfoArray, m_nNumParts, &m_aMotionInf
 	m_bValidAttack = false;
 	m_nNumKillEnemy = 0;
 	m_nCntLockAct = 0;
-	m_nNumShockWave = 0;
-	m_nNumThunder = 0;
 
 	m_nCntGameover = 0;
 }
@@ -167,14 +166,6 @@ HRESULT CPlayer::Init(void) {
 
 	//マネージャーの取得
 	CManager* pManager = CManager::GetManager();
-	//カメラの取得
-	CCamera* pCamera = nullptr;
-	if (pManager != nullptr) pCamera = pManager->GetCamera();
-
-	//カメラの初期設定
-	if (pCamera != nullptr) {
-		//pCamera->SetDistance(CAMERA_DISTANCE);
-	}
 
 	CObjectMotion::Init();
 	SetMotion((int)MOTION_TYPE::NEUTRAL);	//モーションの初期設定
@@ -250,6 +241,12 @@ void CPlayer::Update(void) {
 			}
 			return;
 		}
+	}
+	//ゲーム以外
+	else {
+		//モーションのアップデート
+		CObjectMotion::Update();
+		return;
 	}
 
 	//----------------------------
@@ -806,6 +803,21 @@ void CPlayer::MotionAction(void) {
 
 	bool bBeginAttack = false;	//攻撃開始時かどうか
 
+	CGameScene* pGameScene = nullptr;
+	if(pManager != nullptr) pGameScene = pManager->GetGameScene();
+
+	CAppleTree* pAppleTree = nullptr;
+	if (pGameScene != nullptr) pAppleTree = pGameScene->GetAppleTree();
+
+	int nNumShockwave = 0;
+	int nNumThunder = 0;
+
+	if (pAppleTree != nullptr) {
+		nNumShockwave = pAppleTree->CAppleTree::GetNumApple(CGlowApple::APPLE_TYPE::WHITE);
+		nNumThunder = pAppleTree->CAppleTree::GetNumApple(CGlowApple::APPLE_TYPE::SILVER);
+		nNumThunder *= 2;
+	}
+
 	switch ((MOTION_TYPE)GetMotionType())
 	{
 
@@ -869,12 +881,12 @@ void CPlayer::MotionAction(void) {
 
 			//衝撃波生成
 			D3DXVECTOR3 posWave = GetPos() + D3DXVECTOR3(sinf(GetRot().y + D3DX_PI) * 200.0f, -5.0f, cosf(GetRot().y + D3DX_PI) * 200.0f);	//プレイヤーの前方
-			CShockWaveEmitter* pSWEmitter = CShockWaveEmitter::Create(m_nNumShockWave + 1, 4, posWave, 40.0f, 0.0f, 22.0f, 90.0f, -1.0f, 13, D3DX_PI * 0.02f);
+			CShockWaveEmitter* pSWEmitter = CShockWaveEmitter::Create(nNumShockwave + 1, 4, posWave, 40.0f, 0.0f, 22.0f, 90.0f, -1.0f, 13, D3DX_PI * 0.02f);
 			//生成数ごとに足す色の設定
 			if (pSWEmitter != nullptr) pSWEmitter->SetColAddCreate(D3DXCOLOR(-0.15f, -0.15f, 0.0f, 0.0f));
 
 			//雷の生成
-			if (m_nNumThunder > 0) CThunderEmitter::CreateStraight(m_nNumThunder + 1, 5, posWave, posWave - GetPos(), 100.0f);
+			if (nNumThunder > 0) CThunderEmitter::CreateStraight(nNumThunder + 1, 5, posWave, posWave - GetPos(), 100.0f);
 		}
 		break;
 
@@ -898,12 +910,12 @@ void CPlayer::MotionAction(void) {
 
 			//衝撃波生成
 			D3DXVECTOR3 posWave = GetPos() + D3DXVECTOR3(0.0f, -5.0f, 0.0f);
-			CShockWaveEmitter* pSWEmitter = CShockWaveEmitter::Create(m_nNumShockWave + 2, 4, posWave, 40.0f, 0.0f, 30.0f, 110.0f, -1.0f, 15, D3DX_PI * 0.02f);
+			CShockWaveEmitter* pSWEmitter = CShockWaveEmitter::Create(nNumShockwave + 2, 4, posWave, 50.0f, 0.0f, 30.0f, 110.0f, -1.0f, 15, D3DX_PI * 0.02f);
 			//生成数ごとに足す色の設定
 			if (pSWEmitter != nullptr) pSWEmitter->SetColAddCreate(D3DXCOLOR(0.0f, -0.05f, -0.15f, 0.0f));
 
 			//雷の生成
-			if(m_nNumThunder > 0) CThunderEmitter::CreateRound(m_nNumThunder + 1, 3, posWave, GetRot().y + D3DX_PI, 400.0f);
+			if(nNumThunder > 0) CThunderEmitter::CreateRound(nNumThunder + 1, 3, posWave, GetRot().y + D3DX_PI, 400.0f);
 		}
 		break;
 

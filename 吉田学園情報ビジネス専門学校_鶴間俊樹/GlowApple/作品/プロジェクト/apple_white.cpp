@@ -6,9 +6,6 @@
 //=============================================================================
 #include "apple_white.h"
 #include "appleTree.h"
-#include "manager.h"
-#include "gameScene.h"
-#include "player.h"
 #include "effect.h"
 
 //=============================================================================
@@ -43,23 +40,11 @@ CAppleWhite::~CAppleWhite()
 // 白林檎の生成処理
 //=============================================================================
 CAppleWhite* CAppleWhite::Create(D3DXVECTOR3 pos, CAppleTree* pTree) {
-	CAppleWhite* pAppleWhite;
-	pAppleWhite = new CAppleWhite(pTree);
+	//ポインタがリンゴの木ではない場合null
+	pTree = dynamic_cast<CAppleTree*>(pTree);
+
+	CAppleWhite* pAppleWhite = new CAppleWhite(pTree);
 	if (pAppleWhite == nullptr) return nullptr;
-
-	//マネージャーの取得
-	CManager* pManager = CManager::GetManager();
-	CGameScene* pGame = nullptr;
-	CPlayer* pPlayer = nullptr;
-	//ゲームシーンの取得
-	if (pManager != nullptr) pGame = pManager->GetGameScene();
-	//プレイヤーの取得
-	if (pGame != nullptr) pPlayer = pGame->GetPlayer();
-
-	//プレイヤーの衝撃波数を増やす
-	if (pPlayer != nullptr) {
-		pPlayer->AddNumShockwave(1);
-	}
 
 	//風の渦のエフェクトを生成
 	pAppleWhite->m_pEffectWind = CEffect::Create(pos + D3DXVECTOR3(0.0f, -15.0f, 0.0f), CEffect::EFFECT_TYPE::WIND, 40.0f, 40.0f, true);

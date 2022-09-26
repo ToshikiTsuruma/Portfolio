@@ -120,24 +120,6 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, bool bWindow) {
 	//モデルのロード
 	CModel::Load();
 
-	//------------------------------
-	//インスタンス生成
-	//------------------------------
-
-	//カメラの生成
-	m_pCamera = CCamera::Create();
-
-	//------------------------------
-	//ライトの初期設定	(ビューマトリックスはカメラで設定)
-	//------------------------------
-	D3DXVECTOR3 vecLight = D3DXVECTOR3(0.0f, -1.0f, 0.4f);	//ライトのベクトル
-	D3DXMATRIX mtxLightProj;   // ライトの射影変換
-	//ライトのプロジェクションマトリックスを生成
-	D3DXMatrixPerspectiveFovLH(&mtxLightProj, D3DXToRadian(45.0f), 1.0f, 600.0f, 5400.0f);
-
-	//シェーダのライトを設定
-	m_pRenderer->SetEffectLightVector(D3DXVECTOR4(vecLight, 1.0f));
-	m_pRenderer->SetEffectLightMatrixProj(mtxLightProj);
 
 	//シーンの生成
 	CScene::ChangeScene(m_pScene, CScene::SCENE_TYPE::TITLE);
@@ -264,6 +246,17 @@ void CManager::Draw(void) {
 void CManager::ChangeScene(int nTypeScene) {
 	//シーンの変更
 	CScene::ChangeScene(m_pScene, (CScene::SCENE_TYPE)nTypeScene);
+}
+
+//=============================================================================
+// カメラの設定
+//=============================================================================
+void CManager::SetCamera(CCamera* pCamera) {
+	if (pCamera == nullptr) return;
+	//現在のカメラの破棄
+	if (m_pCamera != nullptr) m_pCamera->Uninit();
+	//新しいカメラの設定
+	m_pCamera = pCamera;
 }
 
 //=============================================================================
