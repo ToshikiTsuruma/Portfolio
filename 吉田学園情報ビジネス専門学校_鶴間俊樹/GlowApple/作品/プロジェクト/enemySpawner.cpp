@@ -142,18 +142,25 @@ void CEnemySpawner::SetTimeLevel(void) {
 		CEnemy::SetGoldRush(false);
 		break;
 
-	case 50:
+	case 60:
 		//スポーン間隔の減少
 		AddSpan(-180);
 		//レベルの設定
 		SetLevel(0);	//一番移動速度が早い敵のみにする
 		break;
 
-	case 30:
+	case 40:
 		//レベルの設定
-		SetLevel(4);	//一番強い敵のみにする
+		SetLevel(4);	//一番強い敵は多く出る
 		//スポーンの半径を縮める
 		SetSpawnRadius(1000.0f);
+		break;
+
+	case 10:
+		//スポーン間隔の減少
+		m_nSpanSpawn = 60;
+		//レベルの設定
+		SetLevel(5);	//混ぜる
 		break;
 	}
 }
@@ -245,9 +252,15 @@ void CEnemySpawner::GetSpawnRate(int nLevel, int* pRateArray) {
 		break;
 
 	case 4:
-		pRateArray[(int)ENEMYTYPE::NORMAL] = 40;
+		pRateArray[(int)ENEMYTYPE::NORMAL] = 30;
 		pRateArray[(int)ENEMYTYPE::HUMAN] = 10;
-		pRateArray[(int)ENEMYTYPE::SORCERER] = 50;
+		pRateArray[(int)ENEMYTYPE::SORCERER] = 60;
+		break;
+
+	case 5:
+		pRateArray[(int)ENEMYTYPE::NORMAL] = 30;
+		pRateArray[(int)ENEMYTYPE::HUMAN] = 30;
+		pRateArray[(int)ENEMYTYPE::SORCERER] = 40;
 		break;
 
 	default:

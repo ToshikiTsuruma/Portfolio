@@ -44,7 +44,6 @@ private:
 	int m_nTimeComboMax;	//コンボの残り時間の最大
 	float m_fScoreRate;		//スコアの倍率
 
-	CObject2D* m_pRateBG;			//スコアの倍率の背景
 	CObject2D* m_pScoreRate;		//スコア倍率のテキスト
 	CObject2D* m_pTextCombo;		//コンボのテキスト
 	CGauge2D* m_pComboTimeGauge;	//コンボの残り時間のゲージ

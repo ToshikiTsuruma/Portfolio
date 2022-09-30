@@ -224,7 +224,7 @@ CGlowApple* CAppleTree::CreateApple(CGlowApple::APPLE_TYPE typeApple, D3DXVECTOR
 }
 
 //=============================================================================
-// —ÑŒç‚Ì¶¬
+// —ÑŒç‚ªÀ‚ğ‚Â‚¯‚é
 //=============================================================================
 void CAppleTree::YieldApple(CGlowApple::APPLE_TYPE typeApple) {
 	//—ÑŒç‚ÌˆÊ’u‚ğæ“¾

@@ -359,7 +359,7 @@ void CGameScene::UpdateGameClear(void) {
 	//タイトルへのフェード以前の、遷移なしフェード切り替えタイミング
 	if (pFade->GetChangeFade() && m_nCntGameClear < 600) {
 		//リンゴの木から生成したリンゴの数と種類を取得
-		int nNumCreateApple = MAX_NUM_CREATE_APPLE;	//現状クリアするにはすべてのリンゴがなっているのでとりあえず最大数
+		int nNumCreateApple = MAX_NUM_CREATE_APPLE;	//現状クリアするにはすべてのリンゴが実っているのでとりあえず最大数
 		//最大数を超えないように
 		if (nNumCreateApple > MAX_NUM_CREATE_APPLE) nNumCreateApple = MAX_NUM_CREATE_APPLE;
 
@@ -397,7 +397,7 @@ void CGameScene::UpdateGameClear(void) {
 			{
 				D3DXVECTOR3 posApple = posTree + CAppleTree::GetOffsetPosApple(nCntApple);
 				//リンゴの生成
-				CAppleTree::CreateApple(aTypeApple[nCntApple], posApple, nullptr);
+				CAppleTree::CreateApple(aTypeApple[nCntTree], posApple, nullptr);
 			}
 		}
 

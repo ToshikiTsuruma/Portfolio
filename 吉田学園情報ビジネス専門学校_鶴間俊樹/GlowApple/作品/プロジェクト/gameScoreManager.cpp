@@ -44,8 +44,7 @@ CGameScoreManager* CGameScoreManager::Create(D3DXVECTOR3 pos, float fSize) {
 	pGameScoreManager->m_nKillCombo = 0;
 	pGameScoreManager->m_nTimeCombo = 0;
 	pGameScoreManager->m_fScoreRate = 1.0f;
-	pGameScoreManager->m_pRateBG = CObject2D::Create(pos + D3DXVECTOR3(fSize * 0.5f, 0.0f, 0.0f), CTexture::TEXTURE_TYPE::RATE_BG, fSize, fSize);
-	pGameScoreManager->m_pScoreRate = CObject2D::Create(pos + D3DXVECTOR3(fSize * 0.5f, fSize * 0.1f, 0.0f), CTexture::TEXTURE_TYPE::TEXT_X1, fSize * 0.6f, fSize * 0.6f);
+	pGameScoreManager->m_pScoreRate = CObject2D::Create(pos + D3DXVECTOR3(fSize * 0.5f, fSize * 0.1f, 0.0f), CTexture::TEXTURE_TYPE::TEXT_X1, fSize * 0.8f, fSize * 0.8f);
 	pGameScoreManager->m_pTextCombo = CObject2D::Create(pos + D3DXVECTOR3(fSize * 0.5f, fSize * 0.8f, 0.0f), CTexture::TEXTURE_TYPE::TEXT_COMBO, fSize, fSize * 0.3f);
 	pGameScoreManager->m_pComboTimeGauge = CGauge2D::Create(MAX_TIME_COMBO_DEFAULT, false, 0, 0, false);
 	//時間ゲージの初期設定
@@ -57,7 +56,7 @@ CGameScoreManager* CGameScoreManager::Create(D3DXVECTOR3 pos, float fSize) {
 		pGameScoreManager->m_pComboTimeGauge->CreateGauge(CTexture::TEXTURE_TYPE::GAUGE_HORIZONTAL, pos + D3DXVECTOR3(fSize * 0.5f, fSize * 0.6f, 0.0f), fSize - fSize * 0.05f, fSize * 0.1f - fSize * 0.05f);
 		pGameScoreManager->m_pComboTimeGauge->SetGaugeColor(D3DXCOLOR(0.0f, 0.8f, 1.0f, 1.0f));
 		pGameScoreManager->m_pComboTimeGauge->SetGaugeColorDanger(D3DXCOLOR(1.0f, 0.8f, 0.0f, 1.0f));
-		pGameScoreManager->m_pComboTimeGauge->SetDangerValue(FPS);
+		pGameScoreManager->m_pComboTimeGauge->SetDangerValue(FPS * 2);
 		pGameScoreManager->m_pComboTimeGauge->SetGaugeValue(0);
 
 	}
@@ -85,11 +84,6 @@ HRESULT CGameScoreManager::Init(void) {
 // ゲームスコアマネージャーの終了処理
 //=============================================================================
 void CGameScoreManager::Uninit(void) {
-	//背景の破棄
-	if (m_pRateBG != nullptr) {
-		m_pRateBG->Uninit();
-		m_pRateBG = nullptr;
-	}
 	//スコアの倍率表示の破棄
 	if (m_pScoreRate != nullptr) {
 		m_pScoreRate->Uninit();

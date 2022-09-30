@@ -41,6 +41,7 @@ public:
 
 	void AddLevel(int nLevel) { m_nLevel += nLevel; }	//レベルの増加
 	void SetLevel(int nLevel) { m_nLevel = nLevel; }	//レベルの設定
+	void SetSpan(int nSpan) { m_nSpanSpawn = nSpan; }	//スポーンのスパンを設定
 	void AddSpan(int nSpan) { m_nSpanSpawn += nSpan; }	//スポーンのスパンを増加
 	void SetSpawnRadius(float fRadius) { m_fRadiusSpawn = fRadius; }	//スポーンの半径を設定
 
